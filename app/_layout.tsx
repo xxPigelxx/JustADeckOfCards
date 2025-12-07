@@ -8,6 +8,7 @@ export default function RootLayout() {
         title: "Home",
         headerBackButtonDisplayMode: "minimal",
         headerShown: false,
+        statusBarStyle: "dark",
       }}
     />
     <Stack.Screen 
@@ -16,6 +17,7 @@ export default function RootLayout() {
         title: "", 
         headerBackButtonDisplayMode: "minimal",
         headerTransparent: true,
+        statusBarStyle: "dark",
       }}
     />
     <Stack.Screen 
@@ -24,6 +26,7 @@ export default function RootLayout() {
         title: "", 
         headerBackButtonDisplayMode: "minimal",
         headerTransparent: true,
+        statusBarStyle: "dark",
       }}
     />
     <Stack.Screen 
@@ -32,6 +35,16 @@ export default function RootLayout() {
         title: "", 
         headerBackButtonDisplayMode: "minimal",
         headerTransparent: true,
+        statusBarStyle: "dark",
+      }}
+    />
+    <Stack.Screen 
+      name="controls" 
+      options={{ 
+        title: "", 
+        headerBackButtonDisplayMode: "minimal",
+        headerTransparent: true,
+        statusBarStyle: "dark",
       }}
     />
   </Stack>;
