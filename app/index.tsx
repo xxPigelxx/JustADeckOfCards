@@ -1,3 +1,4 @@
+import AppButton from '@/componets/AppButton';
 import { useFonts } from 'expo-font';
 import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
@@ -22,35 +23,44 @@ export default function Index() {
             onPress={() => setMenuOpen(!menuOpen)}
             style={({ pressed }) => [
                styles.burgerButton,
-               menuOpen && { backgroundColor: "#e6c457ff" },
+               menuOpen && { backgroundColor: "#f1ce5bff" },
                pressed && { opacity: 0.6 }
             ]
             }>
           {menuOpen ? (
-            <Text style={styles.buttonText}>✕</Text>
+            <Text style={styles.text}>✕</Text>
           ) : (
-            <Text style={styles.buttonText}>☰</Text>)}
+            <Text style={styles.text}>☰</Text>)}
           </Pressable>
           {menuOpen && (
             <View style={styles.circleMenu}>
-              <Pressable
-                style={styles.circleItem}
-                onPress={() => {
+              <AppButton
+                title="Controls"
+                onPress={() => { 
                   setMenuOpen(false);
                   router.push("/controls");
                 }}
-              >
-                <Text style={styles.circleText}>Controls</Text>
-              </Pressable>
-              <Pressable
-                style={styles.circleItem}
-                onPress={() => {
+                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
+                textStyle={styles.circleText}
+              />
+              <AppButton
+                title="Create"
+                onPress={() => { 
+                  setMenuOpen(false);
+                  router.push("/create");
+                }}
+                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
+                textStyle={styles.circleText}
+              />
+              <AppButton
+                title="Rulebook"
+                onPress={() => { 
                   setMenuOpen(false);
                   router.push("/rulebook");
                 }}
-              >
-                <Text style={styles.circleText}>Rulebook</Text>
-              </Pressable>
+                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
+                textStyle={styles.circleText}
+              />
             </View>
           )}
 
@@ -64,29 +74,9 @@ export default function Index() {
           <Text style={styles.logoText}>Just A Deck Of Cards</Text>
         </ImageBackground>
       </View>
-      <View
-        style={styles.container}
-      >
-        <Pressable 
-            onPress={() => router.push("/create")}
-            style={({ pressed }) => ({
-              ...styles.button,
-              opacity:  pressed? .6 :1, 
-            })
-          }
-          >
-          <Text style={styles.buttonText}>Create Game</Text>
-        </Pressable>
-        <Pressable 
-            onPress={() => router.push("/join")}
-            style={({ pressed }) => ({
-              ...styles.button,
-              opacity:  pressed? .6 :1, 
-            })
-          }
-          >
-          <Text style={styles.buttonText}>Join Game</Text>
-        </Pressable>
+      <View style={styles.container}>
+        <AppButton title='Create Game' onPress={() => router.push("/create")}/>
+        <AppButton title='Join Game' onPress={() => router.push("/join")}/>
       </View>
     </View>
   );
@@ -148,29 +138,17 @@ const styles = StyleSheet.create({
     rowGap: 50,
     padding: 20,
   },
-  button: {
-    backgroundColor: '#000000ff',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 15, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, 
-    minWidth: 200, 
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
   logoText: {
     fontSize: 32,
     fontFamily: 'MochiBoom',
     color: '#000000ff',
     marginTop: 0,
     marginBottom: 100,
+  },
+
+  text: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
