@@ -1,9 +1,10 @@
 import AppButton from '@/componets/AppButton';
+import BurgerMenu from '@/componets/BurgerMenu';
 import { useFonts } from 'expo-font';
 import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
 
@@ -18,53 +19,7 @@ export default function Index() {
 
    return (
     <View style={{ flex: 1 }}>
-      
-        <Pressable 
-            onPress={() => setMenuOpen(!menuOpen)}
-            style={({ pressed }) => [
-               styles.burgerButton,
-               menuOpen && { backgroundColor: "#f1ce5bff" },
-               pressed && { opacity: 0.6 }
-            ]
-            }>
-          {menuOpen ? (
-            <Text style={styles.text}>✕</Text>
-          ) : (
-            <Text style={styles.text}>☰</Text>)}
-          </Pressable>
-          {menuOpen && (
-            <View style={styles.circleMenu}>
-              <AppButton
-                title="Controls"
-                onPress={() => { 
-                  setMenuOpen(false);
-                  router.push("/controls");
-                }}
-                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
-                textStyle={styles.circleText}
-              />
-              <AppButton
-                title="Create"
-                onPress={() => { 
-                  setMenuOpen(false);
-                  router.push("/create");
-                }}
-                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
-                textStyle={styles.circleText}
-              />
-              <AppButton
-                title="Rulebook"
-                onPress={() => { 
-                  setMenuOpen(false);
-                  router.push("/rulebook");
-                }}
-                style={{ ...styles.circleItem, minWidth: 90,paddingHorizontal: 0, paddingVertical: 0 }}
-                textStyle={styles.circleText}
-              />
-            </View>
-          )}
-
-      
+      <BurgerMenu />
       <View style={{ alignItems: 'center', paddingTop: 150 }} > 
         <ImageBackground
           source={require('../assets/images/Logo.png')}
