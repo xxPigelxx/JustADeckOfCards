@@ -60,8 +60,8 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
 const styles = StyleSheet.create({
   burgerButton: {
     position: "absolute",
-    top: 75,
-    right: 20,
+    bottom: 40,
+    right: 40,
     width: 48,
     height: 48,
     borderRadius: 24, 
@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
 
   circleMenu: {
     position: "absolute",
-    top: 135,
-    right: 20,
+    bottom: 100,
+    right: 40,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 10,
