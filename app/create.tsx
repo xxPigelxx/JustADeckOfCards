@@ -42,23 +42,18 @@ export default function Create() {
       </View>
 
       <Text style={styles.heading}>Anzahl der Decks</Text>
-    
       <CustomSlider value={players} onChange={setPlayers} />
-
 
       <Text style={styles.heading}>Anzahl Spieler</Text>
-    
       <CustomSlider value={players} onChange={setPlayers} />
-
 
       <Text style={styles.heading}>Anzahl Handkarten</Text>
-    
       <CustomSlider value={players} onChange={setPlayers} />
 
-      <AppButton 
-        title="Spielcode teilen" 
-        onPress={() => router.push("/create")} 
-      />
+      <View style={styles.buttonContainer}>
+        <AppButton title="Spielcode teilen" onPress={() => router.push("/create")} />
+      </View>
+        
     </View>
   );
 }
@@ -106,4 +101,10 @@ const styles = StyleSheet.create({
   toggleTextActive: {
     color: "#000000ff",
   },
+
+  buttonContainer: {
+    marginTop: 40,
+    alignItems: 'center',
+  },
+
 });
