@@ -12,9 +12,8 @@ export default function Create() {
   const options = ["54 Karten", "52 Karten", "36 Karten", "32 Karten", "24 Karten"];
 
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.toggleContainer}>
       <Text style={styles.heading}>Kartendecktyp</Text>
-
       <View style={styles.toggleGroup}>
         {options.map((title, index) => {
           const isActive = selected === index;
@@ -40,26 +39,34 @@ export default function Create() {
           );
         })}
       </View>
+    
+    <View style={styles.sliderContainer}>
+        <Text style={styles.heading}>Anzahl der Decks</Text>
+        <CustomSlider value={players} onChange={setPlayers} />  
+      </View>    
 
-      <Text style={styles.heading}>Anzahl der Decks</Text>
-      <CustomSlider value={players} onChange={setPlayers} />
-
-      <Text style={styles.heading}>Anzahl Spieler</Text>
-      <CustomSlider value={players} onChange={setPlayers} />
-
-      <Text style={styles.heading}>Anzahl Handkarten</Text>
-      <CustomSlider value={players} onChange={setPlayers} />
-
-      <View style={styles.buttonContainer}>
-        <AppButton title="Spielcode teilen" onPress={() => router.push("/create")} />
-      </View>
-        
+    <View style={styles.sliderContainer}>
+        <Text style={styles.heading}>Anzahl Spieler</Text>
+        <CustomSlider value={players} onChange={setPlayers} /> 
+      </View>        
+    
+    <View style={styles.sliderContainer}>
+        <Text style={styles.heading}>Anzahl Handkarten</Text>
+        <CustomSlider value={players} onChange={setPlayers} /> 
+      </View>     
+    
+     <AppButton
+            title="Spielcode teilen"
+            onPress={() => router.push("/invite")}
+            style={styles.button}
+          />
+    
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  toggleContainer: {
     flex: 1,
     paddingTop: 80,
     paddingHorizontal: 20,
@@ -102,8 +109,13 @@ const styles = StyleSheet.create({
     color: "#000000ff",
   },
 
-  buttonContainer: {
+  button: {
     marginTop: 40,
+    alignItems: 'center',
+  },
+
+  sliderContainer: {
+    marginTop: 20,
     alignItems: 'center',
   },
 
