@@ -70,6 +70,5 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 30,
-    width: '80%',
   },
 });
