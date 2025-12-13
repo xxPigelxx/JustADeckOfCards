@@ -47,5 +47,14 @@ export default function RootLayout() {
         statusBarStyle: "dark",
       }}
     />
+    <Stack.Screen 
+      name="invite" 
+      options={{ 
+        title: "", 
+        headerBackButtonDisplayMode: "minimal",
+        headerTransparent: true,
+        statusBarStyle: "dark",
+      }}
+    />
   </Stack>;
 }
