@@ -9,29 +9,29 @@ export default function Join() {
 
   return (
     <View style={styles.container}>
-      
-      <View style={styles.topContainer}>
-        <Image
-          source={require('../assets/images/key.png')}
-          style={styles.image}
-          resizeMode="contain"
-        />
-        <Text style={styles.logoText}>Einladungscode eingeben</Text>
-      </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Code eingeben"
-          placeholderTextColor="#888"
-          value={code}
-          onChangeText={setCode}
-        />
-      </View>
+      <Image
+        source={require('../assets/images/key.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
 
-      <View style={styles.buttonContainer}>
-        <AppButton title="Spiel beitreten" onPress={() => router.push("/join")} />
-      </View>
+      <Text style={styles.title}>Einladungscode eingeben</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Code eingeben"
+        placeholderTextColor="#888"
+        value={code}
+        onChangeText={setCode}
+        textAlign="center"
+      />
+
+      <AppButton
+        title="Spiel beitreten"
+        onPress={() => router.push("/join")}
+        style={styles.button}
+      />
 
     </View>
   );
@@ -43,26 +43,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
-  },
-  topContainer: {
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
   },
   image: {
     width: 250,
     height: 250,
+    marginTop: 40,
   },
-  logoText: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-  },
-  inputContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 30,
+    marginTop: 10,
   },
   input: {
     width: '80%',
@@ -70,13 +63,13 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 10,
     backgroundColor: '#fff',
     color: '#000',
-    textAlign: 'center',
-  },
-  buttonContainer: {
     marginTop: 30,
-    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  button: {
+    marginTop: 30,
+    width: '80%',
   },
 });
