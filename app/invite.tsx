@@ -1,10 +1,10 @@
 import AppButton from '@/componets/AppButton';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-export default function Join() {
-  const [code, setCode] = useState('');
+export default function Invite() {
+  const [code, setCode] = useState('123456');
   const router = useRouter();
 
   return (
@@ -16,20 +16,15 @@ export default function Join() {
         resizeMode="contain"
       />
 
-      <Text style={styles.title}>Einladungscode eingeben</Text>
+      <Text style={styles.title}>Einladungscode</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Code eingeben"
-        placeholderTextColor="#888"
-        value={code}
-        onChangeText={setCode}
-        textAlign="center"
-      />
+      <View style={styles.codeField}>
+        <Text style={styles.codeText}>{code}</Text>
+      </View>
 
       <AppButton
-        title="Spiel beitreten"
-        onPress={() => router.push("/join")}
+        title="Spiel starten"
+        onPress={() => router.push("/invite")}
         style={styles.button}
       />
 
@@ -57,18 +52,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
-  input: {
+  codeField: {
     width: '80%',
     height: 45,
     borderColor: '#000',
     borderWidth: 1,
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#fff',
-    color: '#000',
     marginTop: 30,
-    paddingHorizontal: 10,
+  },
+  codeText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   button: {
-    marginTop: 30,
+    marginTop:30,
   },
 });
