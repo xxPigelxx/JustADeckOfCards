@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 10,
-    zIndex: 99,
+    zIndex: 9999,
     alignItems: "center",
   },
 

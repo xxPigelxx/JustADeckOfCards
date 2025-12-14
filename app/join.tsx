@@ -1,4 +1,5 @@
 import AppButton from '@/componets/AppButton';
+import BurgerMenu from '@/componets/BurgerMenu';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -29,10 +30,10 @@ export default function Join() {
 
       <AppButton
         title="Spiel beitreten"
-        onPress={() => router.push("/join")}
+        onPress={() => router.push("/gameScreen")}
         style={styles.button}
       />
-
+      <BurgerMenu />
     </View>
   );
 }

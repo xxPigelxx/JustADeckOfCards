@@ -1,4 +1,5 @@
 import AppButton from "@/componets/AppButton";
+import BurgerMenu from "@/componets/BurgerMenu";
 import CustomSlider from "@/componets/Slider";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -60,7 +61,7 @@ export default function Create() {
             onPress={() => router.push("/invite")}
             style={styles.button}
           />
-    
+      <BurgerMenu />
     </View>
   );
 }
@@ -68,7 +69,7 @@ export default function Create() {
 const styles = StyleSheet.create({
   toggleContainer: {
     flex: 1,
-    paddingTop: 80,
+    paddingTop: 100,
     paddingHorizontal: 20,
     gap: 20,
   },

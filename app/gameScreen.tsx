@@ -1,4 +1,5 @@
 import AppButton from "@/componets/AppButton";
+import BurgerMenu from "@/componets/BurgerMenu";
 import Card from "@/componets/Card";
 import React, { useState } from "react";
 import {
@@ -226,14 +227,13 @@ export default function GameScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+     
       
       {/* 
           MANUAL SAFE AREA CONTROL 
           We use padding instead of SafeAreaView so we know exactly where Y=0 starts.
       */}
       <View style={{ flex: 1, paddingTop: SAFE_TOP }}>
-        
         <View style={styles.boardContainer}>
           <View style={styles.boardSurface}>
             
@@ -331,8 +331,9 @@ export default function GameScreen() {
             );
           })}
         </View>
+       
       </View>
-
+      <BurgerMenu />
       {renderContextMenu()}
 
     </GestureHandlerRootView>
@@ -370,8 +371,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "rgba(0,0,0,0.02)"
   },
-  handArea: { height: HAND_HEIGHT, backgroundColor: "#333", width: "100%", zIndex: 100 },
-  arrowButton: { position: "absolute", bottom: 20, alignSelf: "center", width: 24, height: 24, borderRadius: 12, backgroundColor: "#222", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#444" },
+  handArea: { height: HAND_HEIGHT, backgroundColor: "#333", width: "100%", zIndex: 10 },
+  
   
   // MENU
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.1)' },

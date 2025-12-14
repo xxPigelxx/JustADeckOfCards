@@ -22,6 +22,7 @@ export default function RootLayout() {
         {/* Back button only */}
         <Stack.Screen name="create" />
         <Stack.Screen name="join" />
+        <Stack.Screen name="invite" />
         <Stack.Screen name="rulebook/[id]" />
         <Stack.Screen name="controls" />
 

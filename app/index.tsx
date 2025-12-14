@@ -19,7 +19,7 @@ export default function Index() {
 
    return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu dontShow='home'/>
+      <BurgerMenu dontShow=''/>
       <View style={{ alignItems: 'center', paddingTop: 150 }} > 
         <ImageBackground
           source={require('../assets/images/Logo.png')}
@@ -32,7 +32,7 @@ export default function Index() {
       <View style={styles.container}>
         <AppButton title='Create Game' onPress={() => router.push("/create")}/>
         <AppButton title='Join Game' onPress={() => router.push("/join")}/>
-        <AppButton title='Game' onPress={() => router.push("/gameScreen")}/>
+        {/* <AppButton title='Game' onPress={() => router.push("/gameScreen")}/> */}
       </View>
     </View>
   );

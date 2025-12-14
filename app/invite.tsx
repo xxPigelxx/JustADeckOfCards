@@ -1,4 +1,5 @@
 import AppButton from '@/componets/AppButton';
+import BurgerMenu from '@/componets/BurgerMenu';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
@@ -24,10 +25,10 @@ export default function Invite() {
 
       <AppButton
         title="Spiel starten"
-        onPress={() => router.push("/invite")}
+        onPress={() => router.push("/gameScreen")}
         style={styles.button}
       />
-
+      <BurgerMenu />
     </View>
   );
 }
