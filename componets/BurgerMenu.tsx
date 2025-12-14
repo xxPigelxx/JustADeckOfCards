@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AppButton from './AppButton';
 
 type BurgerMenuProps = {
-    dontShow?: "controls" | "rulebook" | "";
+    dontShow?: "controls" | "rulebook" | "home" | "";
 }
 
 export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
@@ -51,6 +51,22 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
                         textStyle={styles.circleText}
                 />
             )}
+            {dontShow !== "home" && (
+                <AppButton
+                    title="Home"
+                    onPress={() => {
+                      setMenuOpen(false);
+                      router.replace("/");
+                    }}
+                    style={{
+                      ...styles.circleItem,
+                      minWidth: 90,
+                      paddingHorizontal: 0,
+                      paddingVertical: 0,
+                    }}
+                    textStyle={styles.circleText}
+            />
+          )}
         </View>
       )}
     </>

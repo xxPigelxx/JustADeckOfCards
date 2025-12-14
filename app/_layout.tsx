@@ -1,51 +1,36 @@
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
-   return <Stack> 
-    <Stack.Screen 
-      name="index" 
-      options={{ 
-        title: "Home",
-        headerBackButtonDisplayMode: "minimal",
-        headerShown: false,
-        statusBarStyle: "dark",
-      }}
-    />
-    <Stack.Screen 
-      name="create" 
-      options={{ 
-        title: "", 
-        headerBackButtonDisplayMode: "minimal",
-        headerTransparent: true,
-        statusBarStyle: "dark",
-      }}
-    />
-    <Stack.Screen 
-      name="join" 
-      options={{ 
-        title: "", 
-        headerBackButtonDisplayMode: "minimal",
-        headerTransparent: true,
-        statusBarStyle: "dark",
-      }}
-    />
-    <Stack.Screen 
-      name="rulebook" 
-      options={{ 
-        title: "", 
-        headerBackButtonDisplayMode: "minimal",
-        headerTransparent: true,
-        statusBarStyle: "dark",
-      }}
-    />
-    <Stack.Screen 
-      name="controls" 
-      options={{ 
-        title: "", 
-        headerBackButtonDisplayMode: "minimal",
-        headerTransparent: true,
-        statusBarStyle: "dark",
-      }}
-    />
-  </Stack>;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          statusBarStyle: "dark",
+          headerTitle: "",
+          headerTransparent: true,
+          headerShadowVisible: false,
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      >
+        {/* No header at all */}
+        <Stack.Screen
+          name="index"
+          options={{ headerShown: false }}
+        />
+
+        {/* Back button only */}
+        <Stack.Screen name="create" />
+        <Stack.Screen name="join" />
+        <Stack.Screen name="rulebook/[id]" />
+        <Stack.Screen name="controls" />
+
+        {/* No header */}
+        <Stack.Screen
+          name="gameScreen"
+          options={{ headerShown: false, statusBarStyle: "light" }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
+  );
 }
