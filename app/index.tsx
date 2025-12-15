@@ -19,7 +19,7 @@ export default function Index() {
 
    return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu dontShow=''/>
+      <BurgerMenu dontShow='home'/>
       <View style={{ alignItems: 'center', paddingTop: 150 }} > 
         <ImageBackground
           source={require('../assets/images/Logo.png')}
