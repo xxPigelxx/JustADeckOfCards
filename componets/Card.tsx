@@ -16,7 +16,10 @@ type CardProps = {
   x: number;
   y: number;
   zIndex?: number;
+  isFaceUp?: boolean;
+  badgeCount?: number; // New prop for stack count badge
   onDrop: (id: string, x: number, y: number) => void;
+  onDrag?: (id: string, x: number, y: number) => void; 
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onTap?: () => void;
@@ -32,7 +35,10 @@ export default function Card({
   x,
   y,
   zIndex = 1,
+  isFaceUp = true,
+  badgeCount = 0, // Default to 0 (no badge)
   onDrop,
+  onDrag,
   onDragStart,
   onDragEnd,
   onTap,
@@ -59,6 +65,9 @@ export default function Card({
     .onUpdate((event) => {
       translateX.value = event.translationX + x;
       translateY.value = event.translationY + y;
+      if (onDrag) {
+        runOnJS(onDrag)(id, event.absoluteX, event.absoluteY);
+      }
     })
     .onEnd((event) => {
       isDragging.value = false;
@@ -67,6 +76,7 @@ export default function Card({
       const absY = event.absoluteY;
       runOnJS(onDrop)(id, absX, absY);
       if (onDragEnd) runOnJS(onDragEnd)();
+      
       translateX.value = withSpring(0);
       translateY.value = withSpring(0);
     });
@@ -87,33 +97,50 @@ export default function Card({
 
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View style={[styles.card, animatedStyle]}>
-        {/* Top Left Corner */}
-        <View style={styles.corner}>
-          <Text style={[styles.rankText, { color: isRed ? "red" : "black" }]}>
-            {rank}
-          </Text>
-          <Text style={[styles.suitText, { color: isRed ? "red" : "black" }]}>
-            {suit}
-          </Text>
-        </View>
+      <Animated.View style={[styles.card, animatedStyle, !isFaceUp && styles.cardBack]}>
+        
+        {/* Badge: Renders if badgeCount > 1 */}
+        {badgeCount > 1 && (
+            <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>{badgeCount}</Text>
+            </View>
+        )}
 
-        {/* Center Big Suit */}
-        <View style={styles.centerContent}>
-            <Text style={[styles.bigSuit, { color: isRed ? "red" : "black" }]}>
-                {suit}
-            </Text>
-        </View>
+        {isFaceUp ? (
+            <>
+                {/* Top Left Corner */}
+                <View style={styles.corner}>
+                <Text style={[styles.rankText, { color: isRed ? "red" : "black" }]}>
+                    {rank}
+                </Text>
+                <Text style={[styles.suitText, { color: isRed ? "red" : "black" }]}>
+                    {suit}
+                </Text>
+                </View>
 
-        {/* Bottom Right Corner (Rotated) */}
-        <View style={[styles.corner, styles.bottomRight]}>
-          <Text style={[styles.rankText, { color: isRed ? "red" : "black" }]}>
-            {rank}
-          </Text>
-          <Text style={[styles.suitText, { color: isRed ? "red" : "black" }]}>
-            {suit}
-          </Text>
-        </View>
+                {/* Center Big Suit */}
+                <View style={styles.centerContent}>
+                    <Text style={[styles.bigSuit, { color: isRed ? "red" : "black" }]}>
+                        {suit}
+                    </Text>
+                </View>
+
+                {/* Bottom Right Corner (Rotated) */}
+                <View style={[styles.corner, styles.bottomRight]}>
+                <Text style={[styles.rankText, { color: isRed ? "red" : "black" }]}>
+                    {rank}
+                </Text>
+                <Text style={[styles.suitText, { color: isRed ? "red" : "black" }]}>
+                    {suit}
+                </Text>
+                </View>
+            </>
+        ) : (
+            // Card Back Design
+            <View style={styles.backPattern}>
+                <View style={styles.innerBack} />
+            </View>
+        )}
       </Animated.View>
     </GestureDetector>
   );
@@ -136,6 +163,47 @@ const styles = StyleSheet.create({
     elevation: 2,
     justifyContent: 'space-between'
   },
+  // Badge Styles
+  badgeContainer: {
+    position: 'absolute',
+    top: -8, 
+    right: -8,
+    backgroundColor: 'red',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100, 
+    elevation: 5
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold'
+  },
+  // Face Down Styles
+  cardBack: {
+      backgroundColor: '#fff', 
+      justifyContent: 'center', 
+      alignItems: 'center',
+      padding: 4
+  },
+  backPattern: {
+      flex: 1,
+      width: '100%',
+      backgroundColor: '#3b82f6', // Blue Back
+      borderRadius: 4,
+      justifyContent: 'center', 
+      alignItems: 'center'
+  },
+  innerBack: {
+      width: 20, height: 20,
+      backgroundColor: '#60a5fa',
+      borderRadius: 10,
+      opacity: 0.5
+  },
+  // Face Up Styles
   corner: {
     alignItems: "center",
     width: 20,
