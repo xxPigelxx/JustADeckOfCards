@@ -329,16 +329,20 @@ export default function GameScreen() {
       <Modal transparent visible={menuVisible} animationType="fade">
         <Pressable style={styles.overlay} onPress={() => setMenuVisible(false)}>
           <View style={[styles.menuContainer, { top: menuPosition.y, left: menuPosition.x }]}>
-            <AppButton title="Flip" onPress={handleFlip} style={styles.menuButton} textStyle={styles.menuButtonText} />
+            <AppButton title="Flip" onPress={handleFlip} style={styles.menuButton} textStyle={styles.menuButtonText} /> 
             {isStack ? (
               <>
-                <AppButton title="Take" onPress={handleTake} style={styles.menuButton} textStyle={styles.menuButtonText} />
                 <AppButton title="Mix" onPress={handleShuffle} style={styles.menuButton} textStyle={styles.menuButtonText} />
                 <AppButton title="Move" onPress={handleMoveStack} style={styles.menuButton} textStyle={styles.menuButtonText} />
+                <AppButton title="Take" onPress={handleTake} style={styles.menuButton} textStyle={styles.menuButtonText} />
               </>
             ) : isHand ? (
-              <AppButton title="Mix" onPress={handleShuffle} style={styles.menuButton} textStyle={styles.menuButtonText} />
-            ) : null } 
+                <AppButton title="Mix" onPress={handleShuffle} style={styles.menuButton} textStyle={styles.menuButtonText} />
+              
+            ) : !isHand ? (
+              <AppButton title="Take" onPress={handleTake} style={styles.menuButton} textStyle={styles.menuButtonText} />
+            ) : null 
+            } 
           </View>
         </Pressable>
       </Modal>
