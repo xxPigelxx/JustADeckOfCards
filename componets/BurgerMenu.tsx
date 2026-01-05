@@ -30,7 +30,7 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
 
             {dontShow !== "controls" &&(
                 <AppButton
-                        title="Controls"
+                        title="?"
                         onPress={() => { 
                         setMenuOpen(false);
                         router.push("/controls");
@@ -42,7 +42,7 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
 
             {dontShow !== "rulebook" &&(
                 <AppButton
-                        title="Rulebook"
+                        title="🕮"
                         onPress={() => { 
                         setMenuOpen(false);
                         router.push("/rulebook");
@@ -53,7 +53,7 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
             )}
             {dontShow !== "home" && (
                 <AppButton
-                    title="Home"
+                    title="⬤"
                     onPress={() => {
                       setMenuOpen(false);
                       router.replace("/");
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
 
   circleText: {
     color: "white",
-    fontSize: 14,
+    fontSize: 24,
     fontWeight: "600",
   },
   text: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '600',
   },
 });

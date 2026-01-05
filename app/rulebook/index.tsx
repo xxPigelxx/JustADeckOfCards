@@ -17,7 +17,7 @@ export default function RulebookIndex() {
       <BurgerMenu />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Rulebook</Text>
+        <Text style={styles.title}>Regelbuch</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>

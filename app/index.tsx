@@ -30,8 +30,8 @@ export default function Index() {
         </ImageBackground>
       </View>
       <View style={styles.container}>
-        <AppButton title='Create Game' onPress={() => router.push("/create")}/>
-        <AppButton title='Join Game' onPress={() => router.push("/join")}/>
+        <AppButton title='Spiel Erstellen' onPress={() => router.push("/create")}/>
+        <AppButton title='Spiel Beitreten' onPress={() => router.push("/join")}/>
         {/* <AppButton title='Game' onPress={() => router.push("/gameScreen")}/> */}
       </View>
     </View>
