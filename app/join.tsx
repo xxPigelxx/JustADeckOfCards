@@ -8,9 +8,14 @@ export default function Join() {
   const [code, setCode] = useState('');
   const router = useRouter();
 
+  const isCodeValid = code.trim().length > 0;
+
+  const handleJoin = () => {
+    router.push('/gameScreen');
+  };
+
   return (
     <View style={styles.container}>
-
       <Image
         source={require('../assets/images/key.png')}
         style={styles.image}
@@ -30,9 +35,13 @@ export default function Join() {
 
       <AppButton
         title="Spiel beitreten"
-        onPress={() => router.push("/gameScreen")}
-        style={styles.button}
+        onPress={isCodeValid ? handleJoin : () => {}}
+        style={{
+          ...styles.button,
+          ...( !isCodeValid ? styles.buttonDisabled : {} )
+        }}
       />
+
       <BurgerMenu />
     </View>
   );
@@ -41,14 +50,13 @@ export default function Join() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
   image: {
-    width: 250,
-    height: 250,
+    width: 230,
+    height: 350,
     marginTop: 40,
   },
   title: {
@@ -56,20 +64,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: -40,
   },
   input: {
-    width: '80%',
+    width: '70%',
     height: 45,
     borderColor: '#000',
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderRadius: 8,
     backgroundColor: '#fff',
     color: '#000',
-    marginTop: 30,
+    marginTop: 10,
     paddingHorizontal: 10,
   },
   button: {
     marginTop: 30,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });

@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { Dimensions, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
-// ------- Typ für Slides -------
 type SlideItem = {
   id: string;
   title: string;
@@ -22,29 +11,19 @@ type SlideItem = {
   description: string;
 };
 
-// ------- Slides -------
 const SLIDES: SlideItem[] = [
   {
     id: '1',
     title: 'Karte ausspielen',
-    imageSource: require('../assets/images/HoldAndDrag.png'),
-    description:
-      'Um eine Karte auszuspielen, tippe sie an, halte den Finger darauf und ziehe sie an die gewünschte Position (Drag & Drop). Lasse los, um sie abzulegen.',
+    imageSource: require('../assets/images/hold-and-drag.png'),
+    description: 'Um eine Karte auszuspielen, tippe sie an, halte den Finger darauf und ziehe sie an die gewünschte Position (Drag & Drop). Lasse los, um sie abzulegen.',
   },
   {
     id: '2',
     title: 'Karten-Optionen',
-    imageSource: require('../assets/images/Tap.png'),
-    description:
-      'Ein Tippen auf eine Karte oder einen Stapel öffnet das Aktionsmenü. Hier kannst du Karten umdrehen, den Stapel mischen oder die Reihenfolge umkehren.',
+    imageSource: require('../assets/images/tap.png'),
+    description: 'Ein Tippen auf eine Karte oder einen Stapel öffnet das Aktionsmenü. Hier kannst du Karten umdrehen, den Stapel mischen oder die Reihenfolge umkehren.',
   },
-  {
-    id: '3',
-    title: 'Karte umdrehen',
-    imageSource: require('../assets/images/Doubletap.png'),
-    description:
-      "Ein Doppeltip auf eine Karte bzw. einen Stapel dreht diese(n) um."
-  }
 ];
 
 function Controls() {
@@ -118,19 +97,16 @@ export default function Gestures() {
   );
 }
 
-// ------- Styles -------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    //backgroundColor: '#fff',
   },
   slide: {
     width: width,
     height: height,
-    // ÄNDERUNG: Orientierung oben statt mitte
     justifyContent: 'flex-start',
     alignItems: 'center',
-    // ÄNDERUNG: Exakt gleiches Padding wie auf der Main Page
     paddingTop: 150,
   },
   imageContainer: {
@@ -141,7 +117,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 40,
-    // Optional: Schatten oder Elevation entfernen, falls gewünscht
     shadowColor: 'transparent',
     elevation: 0,
   },
@@ -161,7 +136,7 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 40, // Damit der Text nicht den Rand berührt
+    paddingHorizontal: 40,
   },
   footer: {
     position: 'absolute',

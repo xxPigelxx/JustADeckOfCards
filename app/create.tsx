@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Create() {
 
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(0);
   const [players, setPlayers] = useState(0);
 
   const options = ["54 Karten", "52 Karten", "36 Karten", "32 Karten", "24 Karten"];
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
   toggleButton: {
     paddingVertical: 15,
     paddingHorizontal: 15,
-    borderRadius: 14,
-    backgroundColor: "#E9E9E9",
+    borderRadius: 8,
+    backgroundColor: "#ffffffff",
     alignItems: "center",
   },
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
 
   button: {
     marginTop: 40,
-    alignItems: 'center',
+    alignSelf: "center",
   },
 
   sliderContainer: {

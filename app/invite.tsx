@@ -1,12 +1,21 @@
 import AppButton from '@/componets/AppButton';
 import BurgerMenu from '@/componets/BurgerMenu';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function Invite() {
-  const [code, setCode] = useState('123456');
+  const [code, setCode] = useState('');
   const router = useRouter();
+
+  const generateCode = () => {
+    const randomNum = Math.floor(Math.random() * 10000);
+    return randomNum.toString().padStart(4, '0');
+  };
+
+  useEffect(() => {
+    setCode(generateCode());
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -36,14 +45,13 @@ export default function Invite() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
   image: {
-    width: 250,
-    height: 250,
+    width: 230,
+    height: 350,
     marginTop: 40,
   },
   title: {
@@ -51,18 +59,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: -40,
   },
   codeField: {
-    width: '80%',
+    width: '70%',
     height: 45,
     borderColor: '#000',
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    marginTop: 30,
+    marginTop: 10,
   },
   codeText: {
     color: '#000',
@@ -70,6 +78,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    marginTop:30,
+    marginTop: 30,
   },
 });

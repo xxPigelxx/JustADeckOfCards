@@ -1,6 +1,5 @@
 import BurgerMenu from "@/componets/BurgerMenu";
 import { GAMES } from "@/data/games";
-import { useFonts } from "expo-font";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -8,11 +7,7 @@ export default function RulebookDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const game = GAMES.find((g) => g.id === id);
 
-  const [fontsLoaded] = useFonts({
-    MochiBoom: require("../../assets/fonts/MochiBoom.ttf"),
-  });
-
-  if (!fontsLoaded || !game) return null;
+  if (!game) return null;
 
   return (
     <View style={{ flex: 1 }}>
@@ -38,7 +33,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: "MochiBoom",
+    fontWeight: 'bold',
     color: "#000",
     textAlign: "center",
   },

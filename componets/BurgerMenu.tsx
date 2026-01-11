@@ -1,7 +1,10 @@
+import { Feather } from "@expo/vector-icons";
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AppButton from './AppButton';
+
+
 
 type BurgerMenuProps = {
     dontShow?: "controls" | "rulebook" | "home" | "";
@@ -30,7 +33,8 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
 
             {dontShow !== "controls" &&(
                 <AppButton
-                        title="?"
+                        title="Controls"
+                        icon={<Feather name="help-circle" size={22} color="white" />}
                         onPress={() => { 
                         setMenuOpen(false);
                         router.push("/controls");
@@ -42,7 +46,8 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
 
             {dontShow !== "rulebook" &&(
                 <AppButton
-                        title="🕮"
+                        title="Rulebook"
+                        icon={<Feather name="book" size={22} color="white" />}
                         onPress={() => { 
                         setMenuOpen(false);
                         router.push("/rulebook");
@@ -53,7 +58,8 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
             )}
             {dontShow !== "home" && (
                 <AppButton
-                    title="⬤"
+                    title="Home"
+                    icon={<Feather name="home" size={22} color="white" />}
                     onPress={() => {
                       setMenuOpen(false);
                       router.replace("/");

@@ -1,14 +1,15 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextStyle, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 
 interface AppButtonProps {
     title: string;
+    icon?: React.ReactNode;
     onPress: () => void;
     style?: ViewStyle;
     textStyle?: TextStyle;
 }
 
-export default function AppButton({ title, onPress, style, textStyle }: AppButtonProps) {
+export default function AppButton({ title, icon, onPress, style, textStyle }: AppButtonProps) {
   return (
     <Pressable 
         onPress={onPress}
@@ -17,8 +18,15 @@ export default function AppButton({ title, onPress, style, textStyle }: AppButto
             style,
             pressed && { opacity: 0.6 , backgroundColor: '#f1ce5bff' },
         ]}
-    >
-        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+    > 
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {!icon && (
+            <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+          )} 
+          {icon}
+
+        </View>
+
     </Pressable>
   )
 }

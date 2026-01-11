@@ -6,6 +6,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
         screenOptions={{
+          contentStyle: { backgroundColor: "#F2E8DF" },
           statusBarStyle: "dark",
           headerTitle: "",
           headerTransparent: true,

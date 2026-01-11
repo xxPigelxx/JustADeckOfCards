@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   
   track: { 
     height: 8, 
-    backgroundColor: "#dcdcdc", 
+    backgroundColor: "#ffffffff", 
     borderRadius: 20, 
   },
   
