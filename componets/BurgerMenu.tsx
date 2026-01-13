@@ -29,51 +29,53 @@ export default function BurgerMenu( { dontShow }: BurgerMenuProps) {
             </Text>
       </Pressable>
       {menuOpen && (
-        <View style={styles.circleMenu}>
+        <Pressable style={styles.overlay} onPress={() => setMenuOpen(false)}>
+          <View style={styles.circleMenu}>
 
-            {dontShow !== "controls" &&(
-                <AppButton
-                        title="Controls"
-                        icon={<Feather name="help-circle" size={22} color="white" />}
-                        onPress={() => { 
-                        setMenuOpen(false);
-                        router.push("/controls");
-                        }}
-                        style={{ ...styles.circleItem, minWidth: 90, paddingHorizontal: 0, paddingVertical: 0 }}
-                        textStyle={styles.circleText}
-                />
-            )}
+              {dontShow !== "controls" &&(
+                  <AppButton
+                          title="Controls"
+                          icon={<Feather name="help-circle" size={22} color="white" />}
+                          onPress={() => { 
+                          setMenuOpen(false);
+                          router.push("/controls");
+                          }}
+                          style={{ ...styles.circleItem, minWidth: 90, paddingHorizontal: 0, paddingVertical: 0 }}
+                          textStyle={styles.circleText}
+                  />
+              )}
 
-            {dontShow !== "rulebook" &&(
-                <AppButton
-                        title="Rulebook"
-                        icon={<Feather name="book" size={22} color="white" />}
-                        onPress={() => { 
+              {dontShow !== "rulebook" &&(
+                  <AppButton
+                          title="Rulebook"
+                          icon={<Feather name="book" size={22} color="white" />}
+                          onPress={() => { 
+                          setMenuOpen(false);
+                          router.push("/rulebook");
+                          }}
+                          style={{ ...styles.circleItem, minWidth: 90, paddingHorizontal: 0, paddingVertical: 0 }}
+                          textStyle={styles.circleText}
+                  />
+              )}
+              {dontShow !== "home" && (
+                  <AppButton
+                      title="Home"
+                      icon={<Feather name="home" size={22} color="white" />}
+                      onPress={() => {
                         setMenuOpen(false);
-                        router.push("/rulebook");
-                        }}
-                        style={{ ...styles.circleItem, minWidth: 90, paddingHorizontal: 0, paddingVertical: 0 }}
-                        textStyle={styles.circleText}
-                />
+                        router.replace("/");
+                      }}
+                      style={{
+                        ...styles.circleItem,
+                        minWidth: 90,
+                        paddingHorizontal: 0,
+                        paddingVertical: 0,
+                      }}
+                      textStyle={styles.circleText}
+              />
             )}
-            {dontShow !== "home" && (
-                <AppButton
-                    title="Home"
-                    icon={<Feather name="home" size={22} color="white" />}
-                    onPress={() => {
-                      setMenuOpen(false);
-                      router.replace("/");
-                    }}
-                    style={{
-                      ...styles.circleItem,
-                      minWidth: 90,
-                      paddingHorizontal: 0,
-                      paddingVertical: 0,
-                    }}
-                    textStyle={styles.circleText}
-            />
-          )}
-        </View>
+          </View>
+        </Pressable>
       )}
     </>
   )
@@ -131,5 +133,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: '600',
+  },
+    overlay: {
+    ...StyleSheet.absoluteFillObject, // This makes it cover the whole screen
+    backgroundColor: 'transparent',   // Keeps it invisible but blocking clicks
+    zIndex: 90,                       // Below the button (100) but above content
   },
 });
