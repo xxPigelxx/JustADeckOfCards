@@ -23,34 +23,34 @@ export default function RulebookIndex() {
       <View style={styles.header}>
         <Text style={styles.title}>Regelbuch</Text>
       </View>
-
-      <ScrollView contentContainerStyle={styles.container}>
-        {GAMES.map((game) => (
-          <AppButton
-            key={game.id}
-            title={game.name}
-            onPress={() =>
-              router.push({
-                pathname: "/rulebook/[id]",
-                params: { id: game.id },
-              })
-            }
-          />
-        ))}
-      </ScrollView>
-
-      <LinearGradient
-          colors={["#F2E8DF", "transparent"]}
-          pointerEvents="none"
-          style={styles.topFade}
+      <View style={{ marginTop: 10, marginBottom: 40, flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.container}>
+          {GAMES.map((game) => (
+            <AppButton
+              key={game.id}
+              title={game.name}
+              onPress={() =>
+                router.push({
+                  pathname: "/rulebook/[id]",
+                  params: { id: game.id },
+                })
+              }
+            />
+          ))}
+        </ScrollView>
+        <LinearGradient
+            colors={["#F2E8DF", "rgba(242, 232, 223, 0)"]}
+            pointerEvents="none"
+            style={styles.topFade}
         />
 
         {/* BOTTOM FADE */}
         <LinearGradient
-          colors={["transparent", "#F2E8DF"]}
+          colors={["rgba(242, 232, 223, 0)", "#F2E8DF"]}
           pointerEvents="none"
           style={styles.bottomFade}
         />
+      </View>
     </View>
   );
 }
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   topFade: {
     position: "absolute",
-    top: 160,
+    top: 0,
     left: 0,
     right: 0,
     height: 60,         
