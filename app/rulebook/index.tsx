@@ -1,11 +1,19 @@
 import AppButton from "@/componets/AppButton";
 import BurgerMenu from "@/componets/BurgerMenu";
 import { GAMES } from "@/data/games";
+import { useFonts } from "expo-font";
 import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function RulebookIndex() {
  
+  const [fontsLoaded] = useFonts({
+    'MochiBoom': require('../../assets/fonts/MochiBoom.ttf'),
+  });
+    if (!fontsLoaded) {
+        return null;
+    }
+
   return (
     <View style={{ flex: 1 }}>
       <BurgerMenu />
@@ -40,8 +48,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: 'MochiBoom',
     color: "#000",
+    paddingTop: -50,
   },
   container: {
     alignItems: "center",
