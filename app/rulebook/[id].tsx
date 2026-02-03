@@ -1,4 +1,4 @@
-import BurgerMenu from "@/componets/BurgerMenu";
+import BurgerMenu from "@/components/BurgerMenu";
 import { GAMES } from "@/data/games";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: "#000",
     textAlign: "center",
   },

@@ -1,123 +1,172 @@
-import AppButton from "@/componets/AppButton";
-import BurgerMenu from "@/componets/BurgerMenu";
-import CustomSlider from "@/componets/Slider";
+import AppButton from "@/components/AppButton";
+import BurgerMenu from "@/components/BurgerMenu";
+import CustomSlider from "@/components/Slider";
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Create() {
+  const [selectedDeckIndex, setSelectedDeckIndex] = useState<number>(1);
 
-  const [selected, setSelected] = useState<number | null>(0);
-  const [players, setPlayers] = useState(0);
+  const [deckCount, setDeckCount] = useState(1);
+  const [playerCount, setPlayerCount] = useState(4);
+  const [startCards, setStartCards] = useState(5);
 
-  const options = ["54 Karten", "52 Karten", "36 Karten", "32 Karten", "24 Karten"];
+  const options = [
+    "54 Karten",
+    "52 Karten",
+    "36 Karten",
+    "32 Karten",
+    "24 Karten",
+  ];
+
+  const handleStartGame = () => {
+    router.push({
+      pathname: "/gameScreen",
+      params: {
+        deckType: options[selectedDeckIndex],
+        deckCount: deckCount,
+        playerCount: playerCount,
+        startCards: startCards,
+      },
+    });
+  };
 
   return (
-    <View style={styles.toggleContainer}>
-      <Text style={styles.heading}>Kartendecktyp</Text>
-      <View style={styles.toggleGroup}>
-        {options.map((title, index) => {
-          const isActive = selected === index;
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* --- DECK TYP --- */}
+        <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
 
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => setSelected(index)}
-              style={[
-                styles.toggleButton,
-                isActive && styles.toggleButtonActive,
-              ]}
-            >
-              <Text
+        <View style={styles.toggleGroup}>
+          {options.map((title, index) => {
+            const isActive = selectedDeckIndex === index;
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setSelectedDeckIndex(index)}
                 style={[
-                  styles.toggleText,
-                  isActive && styles.toggleTextActive,
+                  styles.toggleButton,
+                  isActive && styles.toggleButtonActive,
                 ]}
               >
-                {title}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    
-    <View style={styles.sliderContainer}>
-        <Text style={styles.heading}>Anzahl der Decks</Text>
-        <CustomSlider value={players} onChange={setPlayers} />  
-      </View>    
+                <Text
+                  style={[
+                    styles.toggleText,
+                    isActive && styles.toggleTextActive,
+                  ]}
+                >
+                  {title}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-    <View style={styles.sliderContainer}>
-        <Text style={styles.heading}>Anzahl Spieler</Text>
-        <CustomSlider value={players} onChange={setPlayers} /> 
-      </View>        
-    
-    <View style={styles.sliderContainer}>
-        <Text style={styles.heading}>Anzahl Handkarten</Text>
-        <CustomSlider value={players} onChange={setPlayers} /> 
-      </View>     
-    
-     <AppButton
-            title="Spielcode teilen"
-            onPress={() => router.push("/invite")}
-            style={styles.button}
-          />
+        {/* --- GROSSER CONTAINER FÜR ALLE SLIDER --- */}
+        <View style={styles.settingsCard}>
+          {/* 1. ANZAHL DECKS */}
+          <View style={styles.sliderSection}>
+            <Text style={styles.heading}>Anzahl Kartendecks: {deckCount}</Text>
+            <CustomSlider
+              value={deckCount}
+              onValueChange={setDeckCount}
+              minimumValue={1}
+              maximumValue={4}
+            />
+          </View>
+
+          <View style={{ height: 40 }} />
+
+          {/* 2. ANZAHL SPIELER */}
+          <View style={styles.sliderSection}>
+            <Text style={styles.heading}>Anzahl Spieler: {playerCount}</Text>
+            <CustomSlider
+              value={playerCount}
+              onValueChange={setPlayerCount}
+              minimumValue={1}
+              maximumValue={8}
+            />
+          </View>
+
+          <View style={{ height: 40 }} />
+
+          {/* 3. STARTKARTEN */}
+          <View style={styles.sliderSection}>
+            <Text style={styles.heading}>Anzahl Handkarten: {startCards}</Text>
+            <CustomSlider
+              value={startCards}
+              onValueChange={setStartCards}
+              minimumValue={0}
+              maximumValue={10}
+            />
+          </View>
+        </View>
+
+        <AppButton
+          title="Spiel Starten"
+          onPress={handleStartGame}
+          style={styles.button}
+        />
+      </ScrollView>
       <BurgerMenu />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  toggleContainer: {
-    flex: 1,
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    gap: 20,
-  },
+  container: { flex: 1 },
+  scrollContent: { paddingTop: 100, paddingHorizontal: 20, paddingBottom: 40 },
 
-  heading: {
-    fontSize: 20,
-    fontWeight: "700",
-    textAlign: "left",
-    width: "100%",
+  mainHeading: {
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 15,
+    color: "#333",
   },
 
   toggleGroup: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    gap: 15,
+    gap: 10,
+    marginBottom: 25,
   },
-
   toggleButton: {
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    backgroundColor: "#ffffffff",
-    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#fff",
+    shadowColor: "transparent",
+    elevation: 2,
   },
-
   toggleButtonActive: {
     backgroundColor: "#f1ce5bff",
+    borderColor: "#f1ce5bff",
+  },
+  toggleText: { color: "#000", fontWeight: "600", fontSize: 13 },
+  toggleTextActive: { color: "#fff" },
+
+  // Der neue große Container
+  settingsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "transparent",
   },
 
-  toggleText: {
-    color: "#000",
-    fontWeight: "600",
-    fontSize: 16,
+  sliderSection: {
+    marginBottom: 5,
   },
 
-  toggleTextActive: {
-    color: "#000000ff",
-  },
+  heading: { fontSize: 16, fontWeight: "700", color: "#000", marginBottom: 2 },
 
-  button: {
-    marginTop: 40,
-    alignSelf: "center",
-  },
-
-  sliderContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-
+  button: { marginTop: 70, alignSelf: "center" },
 });

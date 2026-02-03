@@ -1,23 +1,23 @@
-import AppButton from '@/componets/AppButton';
-import BurgerMenu from '@/componets/BurgerMenu';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import AppButton from "@/components/AppButton";
+import BurgerMenu from "@/components/BurgerMenu";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Join() {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const router = useRouter();
 
   const isCodeValid = code.trim().length > 0;
 
   const handleJoin = () => {
-    router.push('/gameScreen');
+    router.push("/gameScreen");
   };
 
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/key.png')}
+        source={require("../assets/images/key.png")}
         style={styles.image}
         resizeMode="contain"
       />
@@ -38,7 +38,7 @@ export default function Join() {
         onPress={isCodeValid ? handleJoin : () => {}}
         style={{
           ...styles.button,
-          ...( !isCodeValid ? styles.buttonDisabled : {} )
+          ...(!isCodeValid ? styles.buttonDisabled : {}),
         }}
       />
 
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   image: {
     width: 230,
@@ -61,19 +61,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
     marginTop: -40,
   },
   input: {
-    width: '70%',
+    width: "70%",
     height: 45,
-    borderColor: '#000',
+    borderColor: "#000",
     borderWidth: 0.5,
     borderRadius: 8,
-    backgroundColor: '#fff',
-    color: '#000',
+    backgroundColor: "#fff",
+    color: "#000",
     marginTop: 10,
     paddingHorizontal: 10,
   },

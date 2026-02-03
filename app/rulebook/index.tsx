@@ -1,20 +1,19 @@
-import AppButton from "@/componets/AppButton";
-import BurgerMenu from "@/componets/BurgerMenu";
+import AppButton from "@/components/AppButton";
+import BurgerMenu from "@/components/BurgerMenu";
 import { GAMES } from "@/data/games";
 import { useFonts } from "expo-font";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function RulebookIndex() {
- 
   const [fontsLoaded] = useFonts({
-    'MochiBoom': require('../../assets/fonts/MochiBoom.ttf'),
+    MochiBoom: require("../../assets/fonts/MochiBoom.ttf"),
   });
-    if (!fontsLoaded) {
-        return null;
-    }
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -39,9 +38,9 @@ export default function RulebookIndex() {
           ))}
         </ScrollView>
         <LinearGradient
-            colors={["#F2E8DF", "rgba(242, 232, 223, 0)"]}
-            pointerEvents="none"
-            style={styles.topFade}
+          colors={["#F2E8DF", "rgba(242, 232, 223, 0)"]}
+          pointerEvents="none"
+          style={styles.topFade}
         />
 
         {/* BOTTOM FADE */}
@@ -63,7 +62,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: 'MochiBoom',
+    fontFamily: "MochiBoom",
     color: "#000",
     paddingTop: -50,
   },
@@ -78,7 +77,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 60,         
+    height: 60,
   },
 
   bottomFade: {
