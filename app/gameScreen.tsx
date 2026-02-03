@@ -130,6 +130,7 @@ export default function GameScreen() {
           shuffleStack: game.actions.shuffleStack,
           moveStack: game.setMovingStackSlot,
           takeStack: game.actions.takeStack,
+          flipAllHand: game.actions.flipAllHand,
         }}
       />
     </GestureHandlerRootView>

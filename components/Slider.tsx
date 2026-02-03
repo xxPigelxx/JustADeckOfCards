@@ -27,10 +27,20 @@ export default function CustomSlider({
 
   const pan = useRef(new Animated.Value(getPositionFromValue(value))).current;
   const startPos = useRef(0);
+  const isDragging = useRef(false);
+
+  // Sicherstellen, dass die Füll-Leiste nicht über die Ränder hinausgeht
+  const fillWidth = pan.interpolate({
+    inputRange: [0, sliderWidth],
+    outputRange: [0, sliderWidth],
+    extrapolate: "clamp",
+  });
 
   useEffect(() => {
-    const newPos = getPositionFromValue(value);
-    pan.setValue(newPos);
+    if (!isDragging.current) {
+      const newPos = getPositionFromValue(value);
+      pan.setValue(newPos);
+    }
   }, [value, minimumValue, maximumValue]);
 
   const panResponder = useRef(
@@ -39,6 +49,7 @@ export default function CustomSlider({
       onMoveShouldSetPanResponder: () => true,
 
       onPanResponderGrant: () => {
+        isDragging.current = true;
         // @ts-ignore
         startPos.current = pan._value;
         pan.setOffset(startPos.current);
@@ -57,12 +68,14 @@ export default function CustomSlider({
             range +
           minimumValue;
         const steppedValue = Math.round(rawValue / step) * step;
+
         if (steppedValue !== value) {
           onValueChange(steppedValue);
         }
       },
 
       onPanResponderRelease: (_, gesture) => {
+        isDragging.current = false;
         pan.flattenOffset();
         // @ts-ignore
         let currentPos = pan._value;
@@ -98,7 +111,6 @@ export default function CustomSlider({
 
   return (
     <View style={styles.centerContainer}>
-      {/* Höhe etwas reduziert (60), Hintergrund entfernt */}
       <View
         style={{
           width: sliderWidth,
@@ -107,14 +119,18 @@ export default function CustomSlider({
           backgroundColor: "transparent",
         }}
       >
+        {/* Hintergrund-Track (grau/weiß) */}
         <View style={styles.track} />
 
+        {/* NEU: Füll-Leiste (schwarz), Breite ist animiert */}
+        <Animated.View style={[styles.fill, { width: fillWidth }]} />
+
+        {/* Thumb (Knopf) */}
         <Animated.View
           {...panResponder.panHandlers}
           style={[styles.thumb, { transform: [{ translateX: pan }] }]}
         />
 
-        {/* marginTop auf 30 reduziert (war 45) */}
         <View style={{ width: "100%", height: 20, marginTop: 30 }}>
           {numbers.map((num) => {
             const leftPos = getPositionFromValue(num);
@@ -143,7 +159,7 @@ const styles = StyleSheet.create({
   centerContainer: {
     alignItems: "center",
     marginTop: 10,
-    backgroundColor: "transparent", // Sicherstellen, dass hier kein BG ist
+    backgroundColor: "transparent",
   },
   track: {
     position: "absolute",
@@ -156,6 +172,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
+  // Neuer Style für den gefüllten Bereich
+  fill: {
+    position: "absolute",
+    top: 10, // Gleiche Höhe wie track
+    left: 0,
+    height: 8, // Gleiche Höhe wie track
+    backgroundColor: "#F2E8DF", // Farbe passend zum Thumb
+    borderRadius: 4,
+  },
   thumb: {
     position: "absolute",
     top: 0,
@@ -165,7 +190,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.5)",
     elevation: 5,
     shadowColor: "transparent",
     zIndex: 10,

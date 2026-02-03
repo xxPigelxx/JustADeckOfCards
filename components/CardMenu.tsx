@@ -13,6 +13,8 @@ type CardMenuProps = {
   onClose: () => void;
   actions: {
     flipCard: (id: string | null, slot: number | null) => void;
+    // NEU: Funktion zum Flippen aller Handkarten
+    flipAllHand?: () => void;
     shuffleStack: (id: string | null, slot: number | null) => void;
     moveStack: (slot: number | null) => void;
     takeStack: (slot: number | null) => void;
@@ -82,15 +84,26 @@ export default function CardMenu({
               />
             </>
           ) : isHand ? (
-            <AppButton
-              title="Mix"
-              onPress={() => {
-                actions.shuffleStack(targetCardId, null);
-                onClose();
-              }}
-              style={styles.menuButton}
-              textStyle={styles.menuButtonText}
-            />
+            <>
+              <AppButton
+                title="Flip All"
+                onPress={() => {
+                  actions.flipAllHand?.(); // Sicherer Aufruf
+                  onClose();
+                }}
+                style={styles.menuButton}
+                textStyle={styles.menuButtonText}
+              />
+              <AppButton
+                title="Mix"
+                onPress={() => {
+                  actions.shuffleStack(targetCardId, null);
+                  onClose();
+                }}
+                style={styles.menuButton}
+                textStyle={styles.menuButtonText}
+              />
+            </>
           ) : !isHand ? (
             <AppButton
               title="Take"

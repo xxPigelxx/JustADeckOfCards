@@ -44,9 +44,6 @@ export const useGameLogic = ({
     return row * C.COLS + col;
   };
 
-  // ... (Restlicher Code ist identisch: getHandIndexFromX, flipCard, etc.)
-  // Ich kopiere hier den Rest der Standard-Funktionen rein:
-
   const getHandIndexFromX = (absX: number) => {
     const totalWidth = handCards.length * C.FAN_SPREAD;
     const startX = (C.SCREEN_DIMS.width - totalWidth) / 2;
@@ -66,7 +63,6 @@ export const useGameLogic = ({
   };
 
   const flipCard = (id: string | null, slot: number | null) => {
-    // (Wie vorher)
     if (id && handCards.some((c) => c.id === id)) {
       setHandCards((prev) =>
         prev.map((c) => (c.id === id ? { ...c, isFaceUp: !c.isFaceUp } : c)),
@@ -82,16 +78,27 @@ export const useGameLogic = ({
     }
   };
 
+  // --- NEU: Funktion zum Flippen aller Handkarten ---
+  const flipAllHand = () => {
+    setHandCards((prev) => {
+      // Prüfen, ob ALLE aufgedeckt sind
+      const allFaceUp = prev.every((c) => c.isFaceUp);
+      // Wenn alle aufgedeckt sind -> alle zudecken. Sonst alle aufdecken.
+      return prev.map((c) => ({ ...c, isFaceUp: !allFaceUp }));
+    });
+  };
+  // --------------------------------------------------
+
   const shuffleStack = (id: string | null, slot: number | null) => {
-    // (Wie vorher)
     if (id && handCards.some((c) => c.id === id)) {
-      /* ... */ return;
+      // Hand Shuffle Logic (optional, falls benötigt)
+      return;
     }
     if (slot === null) return;
     setBoardCards((prev) => {
       const s = prev.filter((c) => c.slot === slot);
       const o = prev.filter((c) => c.slot !== slot);
-      // Shuffle Logic...
+
       for (let i = s.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [s[i], s[j]] = [s[j], s[i]];
@@ -154,16 +161,13 @@ export const useGameLogic = ({
       return;
     }
 
-    // Standard Drop (Board to Hand, Hand to Board, Board to Board)
-    // (Deine Standard Logik hier einfügen oder von vorher kopieren - sie ändert sich nicht)
     if (isOverHand) {
-      // ... Board->Hand Logik
       if (fromBoard) {
         setBoardCards((p) => p.filter((c) => c.id !== id));
         setHandCards((p) => [...p, { ...fromBoard, slot: undefined }]);
         return;
       }
-      // ... Hand Order Logik
+      // Optional: Hand Reorder Logic here
       return;
     }
     const targetSlot = getSlotFromCoords(absX, absY);
@@ -198,6 +202,11 @@ export const useGameLogic = ({
     bringToFront,
     handleDrop,
     handleDrag,
-    actions: { flipCard, shuffleStack, takeStack },
+    actions: {
+      flipCard,
+      flipAllHand, // <--- HIER EXPORTIEREN
+      shuffleStack,
+      takeStack,
+    },
   };
 };
