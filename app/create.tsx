@@ -15,8 +15,8 @@ export default function Create() {
   const [selectedDeckIndex, setSelectedDeckIndex] = useState<number>(1);
 
   const [deckCount, setDeckCount] = useState(1);
-  const [playerCount, setPlayerCount] = useState(4);
-  const [startCards, setStartCards] = useState(5);
+  const [playerCount, setPlayerCount] = useState(1);
+  const [startCards, setStartCards] = useState(0);
 
   const options = [
     "54 Karten",
@@ -28,7 +28,7 @@ export default function Create() {
 
   const handleStartGame = () => {
     router.push({
-      pathname: "/gameScreen",
+      pathname: "/invite",
       params: {
         deckType: options[selectedDeckIndex],
         deckCount: deckCount,
@@ -110,7 +110,7 @@ export default function Create() {
         </View>
 
         <AppButton
-          title="Spiel Starten"
+          title="Erstellen"
           onPress={handleStartGame}
           style={styles.button}
         />

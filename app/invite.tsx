@@ -1,6 +1,6 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
@@ -8,9 +8,12 @@ export default function Invite() {
   const [code, setCode] = useState("");
   const router = useRouter();
 
+  // 1. Hier holen wir die Parameter ab, die von Create.tsx kommen
+  const params = useLocalSearchParams();
+
   const generateCode = () => {
-    const randomNum = Math.floor(Math.random() * 10000);
-    return randomNum.toString().padStart(4, "0");
+    const randomNum = Math.floor(Math.random() * 1000000);
+    return randomNum.toString().padStart(6, "0");
   };
 
   useEffect(() => {
@@ -33,7 +36,13 @@ export default function Invite() {
 
       <AppButton
         title="Spiel starten"
-        onPress={() => router.push("/gameScreen")}
+        onPress={() => {
+          // 2. Wir leiten weiter zum GameScreen und geben die Params mit
+          router.push({
+            pathname: "/gameScreen",
+            params: params, // Wichtig: Hier werden die Einstellungen weitergereicht
+          });
+        }}
         style={styles.button}
       />
       <BurgerMenu />
