@@ -6,9 +6,11 @@ import AppButton from "./AppButton";
 
 type BurgerMenuProps = {
   dontShow?: "controls" | "rulebook" | "home" | "";
+  // NEU: Optionale Funktion für das Verlassen-Event
+  onLeave?: () => void;
 };
 
-export default function BurgerMenu({ dontShow }: BurgerMenuProps) {
+export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -61,13 +63,22 @@ export default function BurgerMenu({ dontShow }: BurgerMenuProps) {
                 textStyle={styles.circleText}
               />
             )}
+
             {dontShow !== "home" && (
               <AppButton
                 title="Home"
                 icon={<Feather name="home" size={22} color="white" />}
                 onPress={() => {
                   setMenuOpen(false);
-                  router.replace("/");
+
+                  // LOGIK UPDATE:
+                  // Wenn onLeave existiert (z.B. im Spiel), nutze es für das Popup.
+                  // Sonst (z.B. im Regelbuch), gehe direkt nach Hause.
+                  if (onLeave) {
+                    onLeave();
+                  } else {
+                    router.replace("/");
+                  }
                 }}
                 style={{
                   ...styles.circleItem,
@@ -141,8 +152,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject, // This makes it cover the whole screen
-    backgroundColor: "transparent", // Keeps it invisible but blocking clicks
-    zIndex: 90, // Below the button (100) but above content
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent",
+    zIndex: 90,
   },
 });

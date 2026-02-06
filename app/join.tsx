@@ -1,5 +1,6 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
+import ControlsHint from "@/components/ControlsHint";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
@@ -32,6 +33,8 @@ export default function Join() {
         onChangeText={setCode}
         textAlign="center"
       />
+      {/* 2. NEU: Hinweis-Text */}
+      <ControlsHint style={{ marginTop: 20, marginBottom: 10 }} />
 
       <AppButton
         title="Spiel beitreten"

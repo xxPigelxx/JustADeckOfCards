@@ -2,23 +2,27 @@ import BoardArea from "@/components/BoardArea";
 import BurgerMenu from "@/components/BurgerMenu";
 import CardMenu from "@/components/CardMenu";
 import * as C from "@/components/constants";
+import CustomAlert from "@/components/CustomAlert";
 import HandArea from "@/components/HandArea";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
 import { generateGameData } from "@/utils/gameSetup";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+// 1. NEU: useEffect importieren
+import React, { useEffect, useMemo, useState } from "react";
+// 2. NEU: BackHandler importieren
+import { BackHandler, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function GameScreen() {
   const params = useLocalSearchParams();
+  const router = useRouter();
 
   const initialData = useMemo(() => {
     const deckType = (params.deckType as string) || "52 Karten";
     const deckCount = Number(params.deckCount) || 1;
     const playerCount = Number(params.playerCount) || 4;
-    const startCards = Number(params.startCards) || 0; // <--- NEU
+    const startCards = Number(params.startCards) || 0;
 
     return generateGameData(deckType, deckCount, playerCount, startCards);
   }, [
@@ -28,17 +32,52 @@ export default function GameScreen() {
     params.startCards,
   ]);
 
-  // 2. Logic initialisieren
   const game = useGameLogic({
     initialBoard: initialData.boardCards,
     initialHand: initialData.handCards,
   });
 
-  // 3. UI State
+  // State für Menüs
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTargetSlot, setMenuTargetSlot] = useState<number | null>(null);
   const [menuTargetCardId, setMenuTargetCardId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+
+  // State für Custom Alert
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+
+  // 3. NEU: Android Back-Button Logik
+  useEffect(() => {
+    const onBackPress = () => {
+      if (exitModalVisible) {
+        // Wenn Popup offen ist -> Schließen (User will doch bleiben)
+        setExitModalVisible(false);
+      } else {
+        // Wenn Popup zu ist -> Öffnen (Sicherheitsfrage)
+        setExitModalVisible(true);
+      }
+      // WICHTIG: return true verhindert das sofortige Beenden der App
+      return true;
+    };
+
+    // Listener hinzufügen
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+
+    // Aufräumen beim Verlassen
+    return () => subscription.remove();
+  }, [exitModalVisible]); // Abhängigkeit: Muss wissen, ob Modal gerade offen ist
+
+  const handleLeaveGame = () => {
+    setExitModalVisible(true);
+  };
+
+  const confirmExit = () => {
+    setExitModalVisible(false);
+    router.replace("/");
+  };
 
   const handleCardTap = (cardId: string, globalX: number, globalY: number) => {
     if (game.movingStackSlot !== null) {
@@ -117,7 +156,7 @@ export default function GameScreen() {
         />
       </View>
 
-      <BurgerMenu />
+      <BurgerMenu onLeave={handleLeaveGame} />
 
       <CardMenu
         visible={menuVisible}
@@ -134,6 +173,14 @@ export default function GameScreen() {
           takeStack: game.actions.takeStack,
           flipAllHand: game.actions.flipAllHand,
         }}
+      />
+
+      <CustomAlert
+        visible={exitModalVisible}
+        title="Spiel verlassen"
+        message="Möchtest du das Spiel wirklich verlassen?"
+        onConfirm={confirmExit}
+        onCancel={() => setExitModalVisible(false)}
       />
     </GestureHandlerRootView>
   );
