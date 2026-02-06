@@ -6,6 +6,7 @@ import HandArea from "@/components/HandArea";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
 import { generateGameData } from "@/utils/gameSetup";
 import { useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -80,6 +81,7 @@ export default function GameScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
+      <StatusBar style="light" />
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
 
       <View style={{ flex: 1 }}>

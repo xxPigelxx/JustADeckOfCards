@@ -9,11 +9,15 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Create() {
-  const [selectedDeckIndex, setSelectedDeckIndex] = useState<number>(1);
+  const { width, height } = useWindowDimensions();
+  const isTablet = width > 600;
 
+  const [selectedDeckIndex, setSelectedDeckIndex] = useState<number>(1);
   const [deckCount, setDeckCount] = useState(1);
   const [playerCount, setPlayerCount] = useState(1);
   const [startCards, setStartCards] = useState(0);
@@ -31,98 +35,118 @@ export default function Create() {
       pathname: "/invite",
       params: {
         deckType: options[selectedDeckIndex],
-        deckCount: deckCount,
-        playerCount: playerCount,
-        startCards: startCards,
+        deckCount,
+        playerCount,
+        startCards,
       },
     });
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* --- DECK TYP --- */}
-        <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
+      {/* BurgerMenu bleibt absolut oben */}
+      <BurgerMenu />
 
-        <View style={styles.toggleGroup}>
-          {options.map((title, index) => {
-            const isActive = selectedDeckIndex === index;
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setSelectedDeckIndex(index)}
-                style={[
-                  styles.toggleButton,
-                  isActive && styles.toggleButtonActive,
-                ]}
-              >
-                <Text
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            // Auf Tablets den Inhalt zentrieren, damit er nicht zu breit wird
+            isTablet && { width: 600, alignSelf: "center" },
+          ]}
+        >
+          {/* --- DECK TYP --- */}
+          <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
+
+          <View style={styles.toggleGroup}>
+            {options.map((title, index) => {
+              const isActive = selectedDeckIndex === index;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedDeckIndex(index)}
                   style={[
-                    styles.toggleText,
-                    isActive && styles.toggleTextActive,
+                    styles.toggleButton,
+                    isActive && styles.toggleButtonActive,
                   ]}
                 >
-                  {title}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* --- GROSSER CONTAINER FÜR ALLE SLIDER --- */}
-        <View style={styles.settingsCard}>
-          {/* 1. ANZAHL DECKS */}
-          <View style={styles.sliderSection}>
-            <Text style={styles.heading}>Anzahl Kartendecks: {deckCount}</Text>
-            <CustomSlider
-              value={deckCount}
-              onValueChange={setDeckCount}
-              minimumValue={1}
-              maximumValue={4}
-            />
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      isActive && styles.toggleTextActive,
+                    ]}
+                  >
+                    {title}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
-          <View style={{ height: 40 }} />
+          {/* --- GROSSER CONTAINER FÜR SLIDER --- */}
+          <View style={styles.settingsCard}>
+            {/* 1. ANZAHL DECKS */}
+            <View style={styles.sliderSection}>
+              <Text style={styles.heading}>
+                Anzahl Kartendecks: {deckCount}
+              </Text>
+              <CustomSlider
+                value={deckCount}
+                onValueChange={setDeckCount}
+                minimumValue={1}
+                maximumValue={4}
+              />
+            </View>
 
-          {/* 2. ANZAHL SPIELER */}
-          <View style={styles.sliderSection}>
-            <Text style={styles.heading}>Anzahl Spieler: {playerCount}</Text>
-            <CustomSlider
-              value={playerCount}
-              onValueChange={setPlayerCount}
-              minimumValue={1}
-              maximumValue={8}
-            />
+            {/* Kleiner Abstand (statt 3% View) */}
+            <View style={styles.spacer} />
+
+            {/* 2. ANZAHL SPIELER */}
+            <View style={styles.sliderSection}>
+              <Text style={styles.heading}>Anzahl Spieler: {playerCount}</Text>
+              <CustomSlider
+                value={playerCount}
+                onValueChange={setPlayerCount}
+                minimumValue={1}
+                maximumValue={8}
+              />
+            </View>
+
+            <View style={styles.spacer} />
+
+            {/* 3. STARTKARTEN */}
+            <View style={styles.sliderSection}>
+              <Text style={styles.heading}>
+                Anzahl Handkarten: {startCards}
+              </Text>
+              <CustomSlider
+                value={startCards}
+                onValueChange={setStartCards}
+                minimumValue={0}
+                maximumValue={10}
+              />
+            </View>
           </View>
 
-          <View style={{ height: 40 }} />
-
-          {/* 3. STARTKARTEN */}
-          <View style={styles.sliderSection}>
-            <Text style={styles.heading}>Anzahl Handkarten: {startCards}</Text>
-            <CustomSlider
-              value={startCards}
-              onValueChange={setStartCards}
-              minimumValue={0}
-              maximumValue={10}
-            />
-          </View>
-        </View>
-
-        <AppButton
-          title="Erstellen"
-          onPress={handleStartGame}
-          style={styles.button}
-        />
-      </ScrollView>
-      <BurgerMenu />
+          <AppButton
+            title="Erstellen"
+            onPress={handleStartGame}
+            style={styles.button}
+          />
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingHorizontal: 20, paddingBottom: 40 },
+
+  scrollContent: {
+    paddingTop: 60, // Platz für BurgerMenu
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
 
   mainHeading: {
     fontSize: 22,
@@ -137,6 +161,7 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 25,
   },
+
   toggleButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -144,29 +169,50 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#fff",
-    shadowColor: "transparent",
-    elevation: 2,
+    // Kein Shadow hier, wie im Original gewünscht
   },
+
   toggleButtonActive: {
     backgroundColor: "#f1ce5bff",
     borderColor: "#f1ce5bff",
   },
-  toggleText: { color: "#000", fontWeight: "600", fontSize: 13 },
-  toggleTextActive: { color: "#fff" },
 
-  // Der neue große Container
+  toggleText: {
+    color: "#000",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+
+  toggleTextActive: {
+    color: "#fff",
+  },
+
   settingsCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
-    shadowColor: "transparent",
+    // Originaler Look ohne starken Schatten
   },
 
   sliderSection: {
     marginBottom: 5,
   },
 
-  heading: { fontSize: 16, fontWeight: "700", color: "#000", marginBottom: 2 },
+  // Ersatz für <View style={{ height: "3%" }} />
+  // Fest 20px ist sicherer als %, da % in ScrollViews manchmal kollabiert
+  spacer: {
+    height: 20,
+  },
 
-  button: { marginTop: 70, alignSelf: "center" },
+  heading: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 2,
+  },
+
+  button: {
+    marginTop: 50, // Etwas reduziert, damit es auf kleinen Screens nicht scrollen muss
+    alignSelf: "center",
+  },
 });
