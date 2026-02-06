@@ -11,7 +11,7 @@ export default function RulebookDetail() {
 
   return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu />
+      <BurgerMenu dontShow="rulebook" />
 
       <View style={styles.header}>
         <Text style={styles.title}>{game.name}</Text>
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: "MochiBoom",
     color: "#000",
     textAlign: "center",
   },

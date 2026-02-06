@@ -1,6 +1,5 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
-import { useFonts } from "expo-font";
 import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -10,14 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context"; // Empfohlen für
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { width, height } = useWindowDimensions(); // Holt aktuelle Screen-Maße
-
-  const [fontsLoaded] = useFonts({
-    MochiBoom: require("../assets/fonts/MochiBoom.ttf"),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
 
   // Berechne dynamische Logo-Größe:
   // Auf Tablets größer, auf Handys kleiner, aber nie riesig.

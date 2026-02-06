@@ -22,22 +22,15 @@ export default function CustomAlert({
       transparent={true}
       visible={visible}
       animationType="fade"
+      statusBarTranslucent={true} // 1. WICHTIG: Damit es hinter die Statusbar geht
       onRequestClose={onCancel}
     >
-      {/* 1. ÄNDERUNG: Overlay ist jetzt Pressable und ruft onCancel auf */}
       <Pressable style={styles.overlay} onPress={onCancel}>
-        {/* 2. ÄNDERUNG: Die Box ist auch Pressable (ohne Aktion), 
-            damit Klicks HIER DRIN das Modal NICHT schließen */}
         <Pressable style={styles.alertBox} onPress={() => {}}>
-          {/* Titel */}
           <Text style={styles.title}>{title}</Text>
-
-          {/* Nachricht */}
           <Text style={styles.message}>{message}</Text>
 
-          {/* Buttons Container */}
           <View style={styles.buttonContainer}>
-            {/* NEIN Button (Grau) */}
             <AppButton
               title="Nein"
               onPress={onCancel}
@@ -48,7 +41,6 @@ export default function CustomAlert({
               textStyle={styles.buttonText}
             />
 
-            {/* JA Button (Rot) */}
             <AppButton
               title="Ja"
               onPress={onConfirm}
@@ -68,9 +60,17 @@ export default function CustomAlert({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    // 2. WICHTIG: Absolute Positionierung für Fullscreen
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // Hintergrund & Ausrichtung
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 9999,
   },
   alertBox: {
     width: 320,

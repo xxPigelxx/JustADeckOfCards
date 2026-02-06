@@ -1,14 +1,14 @@
-import Card from "@/components/CardOld";
+import Card from "@/components/Card"; // <--- Korrekter Import
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
+import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-// Optional: Icon für "Hier ablegen"
-import { Feather } from "@expo/vector-icons";
 
 type HandAreaProps = {
   handCards: CardData[];
   draggedId: string | null;
+  cardBackColor?: string; // Prop für Farbe
   onDrop: (id: string, x: number, y: number) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onTap: (id: string, x: number, y: number) => void;
@@ -19,6 +19,7 @@ type HandAreaProps = {
 export default function HandArea({
   handCards,
   draggedId,
+  cardBackColor,
   onDrop,
   onDrag,
   onTap,
@@ -37,35 +38,31 @@ export default function HandArea({
     return { x, translateY, rotation };
   };
 
-  // Berechnung für die Mitte, falls Hand leer ist
   const centerX = (C.SCREEN_DIMS.width - C.CARD_W) / 2;
 
   return (
     <View style={styles.handArea}>
-      {/* 1. NEU: Leere Platzhalter-Karte anzeigen, wenn keine Karten da sind */}
       {handCards.length === 0 && (
         <View
           style={{
             position: "absolute",
             left: centerX,
-            top: 30, // Gleiche Höhe wie die normalen Karten
+            top: 30,
             width: C.CARD_W,
             height: C.CARD_H,
-            // Styling für "Drop Zone"
             borderColor: "#666",
             borderWidth: 2,
-            borderStyle: "dashed", // Gestrichelte Linie
+            borderStyle: "dashed",
             borderRadius: 10,
-            backgroundColor: "rgba(255, 255, 255, 0.05)", // Leicht transparent
+            backgroundColor: "rgba(255, 255, 255, 0.05)",
             justifyContent: "center",
-            alignItems: "center", // Etwas Abstand nach oben
+            alignItems: "center",
           }}
         >
-          <Feather name="arrow-down" size={24} color="#666" />
+          <Feather name="arrow-down" size={38} color="#666" />
         </View>
       )}
 
-      {/* Normale Karten */}
       {handCards.map((card, i) => {
         const { x, translateY, rotation } = getFanConfig(i, handCards.length);
         const isDragging = draggedId === card.id;
@@ -91,6 +88,7 @@ export default function HandArea({
               {...card}
               x={0}
               y={0}
+              backColor={cardBackColor} // Farbe weitergeben
               onDrop={onDrop}
               onDrag={onDrag}
               onTap={() => onTap(card.id, x, handGlobalY)}
@@ -110,6 +108,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#333",
     width: "100%",
     zIndex: 10,
-    overflow: "visible", // Damit die Karten über den Handbereich hinaus sichtbar sind
+    overflow: "visible",
   },
 });

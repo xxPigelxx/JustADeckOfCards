@@ -7,6 +7,7 @@ type CardVisualProps = {
   suit: string;
   isFaceUp?: boolean;
   badgeCount?: number;
+  backColor?: string; // NEU
 };
 
 export default function CardVisual({
@@ -14,6 +15,7 @@ export default function CardVisual({
   suit,
   isFaceUp = true,
   badgeCount = 0,
+  backColor = "#3b82f6", // NEU: Default
 }: CardVisualProps) {
   const isRed = suit === "♥" || suit === "♦";
 
@@ -52,7 +54,8 @@ export default function CardVisual({
           </View>
         </>
       ) : (
-        <View style={styles.backPattern}>
+        // Hier Farbe anwenden
+        <View style={[styles.backPattern, { backgroundColor: backColor }]}>
           <View style={styles.innerBack} />
         </View>
       )}
@@ -68,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 1, // Weniger Padding
+    padding: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -99,18 +102,17 @@ const styles = StyleSheet.create({
   backPattern: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#3b82f6",
     borderRadius: 3,
+    justifyContent: "center",
+    alignItems: "center",
   },
   innerBack: {
     width: 14,
     height: 14,
-    backgroundColor: "#60a5fa",
+    backgroundColor: "white",
     borderRadius: 7,
-    opacity: 0.5,
+    opacity: 0.4,
   },
-
-  // Angepasste Größen für kleine Karten:
   corner: { alignItems: "center", width: 14 },
   bottomRight: { alignSelf: "flex-end", transform: [{ rotate: "180deg" }] },
   rankText: { fontSize: 10, fontWeight: "bold", lineHeight: 10 },

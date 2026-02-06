@@ -1,5 +1,6 @@
+import CardVisual from "@/components/CardVisual";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -8,6 +9,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { CARD_H, CARD_W } from "./constants";
 
 type CardProps = {
   id: string;
@@ -17,17 +19,15 @@ type CardProps = {
   y: number;
   zIndex?: number;
   isFaceUp?: boolean;
-  badgeCount?: number; // Anzahl im Stapel
-  forceBadgeVisible?: boolean; // NEU: Zwingt das Badge sichtbar zu bleiben beim Ziehen
+  badgeCount?: number;
+  forceBadgeVisible?: boolean;
+  backColor?: string; // Prop für Farbe
   onDrop: (id: string, x: number, y: number) => void;
   onDrag?: (id: string, x: number, y: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onTap?: () => void;
 };
-
-const CARD_W = 60;
-const CARD_H = 80;
 
 export default function Card({
   id,
@@ -38,7 +38,8 @@ export default function Card({
   zIndex = 1,
   isFaceUp = true,
   badgeCount = 0,
-  forceBadgeVisible = false, // Standard: Badge verschwindet beim Ziehen
+  forceBadgeVisible = false,
+  backColor, // Farbe empfangen
   onDrop,
   onDrag,
   onDragStart,
@@ -95,157 +96,26 @@ export default function Card({
     zIndex: isDragging.value ? 9999 : zIndex,
   }));
 
-  // LOGIK: Badge ausblenden beim Ziehen, AUSSER forceBadgeVisible ist an
-  const badgeStyle = useAnimatedStyle(() => {
-    const shouldHide = isDragging.value && !forceBadgeVisible;
-    return {
-      opacity: withTiming(shouldHide ? 0 : 1, { duration: 100 }),
-      transform: [{ scale: withSpring(shouldHide ? 0 : 1) }],
-    };
-  });
-
-  const isRed = suit === "♥" || suit === "♦";
-
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View
-        style={[styles.card, animatedStyle, !isFaceUp && styles.cardBack]}
-      >
-        {/* Badge wird nur gerendert, wenn count > 1 */}
-        {badgeCount > 1 && (
-          <Animated.View style={[styles.badgeContainer, badgeStyle]}>
-            <Text style={styles.badgeText}>{badgeCount}</Text>
-          </Animated.View>
-        )}
-
-        {isFaceUp ? (
-          <>
-            <View style={styles.corner}>
-              <Text
-                style={[styles.rankText, { color: isRed ? "red" : "black" }]}
-              >
-                {rank}
-              </Text>
-              <Text
-                style={[styles.suitText, { color: isRed ? "red" : "black" }]}
-              >
-                {suit}
-              </Text>
-            </View>
-            <View style={styles.centerContent}>
-              <Text
-                style={[styles.bigSuit, { color: isRed ? "red" : "black" }]}
-              >
-                {suit}
-              </Text>
-            </View>
-            <View style={[styles.corner, styles.bottomRight]}>
-              <Text
-                style={[styles.rankText, { color: isRed ? "red" : "black" }]}
-              >
-                {rank}
-              </Text>
-              <Text
-                style={[styles.suitText, { color: isRed ? "red" : "black" }]}
-              >
-                {suit}
-              </Text>
-            </View>
-          </>
-        ) : (
-          <View style={styles.backPattern}>
-            <View style={styles.innerBack} />
-          </View>
-        )}
+      <Animated.View style={[styles.cardContainer, animatedStyle]}>
+        {/* Hier nutzen wir CardVisual für das Design */}
+        <CardVisual
+          rank={rank}
+          suit={suit}
+          isFaceUp={isFaceUp}
+          badgeCount={badgeCount}
+          backColor={backColor} // Farbe weitergeben
+        />
       </Animated.View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  cardContainer: {
     width: CARD_W,
     height: CARD_H,
-    backgroundColor: "white",
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
-    elevation: 2,
-    justifyContent: "space-between",
-  },
-  badgeContainer: {
     position: "absolute",
-    top: -8,
-    right: -8,
-    backgroundColor: "#f1ce5bff",
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-    elevation: 5,
-  },
-  badgeText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  cardBack: {
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 4,
-  },
-  backPattern: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#3b82f6",
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  innerBack: {
-    width: 20,
-    height: 20,
-    backgroundColor: "#60a5fa",
-    borderRadius: 10,
-    opacity: 0.5,
-  },
-  corner: {
-    alignItems: "center",
-    width: 20,
-  },
-  bottomRight: {
-    alignSelf: "flex-end",
-    transform: [{ rotate: "180deg" }],
-  },
-  rankText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    lineHeight: 12,
-  },
-  suitText: {
-    fontSize: 12,
-    lineHeight: 12,
-  },
-  centerContent: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: -1,
-  },
-  bigSuit: {
-    fontSize: 32,
-    opacity: 0.1,
   },
 });

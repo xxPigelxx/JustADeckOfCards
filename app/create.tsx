@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   scrollContent: {
-    paddingTop: 60, // Platz für BurgerMenu
+    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 40,
   },

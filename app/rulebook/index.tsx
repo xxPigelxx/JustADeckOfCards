@@ -1,23 +1,15 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
 import { GAMES } from "@/data/games";
-import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function RulebookIndex() {
-  const [fontsLoaded] = useFonts({
-    MochiBoom: require("../../assets/fonts/MochiBoom.ttf"),
-  });
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu />
+      <BurgerMenu dontShow="rulebook" />
 
       <View style={styles.header}>
         <Text style={styles.title}>Regelbuch</Text>

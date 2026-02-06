@@ -1,4 +1,4 @@
-import Card from "@/components/Card"; // Achte auf den Import-Pfad (ggf. CardOld wenn du es so nennst)
+import Card from "@/components/Card"; // <--- Korrekter Import
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
 import React from "react";
@@ -9,6 +9,7 @@ type BoardAreaProps = {
   highlightedSlot: number | null;
   movingStackSlot: number | null;
   draggedId: string | null;
+  cardBackColor?: string; // Prop für Farbe
   onDrop: (id: string, x: number, y: number) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onTap: (id: string, x: number, y: number) => void;
@@ -21,32 +22,24 @@ export default function BoardArea({
   highlightedSlot,
   movingStackSlot,
   draggedId,
+  cardBackColor,
   onDrop,
   onDrag,
   onTap,
   onDragStart,
   onDragEnd,
 }: BoardAreaProps) {
-  // --- GRID POSITION HELPER ---
   const getGridCardPosition = (slot: number, visualIndex: number = 0) => {
     const col = slot % C.COLS;
     const row = Math.floor(slot / C.COLS);
-
     const baseX = C.GRID_OFFSET_X + col * (C.SLOT_W + C.GAP);
     const baseY = C.GRID_MARGIN_TOP + row * (C.SLOT_H + C.GAP);
-
-    // Offset für Stapel-Effekt
     const offsetX = visualIndex * C.STACK_OFFSET * -1;
     const offsetY = visualIndex * C.STACK_OFFSET * -1;
-
-    // Globale Koordinaten
     const globalX = baseX + offsetX + C.BOARD_PADDING;
     const globalY = baseY + offsetY + C.TOP_OFFSET + C.SAFE_TOP;
-
-    // Relative Koordinaten
     const surfaceX = baseX + offsetX;
     const surfaceY = baseY + offsetY;
-
     return { surfaceX, surfaceY, globalX, globalY, baseX, baseY };
   };
 
@@ -55,8 +48,6 @@ export default function BoardArea({
     if (!cardsBySlot[card.slot!]) cardsBySlot[card.slot!] = [];
     cardsBySlot[card.slot!].push(card);
   });
-
-  // Sortieren nach zIndex
   Object.values(cardsBySlot).forEach((group) =>
     group.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)),
   );
@@ -64,7 +55,6 @@ export default function BoardArea({
   return (
     <View style={styles.boardContainer}>
       <View style={styles.boardSurface}>
-        {/* GRID SLOTS */}
         <View style={[styles.gridContainer, { paddingLeft: C.GRID_OFFSET_X }]}>
           {Array.from({ length: C.TOTAL_SLOTS }).map((_, i) => (
             <View
@@ -77,18 +67,14 @@ export default function BoardArea({
           ))}
         </View>
 
-        {/* KARTEN */}
         {Object.keys(cardsBySlot).map((slotKeyStr) => {
           const slotKey = Number(slotKeyStr);
           const stack = cardsBySlot[slotKey];
           const totalInStack = stack.length;
 
-          // ----------------------------------------------------
-          // FALL 1: STAPEL IST IM "MOVE-MODUS" (COMPRESSED)
-          // ----------------------------------------------------
           if (movingStackSlot === slotKey) {
-            const leader = stack[stack.length - 1]; // Oberste Karte
-            const pos = getGridCardPosition(slotKey, 0); // Offset 0
+            const leader = stack[stack.length - 1];
+            const pos = getGridCardPosition(slotKey, 0);
 
             return (
               <View
@@ -107,8 +93,8 @@ export default function BoardArea({
                   x={0}
                   y={0}
                   badgeCount={totalInStack}
-                  // HIER: Badge bleibt sichtbar beim Ziehen!
                   forceBadgeVisible={true}
+                  backColor={cardBackColor} // Farbe weitergeben
                   onDrop={onDrop}
                   onDrag={onDrag}
                   onTap={() => onTap(leader.id, pos.globalX, pos.globalY)}
@@ -119,19 +105,13 @@ export default function BoardArea({
             );
           }
 
-          // ----------------------------------------------------
-          // FALL 2: NORMALER STAPEL (SPLAYED)
-          // ----------------------------------------------------
           return stack.map((card, idx) => {
             const threshold = Math.max(0, stack.length - C.VISIBLE_STACK_LIMIT);
-            const isVis = idx >= threshold;
-            if (!isVis) return null; // Performance: unsichtbare Karten skippen
+            if (idx < threshold) return null;
 
             const vIdx = idx - threshold;
             const pos = getGridCardPosition(slotKey, vIdx);
-
             const isTopCard = idx === stack.length - 1;
-            // Wird diese spezifische Karte gerade gezogen?
             const isBeingDragged = draggedId === card.id;
 
             return (
@@ -143,17 +123,16 @@ export default function BoardArea({
                   top: pos.surfaceY,
                   width: C.CARD_W,
                   height: C.CARD_H,
-                  zIndex: card.zIndex,
+                  zIndex: isBeingDragged ? 99999 : card.zIndex,
                 }}
               >
                 <Card
                   {...card}
                   x={0}
                   y={0}
-                  // Badge nur auf der obersten
                   badgeCount={isTopCard ? totalInStack : 0}
-                  // Hier verschwindet das Badge beim Ziehen (weil forceBadgeVisible=false default)
                   forceBadgeVisible={false}
+                  backColor={cardBackColor} // Farbe weitergeben
                   onDrop={onDrop}
                   onDrag={onDrag}
                   onTap={() => onTap(card.id, pos.globalX, pos.globalY)}
@@ -161,10 +140,6 @@ export default function BoardArea({
                   onDragEnd={onDragEnd}
                 />
 
-                {/* STATISCHES BADGE:
-                    Wenn die oberste Karte weggezogen wird, malen wir hier
-                    das Badge einfach fest auf den Stapel.
-                */}
                 {isTopCard && isBeingDragged && totalInStack > 1 && (
                   <View style={styles.staticBadge}>
                     <Text style={styles.badgeText}>{totalInStack - 1}</Text>
@@ -193,11 +168,14 @@ const styles = StyleSheet.create({
     marginHorizontal: C.BOARD_PADDING,
     marginTop: C.TOP_OFFSET,
     position: "relative",
+    overflow: "visible",
+    zIndex: 1,
   },
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: C.GRID_MARGIN_TOP,
+    zIndex: 0,
   },
   cardSlot: {
     width: C.SLOT_W,
@@ -214,7 +192,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.2)",
     borderWidth: 2,
   },
-  // Statisches Badge (Kopie vom Card Style)
   staticBadge: {
     position: "absolute",
     top: -8,
@@ -226,7 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
-    elevation: 100,
+    elevation: 5,
   },
   badgeText: {
     color: "white",

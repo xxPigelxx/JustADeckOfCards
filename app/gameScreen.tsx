@@ -5,16 +5,27 @@ import * as C from "@/components/constants";
 import CustomAlert from "@/components/CustomAlert";
 import HandArea from "@/components/HandArea";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
+import { DEFAULT_BACK_COLOR, loadCardBack } from "@/utils/designStorage"; // NEU
 import { generateGameData } from "@/utils/gameSetup";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react"; // useCallback hinzu
 import { BackHandler, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function GameScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+
+  // --- NEU: State für Farbe ---
+  const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
+
+  // Lädt die Farbe neu, wenn man zum Screen zurückkehrt
+  useFocusEffect(
+    useCallback(() => {
+      loadCardBack().then(setCardBackColor);
+    }, []),
+  );
 
   const initialData = useMemo(() => {
     const deckType = (params.deckType as string) || "52 Karten";
@@ -35,42 +46,52 @@ export default function GameScreen() {
     initialHand: initialData.handCards,
   });
 
-  // --- NEU: Wir ermitteln die QUELLE des Drags ---
+  // --- Smart zIndex Fix ---
   const draggedSource = useMemo(() => {
     if (!game.draggedId) return null;
-    // Ist die Karte in der Hand?
     if (game.handCards.find((c) => c.id === game.draggedId)) {
       return "hand";
     }
-    // Sonst ist sie auf dem Board
     return "board";
   }, [game.draggedId, game.handCards]);
 
-  // --- NEU: Dynamische Z-Indexe basierend auf der Quelle ---
-  // Standard: Hand (10) liegt über Board (1), damit man Karten reinstecken kann.
-  // Wenn Board gezogen wird: Board (100) muss über Hand liegen.
-  // Wenn Hand gezogen wird: Hand (100) muss über Board liegen.
   const boardZIndex = draggedSource === "board" ? 100 : 1;
   const handZIndex = draggedSource === "hand" ? 100 : 10;
 
+  // Menü State
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTargetSlot, setMenuTargetSlot] = useState<number | null>(null);
   const [menuTargetCardId, setMenuTargetCardId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+
+  // Alert State
   const [exitModalVisible, setExitModalVisible] = useState(false);
 
-  useEffect(() => {
-    const onBackPress = () => {
-      if (exitModalVisible) setExitModalVisible(false);
-      else setExitModalVisible(true);
-      return true;
-    };
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress,
-    );
-    return () => subscription.remove();
-  }, [exitModalVisible]);
+  // NEUE VERSION: Nur aktiv, wenn Screen im Fokus ist
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Wenn Modal offen -> Modal schließen
+        if (exitModalVisible) {
+          setExitModalVisible(false);
+          return true; // Event konsumieren (nicht zurück gehen)
+        }
+
+        // Wenn Modal zu -> Modal öffnen
+        setExitModalVisible(true);
+        return true; // Event konsumieren
+      };
+
+      // Listener hinzufügen
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      // Listener entfernen, sobald Screen Fokus verliert
+      return () => subscription.remove();
+    }, [exitModalVisible]),
+  );
 
   const handleLeaveGame = () => setExitModalVisible(true);
   const confirmExit = () => {
@@ -123,13 +144,14 @@ export default function GameScreen() {
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
 
       <View style={{ flex: 1 }}>
-        {/* BOARD AREA mit dynamischem zIndex */}
+        {/* BOARD AREA */}
         <View style={{ flex: 1, zIndex: boardZIndex, elevation: boardZIndex }}>
           <BoardArea
             boardCards={game.boardCards}
             highlightedSlot={game.highlightedSlot}
             movingStackSlot={game.movingStackSlot}
             draggedId={game.draggedId}
+            cardBackColor={cardBackColor} // Farbe übergeben
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}
@@ -144,7 +166,7 @@ export default function GameScreen() {
           />
         </View>
 
-        {/* HAND AREA mit dynamischem zIndex */}
+        {/* HAND AREA */}
         <View
           style={{
             height: C.HAND_HEIGHT,
@@ -155,6 +177,7 @@ export default function GameScreen() {
           <HandArea
             handCards={game.handCards}
             draggedId={game.draggedId}
+            cardBackColor={cardBackColor} // Farbe übergeben
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}

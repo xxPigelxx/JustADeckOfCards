@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import AppButton from "./AppButton";
 
 type BurgerMenuProps = {
-  dontShow?: "controls" | "rulebook" | "home" | "";
+  dontShow?: "controls" | "rulebook" | "home" | "design" | "";
   // NEU: Optionale Funktion für das Verlassen-Event
   onLeave?: () => void;
 };
@@ -28,6 +28,23 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
       {menuOpen && (
         <Pressable style={styles.overlay} onPress={() => setMenuOpen(false)}>
           <View style={styles.circleMenu}>
+            {dontShow !== "design" && (
+              <AppButton
+                title="Design"
+                icon={<Feather name="edit-2" size={22} color="white" />}
+                onPress={() => {
+                  setMenuOpen(false);
+                  router.push("/design");
+                }}
+                style={{
+                  ...styles.circleItem,
+                  minWidth: 90,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
+                textStyle={styles.circleText}
+              />
+            )}
             {dontShow !== "controls" && (
               <AppButton
                 title="Controls"

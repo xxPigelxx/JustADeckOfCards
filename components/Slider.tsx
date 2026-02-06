@@ -14,6 +14,8 @@ type Props = {
   minimumValue?: number;
   maximumValue?: number;
   step?: number;
+  trackColor?: string;
+  thumbColor?: string;
 };
 
 export default function CustomSlider({
@@ -22,17 +24,24 @@ export default function CustomSlider({
   minimumValue = 0,
   maximumValue = 10,
   step = 1,
+  trackColor = "#F2E8DF",
+  thumbColor = "#000000",
 }: Props) {
-  // 1. State für die dynamische Breite des Containers
   const [sliderWidth, setSliderWidth] = useState(0);
-
-  // 2. Ref für die Breite, damit der PanResponder immer den aktuellen Wert hat (ohne Re-Render-Probleme)
   const widthRef = useRef(0);
 
-  const range = maximumValue - minimumValue;
-  const numberWidth = 40;
+  // FIX: Wir speichern value und callback in Refs, damit der PanResponder
+  // immer die aktuellen Werte sieht (verhindert Endlosschleifen durch Stale Closures)
+  const valueRef = useRef(value);
+  const onValueChangeRef = useRef(onValueChange);
 
-  // Hilfsfunktion: Position basierend auf aktueller Breite berechnen
+  // Bei jedem Render Refs aktualisieren
+  valueRef.current = value;
+  onValueChangeRef.current = onValueChange;
+
+  const range = maximumValue - minimumValue;
+  const showNumbers = range <= 20;
+
   const getPositionFromValue = (val: number, width: number) => {
     if (range === 0 || width === 0) return 0;
     return ((val - minimumValue) / range) * width;
@@ -42,28 +51,19 @@ export default function CustomSlider({
   const startPos = useRef(0);
   const isDragging = useRef(false);
 
-  // Layout-Handler: Wird gefeuert, sobald React Native die Größe berechnet hat
   const onLayout = (event: LayoutChangeEvent) => {
     const { width } = event.nativeEvent.layout;
-    // Wir ziehen ein kleines Padding ab, falls nötig, oder nehmen die volle Breite
-    const usableWidth = width;
-
-    setSliderWidth(usableWidth);
-    widthRef.current = usableWidth;
+    setSliderWidth(width);
+    widthRef.current = width;
   };
 
-  // 3. Füll-Leiste: InputRange muss dynamisch sein. Da interpolate keine dynamischen Werte mag,
-  // tricksen wir etwas: Wir nutzen 0 bis 1 (Prozent) oder aktualisieren es nur, wenn width da ist.
-  // Einfacher: Wir verzichten auf Interpolation für Width und nutzen Flex oder Prozent,
-  // ODER wir setzen die width einfach direkt im Style, da pan ein absoluter Wert ist.
-  // Hier behalten wir die Logik bei, aber schützen gegen 0.
   const fillWidth = pan.interpolate({
-    inputRange: [0, sliderWidth || 1], // Schutz vor 0
+    inputRange: [0, sliderWidth || 1],
     outputRange: [0, sliderWidth || 1],
     extrapolate: "clamp",
   });
 
-  // 4. Update der Position, wenn sich Value ODER Breite ändert (z.B. Rotation)
+  // Synchronisiere Pan-Position, wenn Value sich von außen ändert
   useEffect(() => {
     if (!isDragging.current && sliderWidth > 0) {
       const newPos = getPositionFromValue(value, sliderWidth);
@@ -85,27 +85,26 @@ export default function CustomSlider({
       },
 
       onPanResponderMove: (_, gesture) => {
-        // WICHTIG: Hier widthRef.current nutzen statt state
         const currentWidth = widthRef.current;
         if (currentWidth === 0) return;
 
         const currentPos = startPos.current + gesture.dx;
 
-        // Begrenzung der Bewegung
+        // Clamp Position für visuelles Feedback
         if (currentPos >= 0 && currentPos <= currentWidth) {
           pan.setValue(gesture.dx);
+        } else {
+          const clamped = Math.max(0, Math.min(currentPos, currentWidth));
+          pan.setValue(clamped - startPos.current);
         }
 
-        // Berechnung des Werts basierend auf Position
-        const rawValue =
-          (Math.max(0, Math.min(currentPos, currentWidth)) / currentWidth) *
-            range +
-          minimumValue;
-
+        const clampedPos = Math.max(0, Math.min(currentPos, currentWidth));
+        const rawValue = (clampedPos / currentWidth) * range + minimumValue;
         const steppedValue = Math.round(rawValue / step) * step;
 
-        if (steppedValue !== value) {
-          onValueChange(steppedValue);
+        // FIX: Nutze Refs für Vergleich und Callback
+        if (steppedValue !== valueRef.current) {
+          onValueChangeRef.current(steppedValue);
         }
       },
 
@@ -116,7 +115,6 @@ export default function CustomSlider({
         const currentWidth = widthRef.current;
         // @ts-ignore
         let currentPos = pan._value;
-
         if (currentPos < 0) currentPos = 0;
         if (currentPos > currentWidth) currentPos = currentWidth;
 
@@ -127,7 +125,6 @@ export default function CustomSlider({
           maximumValue,
         );
 
-        // Snap Animation zur nächsten Step-Position
         const snappedPos = getPositionFromValue(clampedValue, currentWidth);
 
         Animated.spring(pan, {
@@ -137,71 +134,72 @@ export default function CustomSlider({
           bounciness: 0,
         }).start();
 
-        onValueChange(clampedValue);
+        // FIX: Auch hier Ref nutzen
+        if (clampedValue !== valueRef.current) {
+          onValueChangeRef.current(clampedValue);
+        }
       },
     }),
   ).current;
 
-  const showAllNumbers = range <= 10;
-  const numbers = showAllNumbers
+  // Render Helpers
+  const numbers = showNumbers
     ? Array.from({ length: range + 1 }, (_, i) => minimumValue + i)
-    : [minimumValue, maximumValue];
+    : [];
+
+  const activeTrackStyle = [
+    styles.fill,
+    { width: fillWidth },
+    trackColor ? { backgroundColor: trackColor } : {},
+  ];
+
+  const thumbStyle = [
+    styles.thumb,
+    { transform: [{ translateX: pan }] },
+    thumbColor
+      ? { backgroundColor: thumbColor, borderColor: "white", borderWidth: 2 }
+      : {},
+  ];
 
   return (
     <View style={styles.container}>
-      {/* Dieser View bestimmt die Breite. onLayout misst sie. */}
       <View
         onLayout={onLayout}
         style={{ width: "100%", height: 60, justifyContent: "center" }}
       >
-        {/* Erst rendern, wenn wir eine Breite haben, sonst springt die UI */}
         {sliderWidth > 0 && (
           <View
             style={{ width: sliderWidth, height: "100%", position: "relative" }}
           >
-            {/* Hintergrund-Track */}
             <View style={[styles.track, { width: sliderWidth }]} />
-
-            {/* Füll-Leiste */}
-            <Animated.View style={[styles.fill, { width: fillWidth }]} />
-
-            {/* Thumb (Knopf) */}
-            {/* Thumb (Knopf) */}
+            <Animated.View style={activeTrackStyle} />
             <Animated.View
               {...panResponder.panHandlers}
-              style={[styles.thumb, { transform: [{ translateX: pan }] }]}
-              // NEU: Touch-Fläche um 20px in alle Richtungen vergrößern
+              style={thumbStyle}
               hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             />
-
-            {/* Zahlen */}
-            <View
-              style={{
-                width: "100%",
-                height: 20,
-                position: "absolute",
-                top: 30,
-              }}
-            >
-              {numbers.map((num) => {
-                const leftPos = getPositionFromValue(num, sliderWidth);
-                return (
-                  <Text
-                    key={num}
-                    style={[
-                      styles.number,
-                      {
-                        // Wir zentrieren die Zahl exakt unter dem Punkt
-                        left: leftPos - numberWidth / 2,
-                        width: numberWidth,
-                      },
-                    ]}
-                  >
-                    {num}
-                  </Text>
-                );
-              })}
-            </View>
+            {showNumbers && (
+              <View
+                style={{
+                  width: "100%",
+                  height: 20,
+                  position: "absolute",
+                  top: 30,
+                }}
+              >
+                {numbers.map((num) => {
+                  const leftPos = getPositionFromValue(num, sliderWidth);
+                  return (
+                    <Text
+                      key={num}
+                      style={[styles.number, { left: leftPos - 20, width: 40 }]}
+                    >
+                      {num}
+                    </Text>
+                  );
+                })}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -211,11 +209,10 @@ export default function CustomSlider({
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%", // Nimmt jetzt 100% des Eltern-Elements ein
+    width: "100%",
     alignItems: "center",
     marginTop: 10,
     backgroundColor: "transparent",
-    paddingHorizontal: 20, // Optional: Abstand zum Rand des Screens
   },
   track: {
     position: "absolute",
@@ -238,7 +235,7 @@ const styles = StyleSheet.create({
   thumb: {
     position: "absolute",
     top: 0,
-    left: -14, // Hälfte der Breite (28/2), damit der Thumb zentriert auf dem Wert sitzt
+    left: -14,
     width: 28,
     height: 28,
     backgroundColor: "#000000",
