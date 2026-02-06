@@ -8,9 +8,7 @@ import { CardData, useGameLogic } from "@/components/useGameLogic";
 import { generateGameData } from "@/utils/gameSetup";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-// 1. NEU: useEffect importieren
 import React, { useEffect, useMemo, useState } from "react";
-// 2. NEU: BackHandler importieren
 import { BackHandler, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -37,43 +35,44 @@ export default function GameScreen() {
     initialHand: initialData.handCards,
   });
 
-  // State für Menüs
+  // --- NEU: Wir ermitteln die QUELLE des Drags ---
+  const draggedSource = useMemo(() => {
+    if (!game.draggedId) return null;
+    // Ist die Karte in der Hand?
+    if (game.handCards.find((c) => c.id === game.draggedId)) {
+      return "hand";
+    }
+    // Sonst ist sie auf dem Board
+    return "board";
+  }, [game.draggedId, game.handCards]);
+
+  // --- NEU: Dynamische Z-Indexe basierend auf der Quelle ---
+  // Standard: Hand (10) liegt über Board (1), damit man Karten reinstecken kann.
+  // Wenn Board gezogen wird: Board (100) muss über Hand liegen.
+  // Wenn Hand gezogen wird: Hand (100) muss über Board liegen.
+  const boardZIndex = draggedSource === "board" ? 100 : 1;
+  const handZIndex = draggedSource === "hand" ? 100 : 10;
+
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTargetSlot, setMenuTargetSlot] = useState<number | null>(null);
   const [menuTargetCardId, setMenuTargetCardId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
-
-  // State für Custom Alert
   const [exitModalVisible, setExitModalVisible] = useState(false);
 
-  // 3. NEU: Android Back-Button Logik
   useEffect(() => {
     const onBackPress = () => {
-      if (exitModalVisible) {
-        // Wenn Popup offen ist -> Schließen (User will doch bleiben)
-        setExitModalVisible(false);
-      } else {
-        // Wenn Popup zu ist -> Öffnen (Sicherheitsfrage)
-        setExitModalVisible(true);
-      }
-      // WICHTIG: return true verhindert das sofortige Beenden der App
+      if (exitModalVisible) setExitModalVisible(false);
+      else setExitModalVisible(true);
       return true;
     };
-
-    // Listener hinzufügen
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
       onBackPress,
     );
-
-    // Aufräumen beim Verlassen
     return () => subscription.remove();
-  }, [exitModalVisible]); // Abhängigkeit: Muss wissen, ob Modal gerade offen ist
+  }, [exitModalVisible]);
 
-  const handleLeaveGame = () => {
-    setExitModalVisible(true);
-  };
-
+  const handleLeaveGame = () => setExitModalVisible(true);
   const confirmExit = () => {
     setExitModalVisible(false);
     router.replace("/");
@@ -124,36 +123,48 @@ export default function GameScreen() {
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
 
       <View style={{ flex: 1 }}>
-        <BoardArea
-          boardCards={game.boardCards}
-          highlightedSlot={game.highlightedSlot}
-          movingStackSlot={game.movingStackSlot}
-          draggedId={game.draggedId}
-          onDrop={game.handleDrop}
-          onDrag={game.handleDrag}
-          onTap={handleCardTap}
-          onDragStart={(id) => {
-            game.setDraggedId(id);
-            game.bringToFront(id);
-          }}
-          onDragEnd={() => {
-            game.setDraggedId(null);
-            game.setHighlightedSlot(null);
-          }}
-        />
+        {/* BOARD AREA mit dynamischem zIndex */}
+        <View style={{ flex: 1, zIndex: boardZIndex, elevation: boardZIndex }}>
+          <BoardArea
+            boardCards={game.boardCards}
+            highlightedSlot={game.highlightedSlot}
+            movingStackSlot={game.movingStackSlot}
+            draggedId={game.draggedId}
+            onDrop={game.handleDrop}
+            onDrag={game.handleDrag}
+            onTap={handleCardTap}
+            onDragStart={(id) => {
+              game.setDraggedId(id);
+              game.bringToFront(id);
+            }}
+            onDragEnd={() => {
+              game.setDraggedId(null);
+              game.setHighlightedSlot(null);
+            }}
+          />
+        </View>
 
-        <HandArea
-          handCards={game.handCards}
-          draggedId={game.draggedId}
-          onDrop={game.handleDrop}
-          onDrag={game.handleDrag}
-          onTap={handleCardTap}
-          onDragStart={(id) => game.setDraggedId(id)}
-          onDragEnd={() => {
-            game.setDraggedId(null);
-            game.setHighlightedSlot(null);
+        {/* HAND AREA mit dynamischem zIndex */}
+        <View
+          style={{
+            height: C.HAND_HEIGHT,
+            zIndex: handZIndex,
+            elevation: handZIndex,
           }}
-        />
+        >
+          <HandArea
+            handCards={game.handCards}
+            draggedId={game.draggedId}
+            onDrop={game.handleDrop}
+            onDrag={game.handleDrag}
+            onTap={handleCardTap}
+            onDragStart={(id) => game.setDraggedId(id)}
+            onDragEnd={() => {
+              game.setDraggedId(null);
+              game.setHighlightedSlot(null);
+            }}
+          />
+        </View>
       </View>
 
       <BurgerMenu onLeave={handleLeaveGame} />
@@ -177,8 +188,8 @@ export default function GameScreen() {
 
       <CustomAlert
         visible={exitModalVisible}
-        title="Spiel verlassen"
-        message="Möchtest du das Spiel wirklich verlassen?"
+        title="Lobby verlassen"
+        message="Möchtest du die Lobby wirklich verlassen?"
         onConfirm={confirmExit}
         onCancel={() => setExitModalVisible(false)}
       />

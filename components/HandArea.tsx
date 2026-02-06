@@ -110,5 +110,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#333",
     width: "100%",
     zIndex: 10,
+    overflow: "visible", // Damit die Karten über den Handbereich hinaus sichtbar sind
   },
 });

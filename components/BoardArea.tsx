@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     height: C.BOARD_HEIGHT - C.SAFE_TOP,
     backgroundColor: "transparent",
     zIndex: 1,
-    overflow: "hidden",
+    overflow: "visible",
   },
   boardSurface: {
     flex: 1,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
-    elevation: 5,
+    elevation: 100,
   },
   badgeText: {
     color: "white",
