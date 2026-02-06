@@ -100,7 +100,7 @@ export default function DesignScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F2E8DF" }}>
+    <View style={{ flex: 1 }}>
       <BurgerMenu dontShow="design" />
 
       <View style={styles.header}>
