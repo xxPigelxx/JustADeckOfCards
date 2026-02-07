@@ -188,7 +188,7 @@ export default function CardVisual({
           /* --- BACK SIDE --- */
           <View style={styles.patternWrapper}>
             {patternIcon ? (
-              <View style={{ opacity: 0.15, transform: [{ scale: 1.8 }] }}>
+              <View style={{ opacity: 0.15, transform: [{ scale: 1.5 }] }}>
                 <MaterialCommunityIcons
                   name={patternIcon}
                   size={Math.min(CARD_W, CARD_H) * 0.6}
@@ -214,10 +214,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 3, // Thick white border
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.0,
+    shadowColor: "transparent", // Kein Schatten
     elevation: 2,
     justifyContent: "center",
     alignItems: "center",
