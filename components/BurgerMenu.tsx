@@ -1,12 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import AppButton from "./AppButton";
 
 type BurgerMenuProps = {
   dontShow?: "controls" | "rulebook" | "home" | "design" | "";
-  // NEU: Optionale Funktion für das Verlassen-Event
   onLeave?: () => void;
 };
 
@@ -15,19 +14,31 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
 
   return (
     <>
+      {/* 
+         1. The Button itself (stays visible)
+         Z-Index needs to be higher than the overlay so it remains clickable to close
+      */}
       <Pressable
         onPress={() => setMenuOpen(!menuOpen)}
         style={({ pressed }) => [
           styles.burgerButton,
-          menuOpen && { backgroundColor: "#f1ce5bff" },
+          menuOpen && { backgroundColor: "#f1ce5bff", zIndex: 99999 }, // High zIndex when open
           pressed && { opacity: 0.6 },
         ]}
       >
         <Text style={styles.text}>{menuOpen ? "✕" : "☰"}</Text>
       </Pressable>
+
+      {/* 
+         2. The Overlay + Menu
+      */}
       {menuOpen && (
         <Pressable style={styles.overlay} onPress={() => setMenuOpen(false)}>
-          <View style={styles.circleMenu}>
+          {/* Prevent clicks on the menu itself from closing it */}
+          <Pressable
+            style={styles.circleMenu}
+            onPress={(e) => e.stopPropagation()}
+          >
             {dontShow !== "design" && (
               <AppButton
                 title="Design"
@@ -36,15 +47,11 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
                   setMenuOpen(false);
                   router.push("/design");
                 }}
-                style={{
-                  ...styles.circleItem,
-                  minWidth: 90,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
+                style={styles.menuButton}
                 textStyle={styles.circleText}
               />
             )}
+
             {dontShow !== "controls" && (
               <AppButton
                 title="Controls"
@@ -53,12 +60,7 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
                   setMenuOpen(false);
                   router.push("/controls");
                 }}
-                style={{
-                  ...styles.circleItem,
-                  minWidth: 90,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
+                style={styles.menuButton}
                 textStyle={styles.circleText}
               />
             )}
@@ -71,12 +73,7 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
                   setMenuOpen(false);
                   router.push("/rulebook");
                 }}
-                style={{
-                  ...styles.circleItem,
-                  minWidth: 90,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
+                style={styles.menuButton}
                 textStyle={styles.circleText}
               />
             )}
@@ -87,26 +84,17 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
                 icon={<Feather name="home" size={22} color="white" />}
                 onPress={() => {
                   setMenuOpen(false);
-
-                  // LOGIK UPDATE:
-                  // Wenn onLeave existiert (z.B. im Spiel), nutze es für das Popup.
-                  // Sonst (z.B. im Regelbuch), gehe direkt nach Hause.
                   if (onLeave) {
                     onLeave();
                   } else {
                     router.replace("/");
                   }
                 }}
-                style={{
-                  ...styles.circleItem,
-                  minWidth: 90,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
+                style={styles.menuButton}
                 textStyle={styles.circleText}
               />
             )}
-          </View>
+          </Pressable>
         </Pressable>
       )}
     </>
@@ -125,30 +113,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 8,
-    zIndex: 100,
+    zIndex: 100, // Default zIndex
     shadowColor: "transparent",
   },
-
-  burgerIcon: {
+  text: {
     color: "white",
-    fontSize: 26,
-    lineHeight: 26,
+    fontSize: 24,
+    fontWeight: "600",
+  },
+
+  // The dark background overlay
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark semi-transparent
+    zIndex: 9000, // High zIndex to cover everything
+    alignItems: "flex-end", // Align menu to right
+    justifyContent: "flex-end", // Align menu to bottom
   },
 
   circleMenu: {
-    position: "absolute",
-    bottom: 100,
-    right: 40,
+    // Position relative to the overlay now
+    marginBottom: 100, // Distance from bottom
+    marginRight: 40, // Distance from right
+
     backgroundColor: "white",
     borderRadius: 20,
     padding: 10,
     elevation: 10,
-    zIndex: 9999,
-    alignItems: "center",
     shadowColor: "transparent",
+    alignItems: "center",
   },
 
-  circleItem: {
+  // Refactored button style for cleaner code
+  menuButton: {
     width: 90,
     height: 40,
     borderRadius: 20,
@@ -156,21 +153,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginVertical: 6,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    minWidth: 90,
   },
 
   circleText: {
     color: "white",
-    fontSize: 24,
+    fontSize: 14, // Adjusted size (24 was very large for button text)
     fontWeight: "600",
-  },
-  text: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "600",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "transparent",
-    zIndex: 90,
   },
 });
