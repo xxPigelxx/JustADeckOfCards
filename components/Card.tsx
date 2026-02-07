@@ -1,5 +1,5 @@
 import CardVisual from "@/components/CardVisual";
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -21,12 +21,22 @@ type CardProps = {
   isFaceUp?: boolean;
   badgeCount?: number;
   forceBadgeVisible?: boolean;
-  backColor?: string; // Prop für Farbe
+  backColor?: string;
   onDrop: (id: string, x: number, y: number) => void;
   onDrag?: (id: string, x: number, y: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onTap?: () => void;
+};
+
+// NEU: Konfiguration für ein sattes, direktes Einrasten ohne Wackeln
+const SPRING_CONFIG = {
+  damping: 20, // Höhere Dämpfung = weniger Schwingen
+  stiffness: 150, // Steifigkeit
+  mass: 0.5, // Leichte Masse = schnelle Reaktion
+  overshootClamping: true, // Verhindert das "Über das Ziel hinaus schießen"
+  restDisplacementThreshold: 0.01,
+  restSpeedThreshold: 0.01,
 };
 
 export default function Card({
@@ -39,7 +49,7 @@ export default function Card({
   isFaceUp = true,
   badgeCount = 0,
   forceBadgeVisible = false,
-  backColor, // Farbe empfangen
+  backColor,
   onDrop,
   onDrag,
   onDragStart,
@@ -52,6 +62,12 @@ export default function Card({
   const scale = useSharedValue(1);
   const rotateZ = useSharedValue(0);
 
+  // Position updaten, wenn sich die Props ändern (durch Spiellogik)
+  useEffect(() => {
+    translateX.value = withSpring(x, SPRING_CONFIG);
+    translateY.value = withSpring(y, SPRING_CONFIG);
+  }, [x, y, translateX, translateY]);
+
   const tapGesture = Gesture.Tap()
     .maxDuration(250)
     .onEnd(() => {
@@ -61,27 +77,32 @@ export default function Card({
   const dragGesture = Gesture.Pan()
     .onStart(() => {
       isDragging.value = true;
-      scale.value = withSpring(1.1);
+      scale.value = withSpring(1.1, SPRING_CONFIG);
       rotateZ.value = withTiming(0);
       if (onDragStart) runOnJS(onDragStart)();
     })
     .onUpdate((event) => {
-      translateX.value = event.translationX + x;
-      translateY.value = event.translationY + y;
+      // Harte Zuweisung während Drag (kein Spring, 1:1 Bewegung)
+      translateX.value = x + event.translationX;
+      translateY.value = y + event.translationY;
+
       if (onDrag) {
         runOnJS(onDrag)(id, event.absoluteX, event.absoluteY);
       }
     })
     .onEnd((event) => {
       isDragging.value = false;
-      scale.value = withSpring(1);
+      scale.value = withSpring(1, SPRING_CONFIG);
       const absX = event.absoluteX;
       const absY = event.absoluteY;
+
       runOnJS(onDrop)(id, absX, absY);
       if (onDragEnd) runOnJS(onDragEnd)();
 
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
+      // Zurück zur Ausgangsposition springen (falls Drop fehlschlägt)
+      // Mit der neuen Config sollte das "snappy" wirken.
+      translateX.value = withSpring(x, SPRING_CONFIG);
+      translateY.value = withSpring(y, SPRING_CONFIG);
     });
 
   const gesture = Gesture.Race(dragGesture, tapGesture);
@@ -93,19 +114,19 @@ export default function Card({
       { scale: scale.value },
       { rotateZ: `${rotateZ.value}deg` },
     ],
+    // Z-Index extrem hoch während Drag
     zIndex: isDragging.value ? 9999 : zIndex,
   }));
 
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.cardContainer, animatedStyle]}>
-        {/* Hier nutzen wir CardVisual für das Design */}
         <CardVisual
           rank={rank}
           suit={suit}
           isFaceUp={isFaceUp}
           badgeCount={badgeCount}
-          backColor={backColor} // Farbe weitergeben
+          backColor={backColor}
         />
       </Animated.View>
     </GestureDetector>
@@ -117,5 +138,6 @@ const styles = StyleSheet.create({
     width: CARD_W,
     height: CARD_H,
     position: "absolute",
+    // Optional: Schatten während Drag verstärken (über Animated Style besser, aber hier als Basis)
   },
 });

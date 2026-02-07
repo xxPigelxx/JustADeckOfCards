@@ -1,4 +1,4 @@
-import Card from "@/components/Card"; // <--- Korrekter Import
+import Card from "@/components/Card";
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
 import React from "react";
@@ -9,7 +9,7 @@ type BoardAreaProps = {
   highlightedSlot: number | null;
   movingStackSlot: number | null;
   draggedId: string | null;
-  cardBackColor?: string; // Prop für Farbe
+  cardBackColor?: string;
   onDrop: (id: string, x: number, y: number) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onTap: (id: string, x: number, y: number) => void;
@@ -32,14 +32,23 @@ export default function BoardArea({
   const getGridCardPosition = (slot: number, visualIndex: number = 0) => {
     const col = slot % C.COLS;
     const row = Math.floor(slot / C.COLS);
+
+    // Relativ zur "BoardSurface" (die Box, in der die Karten liegen)
     const baseX = C.GRID_OFFSET_X + col * (C.SLOT_W + C.GAP);
     const baseY = C.GRID_MARGIN_TOP + row * (C.SLOT_H + C.GAP);
+
     const offsetX = visualIndex * C.STACK_OFFSET * -1;
     const offsetY = visualIndex * C.STACK_OFFSET * -1;
-    const globalX = baseX + offsetX + C.BOARD_PADDING;
-    const globalY = baseY + offsetY + C.TOP_OFFSET + C.SAFE_TOP;
+
+    // Koordinaten für das Rendering INNERHALB der BoardSurface
     const surfaceX = baseX + offsetX;
     const surfaceY = baseY + offsetY;
+
+    // Koordinaten für globale Events (z.B. Menü-Positionierung)
+    // BoardSurface hat Margin: C.BOARD_PADDING horizontal, C.TOP_OFFSET vertikal (+SafeTop)
+    const globalX = surfaceX + C.BOARD_PADDING;
+    const globalY = surfaceY + C.TOP_OFFSET + C.SAFE_TOP;
+
     return { surfaceX, surfaceY, globalX, globalY, baseX, baseY };
   };
 
@@ -48,6 +57,7 @@ export default function BoardArea({
     if (!cardsBySlot[card.slot!]) cardsBySlot[card.slot!] = [];
     cardsBySlot[card.slot!].push(card);
   });
+
   Object.values(cardsBySlot).forEach((group) =>
     group.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)),
   );
@@ -55,98 +65,96 @@ export default function BoardArea({
   return (
     <View style={styles.boardContainer}>
       <View style={styles.boardSurface}>
-        <View style={[styles.gridContainer, { paddingLeft: C.GRID_OFFSET_X }]}>
+        {/* Slot Grid zeichnen */}
+        <View style={styles.gridContainer}>
           {Array.from({ length: C.TOTAL_SLOTS }).map((_, i) => (
             <View
               key={i}
               style={[
                 styles.cardSlot,
-                i === highlightedSlot && styles.activeSlot,
+                highlightedSlot === i && styles.activeSlot,
               ]}
             />
           ))}
         </View>
 
+        {/* Karten zeichnen */}
         {Object.keys(cardsBySlot).map((slotKeyStr) => {
           const slotKey = Number(slotKeyStr);
           const stack = cardsBySlot[slotKey];
           const totalInStack = stack.length;
 
+          // Spezialfall: Ganzer Stapel bewegt sich
           if (movingStackSlot === slotKey) {
             const leader = stack[stack.length - 1];
-            const pos = getGridCardPosition(slotKey, 0);
+            const pos = getGridCardPosition(slotKey, 0); // Visuell an Position 0
 
             return (
-              <View
+              <Card
                 key={leader.id}
-                style={{
-                  position: "absolute",
-                  left: pos.baseX,
-                  top: pos.baseY,
-                  width: C.CARD_W,
-                  height: C.CARD_H,
-                  zIndex: 9999,
-                }}
-              >
-                <Card
-                  {...leader}
-                  x={0}
-                  y={0}
-                  badgeCount={totalInStack}
-                  forceBadgeVisible={true}
-                  backColor={cardBackColor} // Farbe weitergeben
-                  onDrop={onDrop}
-                  onDrag={onDrag}
-                  onTap={() => onTap(leader.id, pos.globalX, pos.globalY)}
-                  onDragStart={() => onDragStart(leader.id)}
-                  onDragEnd={onDragEnd}
-                />
-              </View>
+                id={leader.id}
+                rank={leader.rank}
+                suit={leader.suit}
+                x={pos.surfaceX} // Relativ rendern
+                y={pos.surfaceY} // Relativ rendern
+                zIndex={100}
+                isFaceUp={leader.isFaceUp}
+                badgeCount={totalInStack}
+                forceBadgeVisible={true}
+                backColor={cardBackColor}
+                onDrop={onDrop}
+                onDrag={onDrag}
+                onTap={() => onTap(leader.id, pos.globalX, pos.globalY)} // Global melden
+                onDragStart={() => onDragStart(leader.id)}
+                onDragEnd={onDragEnd}
+              />
             );
           }
 
+          // Normalfall: Karten im Stapel
           return stack.map((card, idx) => {
             const threshold = Math.max(0, stack.length - C.VISIBLE_STACK_LIMIT);
             if (idx < threshold) return null;
 
             const vIdx = idx - threshold;
             const pos = getGridCardPosition(slotKey, vIdx);
+
             const isTopCard = idx === stack.length - 1;
             const isBeingDragged = draggedId === card.id;
             const showBadge = isTopCard && !isBeingDragged && totalInStack > 1;
 
             return (
-              <View
-                key={card.id}
-                style={{
-                  position: "absolute",
-                  left: pos.surfaceX,
-                  top: pos.surfaceY,
-                  width: C.CARD_W,
-                  height: C.CARD_H,
-                  zIndex: isBeingDragged ? 99999 : card.zIndex,
-                }}
-              >
+              <React.Fragment key={card.id}>
                 <Card
-                  {...card}
-                  x={0}
-                  y={0}
+                  id={card.id}
+                  rank={card.rank}
+                  suit={card.suit}
+                  x={pos.surfaceX} // Relativ rendern
+                  y={pos.surfaceY} // Relativ rendern
+                  zIndex={card.zIndex}
+                  isFaceUp={card.isFaceUp}
                   badgeCount={showBadge ? totalInStack : 0}
-                  forceBadgeVisible={false}
-                  backColor={cardBackColor} // Farbe weitergeben
+                  backColor={cardBackColor}
                   onDrop={onDrop}
                   onDrag={onDrag}
-                  onTap={() => onTap(card.id, pos.globalX, pos.globalY)}
+                  onTap={() => onTap(card.id, pos.globalX, pos.globalY)} // Global melden
                   onDragStart={() => onDragStart(card.id)}
                   onDragEnd={onDragEnd}
                 />
-
                 {isTopCard && isBeingDragged && totalInStack > 1 && (
-                  <View style={styles.staticBadge}>
+                  <View
+                    style={[
+                      styles.staticBadge,
+                      {
+                        left: pos.surfaceX + C.CARD_W - 10,
+                        top: pos.surfaceY - 10,
+                      },
+                    ]}
+                  >
                     <Text style={styles.badgeText}>{totalInStack - 1}</Text>
                   </View>
                 )}
-              </View>
+              </React.Fragment>
             );
           });
         })}
@@ -177,6 +185,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginTop: C.GRID_MARGIN_TOP,
     zIndex: 0,
+    // Kleiner Padding-Trick, damit Slots mittig sitzen (optional, je nach Layout)
+    paddingLeft: C.GRID_OFFSET_X,
   },
   cardSlot: {
     width: C.SLOT_W,
@@ -195,8 +205,6 @@ const styles = StyleSheet.create({
   },
   staticBadge: {
     position: "absolute",
-    top: -8,
-    right: -8,
     backgroundColor: "#f1ce5bff",
     width: 20,
     height: 20,
