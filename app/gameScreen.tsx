@@ -5,11 +5,16 @@ import * as C from "@/components/constants";
 import CustomAlert from "@/components/CustomAlert";
 import HandArea from "@/components/HandArea";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
-import { DEFAULT_BACK_COLOR, loadCardBack } from "@/utils/designStorage"; // NEU
+import {
+  DEFAULT_BACK_COLOR,
+  DEFAULT_PATTERN, // NEU
+  loadCardBack,
+  loadCardPattern, // NEU
+} from "@/utils/designStorage";
 import { generateGameData } from "@/utils/gameSetup";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useMemo, useState } from "react"; // useCallback hinzu
+import React, { useCallback, useMemo, useState } from "react";
 import { BackHandler, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -17,13 +22,20 @@ export default function GameScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  // --- NEU: State für Farbe ---
+  // --- NEU: State für Farbe UND Muster ---
   const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
+  const [cardBackPattern, setCardBackPattern] = useState(DEFAULT_PATTERN);
 
-  // Lädt die Farbe neu, wenn man zum Screen zurückkehrt
+  // Lädt Design neu, wenn man zum Screen zurückkehrt
   useFocusEffect(
     useCallback(() => {
-      loadCardBack().then(setCardBackColor);
+      // Beide Werte parallel laden
+      Promise.all([loadCardBack(), loadCardPattern()]).then(
+        ([color, pattern]) => {
+          setCardBackColor(color);
+          setCardBackPattern(pattern);
+        },
+      );
     }, []),
   );
 
@@ -67,28 +79,23 @@ export default function GameScreen() {
   // Alert State
   const [exitModalVisible, setExitModalVisible] = useState(false);
 
-  // NEUE VERSION: Nur aktiv, wenn Screen im Fokus ist
+  // Back Button Handler
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        // Wenn Modal offen -> Modal schließen
         if (exitModalVisible) {
           setExitModalVisible(false);
-          return true; // Event konsumieren (nicht zurück gehen)
+          return true;
         }
-
-        // Wenn Modal zu -> Modal öffnen
         setExitModalVisible(true);
-        return true; // Event konsumieren
+        return true;
       };
 
-      // Listener hinzufügen
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
       );
 
-      // Listener entfernen, sobald Screen Fokus verliert
       return () => subscription.remove();
     }, [exitModalVisible]),
   );
@@ -151,7 +158,8 @@ export default function GameScreen() {
             highlightedSlot={game.highlightedSlot}
             movingStackSlot={game.movingStackSlot}
             draggedId={game.draggedId}
-            cardBackColor={cardBackColor} // Farbe übergeben
+            cardBackColor={cardBackColor} // Farbe
+            cardBackPattern={cardBackPattern} // NEU: Muster
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}
@@ -177,7 +185,8 @@ export default function GameScreen() {
           <HandArea
             handCards={game.handCards}
             draggedId={game.draggedId}
-            cardBackColor={cardBackColor} // Farbe übergeben
+            cardBackColor={cardBackColor} // Farbe
+            cardBackPattern={cardBackPattern} // NEU: Muster
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}

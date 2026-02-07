@@ -1,6 +1,6 @@
 import CardVisual from "@/components/CardVisual";
 import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -22,6 +22,7 @@ type CardProps = {
   badgeCount?: number;
   forceBadgeVisible?: boolean;
   backColor?: string;
+  backPattern?: string;
   onDrop: (id: string, x: number, y: number) => void;
   onDrag?: (id: string, x: number, y: number) => void;
   onDragStart?: () => void;
@@ -29,12 +30,11 @@ type CardProps = {
   onTap?: () => void;
 };
 
-// NEU: Konfiguration für ein sattes, direktes Einrasten ohne Wackeln
 const SPRING_CONFIG = {
-  damping: 20, // Höhere Dämpfung = weniger Schwingen
-  stiffness: 150, // Steifigkeit
-  mass: 0.5, // Leichte Masse = schnelle Reaktion
-  overshootClamping: true, // Verhindert das "Über das Ziel hinaus schießen"
+  damping: 20,
+  stiffness: 150,
+  mass: 0.5,
+  overshootClamping: true,
   restDisplacementThreshold: 0.01,
   restSpeedThreshold: 0.01,
 };
@@ -48,63 +48,56 @@ export default function Card({
   zIndex = 1,
   isFaceUp = true,
   badgeCount = 0,
-  forceBadgeVisible = false,
   backColor,
+  backPattern,
   onDrop,
   onDrag,
   onDragStart,
   onDragEnd,
   onTap,
 }: CardProps) {
+  // ... (Gleiche Logik wie vorher) ...
   const translateX = useSharedValue(x);
   const translateY = useSharedValue(y);
+  const offsetX = useSharedValue(0);
+  const offsetY = useSharedValue(0);
   const isDragging = useSharedValue(false);
   const scale = useSharedValue(1);
   const rotateZ = useSharedValue(0);
 
-  // Position updaten, wenn sich die Props ändern (durch Spiellogik)
   useEffect(() => {
     translateX.value = withSpring(x, SPRING_CONFIG);
     translateY.value = withSpring(y, SPRING_CONFIG);
   }, [x, y, translateX, translateY]);
 
-  const tapGesture = Gesture.Tap()
-    .maxDuration(250)
-    .onEnd(() => {
-      if (onTap) runOnJS(onTap)();
-    });
-
   const dragGesture = Gesture.Pan()
     .onStart(() => {
+      offsetX.value = translateX.value;
+      offsetY.value = translateY.value;
       isDragging.value = true;
       scale.value = withSpring(1.1, SPRING_CONFIG);
       rotateZ.value = withTiming(0);
       if (onDragStart) runOnJS(onDragStart)();
     })
     .onUpdate((event) => {
-      // Harte Zuweisung während Drag (kein Spring, 1:1 Bewegung)
-      translateX.value = x + event.translationX;
-      translateY.value = y + event.translationY;
-
-      if (onDrag) {
-        runOnJS(onDrag)(id, event.absoluteX, event.absoluteY);
-      }
+      translateX.value = offsetX.value + event.translationX;
+      translateY.value = offsetY.value + event.translationY;
+      if (onDrag) runOnJS(onDrag)(id, event.absoluteX, event.absoluteY);
     })
     .onEnd((event) => {
       isDragging.value = false;
       scale.value = withSpring(1, SPRING_CONFIG);
-      const absX = event.absoluteX;
-      const absY = event.absoluteY;
-
-      runOnJS(onDrop)(id, absX, absY);
+      runOnJS(onDrop)(id, event.absoluteX, event.absoluteY);
       if (onDragEnd) runOnJS(onDragEnd)();
-
-      // Zurück zur Ausgangsposition springen (falls Drop fehlschlägt)
-      // Mit der neuen Config sollte das "snappy" wirken.
       translateX.value = withSpring(x, SPRING_CONFIG);
       translateY.value = withSpring(y, SPRING_CONFIG);
     });
 
+  const tapGesture = Gesture.Tap()
+    .maxDuration(250)
+    .onEnd(() => {
+      if (onTap) runOnJS(onTap)();
+    });
   const gesture = Gesture.Race(dragGesture, tapGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -114,7 +107,6 @@ export default function Card({
       { scale: scale.value },
       { rotateZ: `${rotateZ.value}deg` },
     ],
-    // Z-Index extrem hoch während Drag
     zIndex: isDragging.value ? 9999 : zIndex,
   }));
 
@@ -125,9 +117,15 @@ export default function Card({
           rank={rank}
           suit={suit}
           isFaceUp={isFaceUp}
-          badgeCount={badgeCount}
           backColor={backColor}
+          backPattern={backPattern}
         />
+
+        {badgeCount > 1 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badgeCount}</Text>
+          </View>
+        )}
       </Animated.View>
     </GestureDetector>
   );
@@ -138,6 +136,26 @@ const styles = StyleSheet.create({
     width: CARD_W,
     height: CARD_H,
     position: "absolute",
-    // Optional: Schatten während Drag verstärken (über Animated Style besser, aber hier als Basis)
+  },
+  // --- Badge Style (Angepasst: KEIN Schatten) ---
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#f1ce5bff",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+    // elevation und shadow entfernt!
+    borderWidth: 1.5,
+    borderColor: "white",
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 });

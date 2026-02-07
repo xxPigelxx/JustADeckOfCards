@@ -1,6 +1,6 @@
 import AppButton from "@/components/AppButton";
-import BurgerMenu from "@/components/BurgerMenu"; // Wieder BurgerMenu!
-import InfoAlert from "@/components/InfoAlert"; // NEU!
+import BurgerMenu from "@/components/BurgerMenu";
+import InfoAlert from "@/components/InfoAlert";
 import CustomSlider from "@/components/Slider";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -61,9 +61,9 @@ export default function Create() {
     <Pressable
       onPress={onPress}
       hitSlop={15}
-      style={{ marginLeft: 6, opacity: 0.6 }}
+      style={{ marginLeft: 8, opacity: 0.6 }} // Margin leicht erhöht
     >
-      <Ionicons name="information-circle" size={22} color="#000" />
+      <Ionicons name="information-circle" size={24} color="#000" />
     </Pressable>
   );
 
@@ -78,7 +78,25 @@ export default function Create() {
             isTablet && { width: 600, alignSelf: "center" },
           ]}
         >
-          <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
+          {/* 
+              NEU: Überschrift jetzt als Row mit Info-Icon 
+          */}
+          <View style={styles.mainHeaderRow}>
+            <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
+            <InfoIcon
+              onPress={() =>
+                showInfo(
+                  "Kartendeck Auswahl",
+                  "Wähle das passende Blatt für dein Spiel:\n" +
+                    "• 54 Karten: Standard + 2 Joker (Rommé)\n" +
+                    "• 52 Karten: International (Poker, Blackjack)\n" +
+                    "• 36 Karten: Kleines Blatt (Durak, Jass)\n" +
+                    "• 32 Karten: Deutsches Blatt (Skat)\n" +
+                    "• 24 Karten: (Schnapsen, Sechsundsechzig)",
+                )
+              }
+            />
+          </View>
 
           <View style={styles.toggleGroup}>
             {options.map((title, index) => {
@@ -188,7 +206,6 @@ export default function Create() {
         </ScrollView>
       </SafeAreaView>
 
-      {/* Das neue Info PopUp */}
       <InfoAlert
         visible={infoVisible}
         title={infoTitle}
@@ -206,11 +223,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  // NEU: Container für Header + Icon
+  mainHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
   mainHeading: {
     fontSize: 22,
     fontWeight: "800",
-    marginBottom: 15,
     color: "#333",
+    // marginBottom entfernt, da jetzt im Row-Container geregelt
   },
   toggleGroup: {
     flexDirection: "row",

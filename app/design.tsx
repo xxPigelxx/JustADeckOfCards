@@ -1,20 +1,21 @@
 import AppButton from "@/components/AppButton";
 import BackButton from "@/components/BackButton";
 import CardVisual from "@/components/CardVisual";
-import ColorPickerModal from "@/components/ColorPickerModal"; // NEU
+import ColorPickerModal from "@/components/ColorPickerModal";
 import {
   DEFAULT_BACK_COLOR,
   loadCardBack,
-  saveCardBack,
+  loadCardPattern, // <--- NEU
+  saveCardDesign, // <--- NEU
 } from "@/utils/designStorage";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Datenkonstante könnte man auch auslagern, aber hier ok
+// --- 1. KOMPLETTE FARBLISTE ---
 const CARD_BACKS = [
   { id: "blue", color: "#3b82f6", name: "Blau" },
   { id: "red", color: "#ef4444", name: "Rot" },
@@ -38,17 +39,53 @@ const CARD_BACKS = [
   { id: "maroon", color: "#7f1d1d", name: "Weinrot" },
 ];
 
+// --- 2. ERWEITERTE MUSTER-LISTE ---
+const CARD_PATTERNS = [
+  { id: "none", name: "Keins", icon: "block-helper" },
+  { id: "stripes", name: "Streifen", icon: "reorder-vertical" },
+  { id: "dots", name: "Punkte", icon: "dots-grid" },
+  { id: "diamond", name: "Karos", icon: "cards-diamond" },
+  { id: "waves", name: "Wellen", icon: "waves" },
+  { id: "stars", name: "Sterne", icon: "star" },
+  { id: "hexagon", name: "Waben", icon: "hexagon-slice-6" },
+  { id: "heart", name: "Herz", icon: "heart" },
+  { id: "club", name: "Kreuz", icon: "cards-club" },
+  { id: "spade", name: "Pik", icon: "cards-spade" },
+  { id: "crown", name: "Krone", icon: "crown" },
+  { id: "skull", name: "Totenkopf", icon: "skull" },
+  { id: "ghost", name: "Geist", icon: "ghost" },
+  { id: "fire", name: "Feuer", icon: "fire" },
+  { id: "lightning", name: "Blitz", icon: "lightning-bolt" },
+  { id: "paw", name: "Pfote", icon: "paw" },
+  { id: "music", name: "Musik", icon: "music-note" },
+  { id: "flower", name: "Blume", icon: "flower" },
+  { id: "spider", name: "Netz", icon: "spider-web" },
+];
+
 export default function DesignScreen() {
   const router = useRouter();
+
   const [selectedColor, setSelectedColor] = useState(DEFAULT_BACK_COLOR);
+  const [selectedPattern, setSelectedPattern] = useState<string>("none");
+  const [activeTab, setActiveTab] = useState<"color" | "pattern">("color");
   const [showPicker, setShowPicker] = useState(false);
 
+  // --- HIER WURDE GEÄNDERT: LADEN ---
   useEffect(() => {
-    loadCardBack().then(setSelectedColor);
+    const loadData = async () => {
+      const color = await loadCardBack();
+      const pattern = await loadCardPattern(); // Pattern laden
+      setSelectedColor(color);
+      setSelectedPattern(pattern); // Pattern setzen
+    };
+    loadData();
   }, []);
 
+  // --- HIER WURDE GEÄNDERT: SPEICHERN ---
   const handleSave = async () => {
-    await saveCardBack(selectedColor);
+    // Speichert jetzt beides gleichzeitig
+    await saveCardDesign(selectedColor, selectedPattern);
+
     if (router.canGoBack()) router.back();
     else router.replace("/");
   };
@@ -68,6 +105,7 @@ export default function DesignScreen() {
         <Text style={styles.title}>Kartendesign</Text>
       </View>
 
+      {/* VORSCHAU */}
       <View style={styles.previewContainer}>
         <View style={{ transform: [{ scale: 1.5 }] }}>
           <CardVisual
@@ -75,9 +113,44 @@ export default function DesignScreen() {
             suit="♠"
             isFaceUp={false}
             backColor={selectedColor}
+            // @ts-ignore
+            backPattern={selectedPattern}
           />
         </View>
         <Text style={styles.previewText}>Vorschau</Text>
+      </View>
+
+      {/* TABS */}
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[styles.tabButton, activeTab === "color" && styles.activeTab]}
+          onPress={() => setActiveTab("color")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "color" && styles.activeTabText,
+            ]}
+          >
+            Farbe
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.tabButton,
+            activeTab === "pattern" && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab("pattern")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "pattern" && styles.activeTabText,
+            ]}
+          >
+            Muster
+          </Text>
+        </Pressable>
       </View>
 
       <View style={styles.selectionArea}>
@@ -91,56 +164,102 @@ export default function DesignScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Mischer Button */}
-          <Pressable
-            onPress={() => setShowPicker(true)}
-            style={[
-              styles.optionItem,
-              isCustomColor ? styles.selectedOption : styles.customOptionDashed,
-            ]}
-          >
-            <View
-              style={[
-                styles.rainbowCircle,
-                isCustomColor && { backgroundColor: selectedColor },
-              ]}
-            >
-              <Ionicons
-                name="color-palette"
-                size={24}
-                color={isCustomColor ? "rgba(255,255,255,0.8)" : "white"}
-              />
-            </View>
-            <Text
-              style={[styles.optionText, isCustomColor && styles.selectedText]}
-            >
-              Mischer
-            </Text>
-          </Pressable>
-
-          {/* Preset Colors */}
-          {CARD_BACKS.map((back) => (
-            <Pressable
-              key={back.id}
-              onPress={() => setSelectedColor(back.color)}
-              style={[
-                styles.optionItem,
-                selectedColor === back.color && styles.selectedOption,
-              ]}
-            >
-              <View
-                style={[styles.colorCircle, { backgroundColor: back.color }]}
-              />
-              <Text
+          {/* --- TAB: FARBEN --- */}
+          {activeTab === "color" && (
+            <>
+              <Pressable
+                onPress={() => setShowPicker(true)}
                 style={[
-                  styles.optionText,
-                  selectedColor === back.color && styles.selectedText,
+                  styles.optionItem,
+                  isCustomColor
+                    ? styles.selectedOption
+                    : styles.customOptionDashed,
                 ]}
               >
-                {back.name}
-              </Text>
-            </Pressable>
-          ))}
+                <View
+                  style={[
+                    styles.rainbowCircle,
+                    isCustomColor && { backgroundColor: selectedColor },
+                  ]}
+                >
+                  <Ionicons
+                    name="color-palette"
+                    size={24}
+                    color={isCustomColor ? "rgba(255,255,255,0.8)" : "white"}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.optionText,
+                    isCustomColor && styles.selectedText,
+                  ]}
+                >
+                  Mixer
+                </Text>
+              </Pressable>
+
+              {CARD_BACKS.map((back) => (
+                <Pressable
+                  key={back.id}
+                  onPress={() => setSelectedColor(back.color)}
+                  style={[
+                    styles.optionItem,
+                    selectedColor === back.color && styles.selectedOption,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.colorCircle,
+                      { backgroundColor: back.color },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedColor === back.color && styles.selectedText,
+                    ]}
+                  >
+                    {back.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </>
+          )}
+
+          {/* --- TAB: MUSTER --- */}
+          {activeTab === "pattern" && (
+            <>
+              {CARD_PATTERNS.map((pat) => (
+                <Pressable
+                  key={pat.id}
+                  onPress={() => setSelectedPattern(pat.id)}
+                  style={[
+                    styles.optionItem,
+                    selectedPattern === pat.id && styles.selectedOption,
+                  ]}
+                >
+                  <View
+                    style={[styles.patternCircle, { backgroundColor: "#eee" }]}
+                  >
+                    <MaterialCommunityIcons
+                      // @ts-ignore
+                      name={pat.icon}
+                      size={24}
+                      color="#444"
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedPattern === pat.id && styles.selectedText,
+                    ]}
+                  >
+                    {pat.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </>
+          )}
         </ScrollView>
 
         <LinearGradient
@@ -154,7 +273,6 @@ export default function DesignScreen() {
         <AppButton title="Speichern" onPress={handleSave} />
       </View>
 
-      {/* Das neue Modal */}
       <ColorPickerModal
         visible={showPicker}
         initialColor={selectedColor}
@@ -168,6 +286,32 @@ export default function DesignScreen() {
 const styles = StyleSheet.create({
   header: { alignItems: "center", paddingTop: 20, marginBottom: 10, zIndex: 1 },
   title: { fontSize: 32, fontFamily: "MochiBoom", color: "#000" },
+
+  // Tabs
+  tabContainer: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.5)",
+    marginHorizontal: 40,
+    marginBottom: 10,
+    borderRadius: 20,
+    padding: 4,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: "center",
+    borderRadius: 16,
+  },
+  activeTab: {
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabText: { fontFamily: "MochiBoom", fontSize: 14, color: "#999" },
+  activeTabText: { color: "#000" },
+
   previewContainer: {
     height: 160,
     justifyContent: "center",
@@ -206,6 +350,7 @@ const styles = StyleSheet.create({
     height: 30,
     zIndex: 5,
   },
+
   optionItem: {
     width: 85,
     height: 85,
@@ -245,6 +390,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
+  },
+  patternCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginBottom: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   optionText: {
     fontSize: 11,

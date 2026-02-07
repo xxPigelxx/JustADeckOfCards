@@ -1,4 +1,4 @@
-import Card from "@/components/Card"; // <--- Korrekter Import
+import Card from "@/components/Card";
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
 import { Feather } from "@expo/vector-icons";
@@ -8,7 +8,8 @@ import { StyleSheet, View } from "react-native";
 type HandAreaProps = {
   handCards: CardData[];
   draggedId: string | null;
-  cardBackColor?: string; // Prop für Farbe
+  cardBackColor?: string;
+  cardBackPattern?: string; // <--- NEU: Prop für Muster
   onDrop: (id: string, x: number, y: number) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onTap: (id: string, x: number, y: number) => void;
@@ -20,6 +21,7 @@ export default function HandArea({
   handCards,
   draggedId,
   cardBackColor,
+  cardBackPattern, // <--- NEU: Destructure
   onDrop,
   onDrag,
   onTap,
@@ -88,7 +90,8 @@ export default function HandArea({
               {...card}
               x={0}
               y={0}
-              backColor={cardBackColor} // Farbe weitergeben
+              backColor={cardBackColor}
+              backPattern={cardBackPattern} // <--- NEU: Weitergeben
               onDrop={onDrop}
               onDrag={onDrag}
               onTap={() => onTap(card.id, x, handGlobalY)}
