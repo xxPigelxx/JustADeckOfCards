@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
-import { Dimensions, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import BackButton from "@/components/BackButton";
+import React, { useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 type SlideItem = {
   id: string;
@@ -13,16 +27,18 @@ type SlideItem = {
 
 const SLIDES: SlideItem[] = [
   {
-    id: '1',
-    title: 'Karte ausspielen',
-    imageSource: require('../assets/images/hold-and-drag.png'),
-    description: 'Um eine Karte auszuspielen, tippe sie an, halte den Finger darauf und ziehe sie an die gewünschte Position (Drag & Drop). Lasse los, um sie abzulegen.',
+    id: "1",
+    title: "Karte ausspielen",
+    imageSource: require("../assets/images/hold-and-drag.png"),
+    description:
+      "Um eine Karte auszuspielen, tippe sie an, halte den Finger darauf und ziehe sie an die gewünschte Position (Drag & Drop). Lasse los, um sie abzulegen.",
   },
   {
-    id: '2',
-    title: 'Karten-Optionen',
-    imageSource: require('../assets/images/tap.png'),
-    description: 'Ein Tippen auf eine Karte oder einen Stapel öffnet das Aktionsmenü. Hier kannst du Karten umdrehen, den Stapel mischen oder die Reihenfolge umkehren.',
+    id: "2",
+    title: "Karten-Optionen",
+    imageSource: require("../assets/images/tap.png"),
+    description:
+      "Ein Tippen auf eine Karte oder einen Stapel öffnet das Aktionsmenü. Hier kannst du Karten umdrehen, den Stapel mischen oder die Reihenfolge umkehren.",
   },
 ];
 
@@ -56,6 +72,7 @@ function Controls() {
 
   return (
     <View style={styles.container}>
+      <BackButton />
       <StatusBar barStyle="dark-content" />
 
       <FlatList
@@ -105,52 +122,52 @@ const styles = StyleSheet.create({
   slide: {
     width: width,
     height: height,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingTop: 150,
   },
   imageContainer: {
     width: 200,
     height: 250,
     borderRadius: 20,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 40,
-    shadowColor: 'transparent',
+    shadowColor: "transparent",
     elevation: 0,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   description: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     lineHeight: 24,
     paddingHorizontal: 40,
   },
   footer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
   },
   paginationContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 30,
-    alignItems: 'center',
+    alignItems: "center",
   },
   dot: {
     width: 10,
@@ -159,9 +176,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
   },
   dotActive: {
-    backgroundColor: '#444',
+    backgroundColor: "#444",
   },
   dotInactive: {
-    backgroundColor: '#CCC',
-  }
+    backgroundColor: "#CCC",
+  },
 });

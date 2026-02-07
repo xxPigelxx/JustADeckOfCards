@@ -113,6 +113,7 @@ export default function BoardArea({
             const pos = getGridCardPosition(slotKey, vIdx);
             const isTopCard = idx === stack.length - 1;
             const isBeingDragged = draggedId === card.id;
+            const showBadge = isTopCard && !isBeingDragged && totalInStack > 1;
 
             return (
               <View
@@ -130,7 +131,7 @@ export default function BoardArea({
                   {...card}
                   x={0}
                   y={0}
-                  badgeCount={isTopCard ? totalInStack : 0}
+                  badgeCount={showBadge ? totalInStack : 0}
                   forceBadgeVisible={false}
                   backColor={cardBackColor} // Farbe weitergeben
                   onDrop={onDrop}

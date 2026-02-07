@@ -1,5 +1,5 @@
 import AppButton from "@/components/AppButton";
-import BurgerMenu from "@/components/BurgerMenu";
+import BackButton from "@/components/BackButton";
 import { GAMES } from "@/data/games";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -9,8 +9,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 export default function RulebookIndex() {
   return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu dontShow="rulebook" />
-
+      <BackButton />
       <View style={styles.header}>
         <Text style={styles.title}>Regelbuch</Text>
       </View>

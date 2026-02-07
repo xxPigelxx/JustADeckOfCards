@@ -1,4 +1,4 @@
-import BurgerMenu from "@/components/BurgerMenu";
+import BackButton from "@/components/BackButton";
 import { GAMES } from "@/data/games";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -11,8 +11,7 @@ export default function RulebookDetail() {
 
   return (
     <View style={{ flex: 1 }}>
-      <BurgerMenu dontShow="rulebook" />
-
+      <BackButton />
       <View style={styles.header}>
         <Text style={styles.title}>{game.name}</Text>
       </View>
