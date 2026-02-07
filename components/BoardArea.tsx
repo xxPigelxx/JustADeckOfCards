@@ -1,7 +1,8 @@
 import Card from "@/components/Card";
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
-import React from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 type BoardAreaProps = {
@@ -31,6 +32,53 @@ export default function BoardArea({
   onDragStart,
   onDragEnd,
 }: BoardAreaProps) {
+  const [touchedSlots, setTouchedSlots] = useState<number[]>([]);
+
+  // Map: SlotIndex -> Label ("P1", "P2", "Deck")
+  const [slotLabels, setSlotLabels] = useState<Record<number, string>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialisierungs-Logik: Wer ist wer?
+  useEffect(() => {
+    if (!isInitialized && boardCards.length > 0) {
+      const slotsWithCards = new Set<number>();
+      const cardCounts: Record<number, number> = {};
+
+      boardCards.forEach((card) => {
+        if (card.slot !== undefined) {
+          slotsWithCards.add(card.slot);
+          cardCounts[card.slot] = (cardCounts[card.slot] || 0) + 1;
+        }
+      });
+
+      const initialSlotIndices = Array.from(slotsWithCards).sort(
+        (a, b) => a - b,
+      );
+      const newLabels: Record<number, string> = {};
+
+      let maxCards = 0;
+      let deckSlot = -1;
+      initialSlotIndices.forEach((slot) => {
+        if (cardCounts[slot] > maxCards) {
+          maxCards = cardCounts[slot];
+          deckSlot = slot;
+        }
+      });
+
+      let playerCounter = 1;
+      initialSlotIndices.forEach((slot) => {
+        if (slot === deckSlot) {
+          newLabels[slot] = "Deck";
+        } else {
+          newLabels[slot] = `P${playerCounter++}`;
+        }
+      });
+
+      setSlotLabels(newLabels);
+      setIsInitialized(true);
+    }
+  }, [boardCards, isInitialized]);
+
   const getGridCardPosition = (slot: number, visualIndex: number = 0) => {
     const col = slot % C.COLS;
     const row = Math.floor(slot / C.COLS);
@@ -60,10 +108,20 @@ export default function BoardArea({
     group.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)),
   );
 
+  // NEU: Diese Funktion markiert den Slot sofort als "berührt"
+  const markAsTouched = (id: string) => {
+    const card = boardCards.find((c) => c.id === id);
+    if (card && card.slot !== undefined) {
+      if (!touchedSlots.includes(card.slot)) {
+        setTouchedSlots((prev) => [...prev, card.slot!]);
+      }
+    }
+  };
+
   return (
     <View style={styles.boardContainer}>
       <View style={styles.boardSurface}>
-        {/* Slot Grid */}
+        {/* 1. LAYER: LEERE SLOTS */}
         <View style={styles.gridContainer}>
           {Array.from({ length: C.TOTAL_SLOTS }).map((_, i) => (
             <View
@@ -76,7 +134,7 @@ export default function BoardArea({
           ))}
         </View>
 
-        {/* Karten */}
+        {/* 2. LAYER: KARTEN */}
         {Object.keys(cardsBySlot).map((slotKeyStr) => {
           const slotKey = Number(slotKeyStr);
           const stack = cardsBySlot[slotKey];
@@ -85,7 +143,6 @@ export default function BoardArea({
           if (movingStackSlot === slotKey) {
             const leader = stack[stack.length - 1];
             const pos = getGridCardPosition(slotKey, 0);
-
             return (
               <Card
                 key={`${leader.id}-${cardBackPattern}`}
@@ -102,20 +159,24 @@ export default function BoardArea({
                 backPattern={cardBackPattern}
                 onDrop={onDrop}
                 onDrag={onDrag}
-                onTap={() => onTap(leader.id, pos.globalX, pos.globalY)}
-                onDragStart={() => onDragStart(leader.id)}
                 onDragEnd={onDragEnd}
+                // HIER: Sowohl bei Tap als auch bei Drag wird markiert
+                onTap={() => {
+                  markAsTouched(leader.id);
+                  onTap(leader.id, pos.globalX, pos.globalY);
+                }}
+                onDragStart={() => {
+                  markAsTouched(leader.id);
+                  onDragStart(leader.id);
+                }}
               />
             );
           }
-
           return stack.map((card, idx) => {
             const threshold = Math.max(0, stack.length - C.VISIBLE_STACK_LIMIT);
             if (idx < threshold) return null;
-
             const vIdx = idx - threshold;
             const pos = getGridCardPosition(slotKey, vIdx);
-
             const isTopCard = idx === stack.length - 1;
             const isBeingDragged = draggedId === card.id;
             const showBadge = isTopCard && !isBeingDragged && totalInStack > 1;
@@ -123,6 +184,7 @@ export default function BoardArea({
             return (
               <React.Fragment key={card.id}>
                 <Card
+                  key={`${card.id}-${cardBackPattern}`}
                   id={card.id}
                   rank={card.rank}
                   suit={card.suit}
@@ -135,22 +197,24 @@ export default function BoardArea({
                   backPattern={cardBackPattern}
                   onDrop={onDrop}
                   onDrag={onDrag}
-                  onTap={() => onTap(card.id, pos.globalX, pos.globalY)}
-                  onDragStart={() => onDragStart(card.id)}
                   onDragEnd={onDragEnd}
+                  // HIER: Sowohl bei Tap als auch bei Drag wird markiert
+                  onTap={() => {
+                    markAsTouched(card.id);
+                    onTap(card.id, pos.globalX, pos.globalY);
+                  }}
+                  onDragStart={() => {
+                    markAsTouched(card.id);
+                    onDragStart(card.id);
+                  }}
                 />
-
-                {/* 
-                   DAS STATISCHE BADGE (wenn Stapel gezogen wird)
-                   Hier angepasst: Gleicher Style wie in Card.tsx, KEIN Schatten
-                */}
                 {isTopCard && isBeingDragged && totalInStack > 1 && (
                   <View
                     style={[
                       styles.staticBadge,
                       {
-                        left: pos.surfaceX + C.CARD_W - 10, // Positionierung angepasst
-                        top: pos.surfaceY - 4,
+                        left: pos.surfaceX + C.CARD_W - 14,
+                        top: pos.surfaceY - 6,
                       },
                     ]}
                   >
@@ -160,6 +224,43 @@ export default function BoardArea({
               </React.Fragment>
             );
           });
+        })}
+
+        {/* 3. LAYER: CHIP MARKER */}
+        {Object.keys(slotLabels).map((slotKeyStr) => {
+          const slotKey = Number(slotKeyStr);
+          const label = slotLabels[slotKey];
+          const hasCards = cardsBySlot[slotKey]?.length > 0;
+          const isTouched = touchedSlots.includes(slotKey);
+
+          if (hasCards && !isTouched) {
+            const pos = getGridCardPosition(slotKey, 0);
+
+            return (
+              <View
+                key={`marker-${slotKey}`}
+                style={[
+                  styles.chipMarker,
+                  {
+                    left: pos.surfaceX + C.CARD_W / 2 - 26,
+                    top: pos.surfaceY + 14,
+                  },
+                ]}
+                pointerEvents="none"
+              >
+                {label === "Deck" ? (
+                  <MaterialCommunityIcons
+                    name="crown"
+                    size={24}
+                    color="#854d0e"
+                  />
+                ) : (
+                  <Text style={styles.chipText}>{label}</Text>
+                )}
+              </View>
+            );
+          }
+          return null;
         })}
       </View>
     </View>
@@ -205,8 +306,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.2)",
     borderWidth: 2,
   },
-
-  // --- Badge Style (angepasst an Card.tsx) ---
   staticBadge: {
     position: "absolute",
     backgroundColor: "#f1ce5bff",
@@ -216,14 +315,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
-    // border: Weißer Rand für Lesbarkeit
     borderWidth: 1.5,
     borderColor: "white",
-    // KEIN Schatten mehr (elevation/shadow entfernt)
   },
   badgeText: {
     color: "white",
     fontSize: 10,
     fontWeight: "bold",
+  },
+
+  // Marker Style
+  chipMarker: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 99999,
+    elevation: 10,
+    shadowColor: "transparent",
+  },
+  chipText: {
+    textAlign: "center",
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: "800",
+    color: "#555",
+    includeFontPadding: false,
   },
 });
