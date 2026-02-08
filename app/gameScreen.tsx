@@ -4,12 +4,14 @@ import CardMenu from "@/components/CardMenu";
 import * as C from "@/components/constants";
 import CustomAlert from "@/components/CustomAlert";
 import HandArea from "@/components/HandArea";
+import HandGridOverlay from "@/components/HandGridOverlay"; // Verwenden wir jetzt
+import HandGridToggleButton from "@/components/HandGridToggleButton";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
 import {
   DEFAULT_BACK_COLOR,
-  DEFAULT_PATTERN, // NEU
+  DEFAULT_PATTERN,
   loadCardBack,
-  loadCardPattern, // NEU
+  loadCardPattern,
 } from "@/utils/designStorage";
 import { generateGameData } from "@/utils/gameSetup";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -22,14 +24,12 @@ export default function GameScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  // --- NEU: State für Farbe UND Muster ---
+  // --- Design State ---
   const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
   const [cardBackPattern, setCardBackPattern] = useState(DEFAULT_PATTERN);
 
-  // Lädt Design neu, wenn man zum Screen zurückkehrt
   useFocusEffect(
     useCallback(() => {
-      // Beide Werte parallel laden
       Promise.all([loadCardBack(), loadCardPattern()]).then(
         ([color, pattern]) => {
           setCardBackColor(color);
@@ -70,19 +70,24 @@ export default function GameScreen() {
   const boardZIndex = draggedSource === "board" ? 100 : 1;
   const handZIndex = draggedSource === "hand" ? 100 : 10;
 
-  // Menü State
+  // UI States
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTargetSlot, setMenuTargetSlot] = useState<number | null>(null);
   const [menuTargetCardId, setMenuTargetCardId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
-
-  // Alert State
   const [exitModalVisible, setExitModalVisible] = useState(false);
+
+  // Hand Grid Modal State
+  const [handGridVisible, setHandGridVisible] = useState(false);
 
   // Back Button Handler
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
+        if (handGridVisible) {
+          setHandGridVisible(false);
+          return true;
+        }
         if (exitModalVisible) {
           setExitModalVisible(false);
           return true;
@@ -97,7 +102,7 @@ export default function GameScreen() {
       );
 
       return () => subscription.remove();
-    }, [exitModalVisible]),
+    }, [exitModalVisible, handGridVisible]),
   );
 
   const handleLeaveGame = () => setExitModalVisible(true);
@@ -158,8 +163,8 @@ export default function GameScreen() {
             highlightedSlot={game.highlightedSlot}
             movingStackSlot={game.movingStackSlot}
             draggedId={game.draggedId}
-            cardBackColor={cardBackColor} // Farbe
-            cardBackPattern={cardBackPattern} // NEU: Muster
+            cardBackColor={cardBackColor}
+            cardBackPattern={cardBackPattern}
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}
@@ -174,6 +179,14 @@ export default function GameScreen() {
           />
         </View>
 
+        {/* TOGGLE BUTTON */}
+        {game.handCards.length > 0 && !handGridVisible && (
+          <HandGridToggleButton
+            onPress={() => setHandGridVisible(true)}
+            style={styles.gridToggleButton}
+          />
+        )}
+
         {/* HAND AREA */}
         <View
           style={{
@@ -185,8 +198,8 @@ export default function GameScreen() {
           <HandArea
             handCards={game.handCards}
             draggedId={game.draggedId}
-            cardBackColor={cardBackColor} // Farbe
-            cardBackPattern={cardBackPattern} // NEU: Muster
+            cardBackColor={cardBackColor}
+            cardBackPattern={cardBackPattern}
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}
@@ -218,6 +231,23 @@ export default function GameScreen() {
         }}
       />
 
+      {/* Hand Grid Overlay */}
+      <HandGridOverlay
+        visible={handGridVisible}
+        handCards={game.handCards}
+        cardBackColor={cardBackColor}
+        cardBackPattern={cardBackPattern}
+        onClose={() => setHandGridVisible(false)}
+        // HIER SIND DIE ECHTEN FUNKTIONEN:
+        onDragStart={(id) => game.setDraggedId(id)}
+        onDrag={game.handleDrag}
+        onDrop={game.handleDrop}
+        onDragEnd={() => {
+          game.setDraggedId(null);
+          game.setHighlightedSlot(null);
+        }}
+      />
+
       <CustomAlert
         visible={exitModalVisible}
         title="Lobby verlassen"
@@ -231,4 +261,13 @@ export default function GameScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#333" },
+
+  gridToggleButton: {
+    position: "absolute",
+    bottom: 40,
+    left: 40,
+    zIndex: 200,
+  },
+
+  // gridIconCircle is no longer needed here!
 });
