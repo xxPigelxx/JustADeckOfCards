@@ -32,7 +32,7 @@ export const useGameLogic = ({
     if (initialHand) setHandCards(initialHand);
   }, [initialBoard, initialHand]);
 
-  // --- STANDARD GRID HIT DETECTION ---
+  // --- HELPER: Detect Board Slot ---
   const getSlotFromCoords = (absX: number, absY: number) => {
     const localX = absX - C.BOARD_PADDING - C.GRID_OFFSET_X;
     const localY = absY - C.TOP_OFFSET - C.GRID_MARGIN_TOP - C.SAFE_TOP;
@@ -44,14 +44,25 @@ export const useGameLogic = ({
     return row * C.COLS + col;
   };
 
+  // --- HELPER: Detect Hand Index (for sorting) ---
   const getHandIndexFromX = (absX: number) => {
-    const totalWidth = handCards.length * C.FAN_SPREAD;
-    const startX = (C.SCREEN_DIMS.width - totalWidth) / 2;
+    // 1. Calculate how wide the hand fan is currently
+    // Note: Matches logic in HandArea.tsx
+    const totalWidth = (handCards.length - 1) * C.FAN_SPREAD;
+
+    // 2. Calculate where the fan starts on screen (left edge)
+    // Note: HandArea centers the fan: (Screen - TotalWidth) / 2 - (CardWidth / 2) offset
+    // We simplify slightly to target the "center" of slots
+    const startX = (C.SCREEN_DIMS.width - totalWidth) / 2 - C.CARD_W / 2;
+
+    // 3. Calculate relative position
     const relativeX = absX - startX;
-    return Math.min(
-      handCards.length,
-      Math.max(0, Math.floor(relativeX / C.FAN_SPREAD)),
-    );
+
+    // 4. Convert to index
+    const index = Math.round(relativeX / C.FAN_SPREAD);
+
+    // 5. Clamp between 0 and last index
+    return Math.max(0, Math.min(handCards.length, index));
   };
 
   const bringToFront = (id: string) => {
@@ -61,6 +72,8 @@ export const useGameLogic = ({
       prev.map((c) => (c.id === id ? { ...c, zIndex: newZ } : c)),
     );
   };
+
+  // --- ACTIONS ---
 
   const flipCard = (id: string | null, slot: number | null) => {
     if (id && handCards.some((c) => c.id === id)) {
@@ -78,20 +91,24 @@ export const useGameLogic = ({
     }
   };
 
-  // --- NEU: Funktion zum Flippen aller Handkarten ---
   const flipAllHand = () => {
     setHandCards((prev) => {
-      // Prüfen, ob ALLE aufgedeckt sind
       const allFaceUp = prev.every((c) => c.isFaceUp);
-      // Wenn alle aufgedeckt sind -> alle zudecken. Sonst alle aufdecken.
       return prev.map((c) => ({ ...c, isFaceUp: !allFaceUp }));
     });
   };
-  // --------------------------------------------------
+
+  const shuffleHand = () => {
+    setHandCards((prev) => {
+      const newHand = [...prev].sort(() => Math.random() - 0.5);
+      return newHand;
+    });
+  };
 
   const shuffleStack = (id: string | null, slot: number | null) => {
+    // If context menu called on a hand card, shuffle the hand
     if (id && handCards.some((c) => c.id === id)) {
-      // Hand Shuffle Logic (optional, falls benötigt)
+      shuffleHand();
       return;
     }
     if (slot === null) return;
@@ -116,6 +133,8 @@ export const useGameLogic = ({
     setHandCards((p) => [...p, ...t.map((c) => ({ ...c, slot: undefined }))]);
   };
 
+  // --- DRAG HANDLERS ---
+
   const handleDrag = (id: string, absX: number, absY: number) => {
     const isOverHand = absY > C.BOARD_HEIGHT - 30;
     if (isOverHand) {
@@ -131,6 +150,7 @@ export const useGameLogic = ({
     const isOverHand = absY > C.BOARD_HEIGHT - 30;
     const fromBoard = boardCards.find((c) => c.id === id);
 
+    // 1. Moving a whole stack (Special Case)
     if (
       movingStackSlot !== null &&
       fromBoard &&
@@ -161,20 +181,45 @@ export const useGameLogic = ({
       return;
     }
 
+    // 2. Dropping into Hand (Sorting / Adding)
     if (isOverHand) {
+      const newIndex = getHandIndexFromX(absX);
+
       if (fromBoard) {
+        // A. From Board -> Hand (Insert at specific index)
         setBoardCards((p) => p.filter((c) => c.id !== id));
-        setHandCards((p) => [...p, { ...fromBoard, slot: undefined }]);
+        setHandCards((prev) => {
+          const newHand = [...prev];
+          newHand.splice(newIndex, 0, { ...fromBoard, slot: undefined });
+          return newHand;
+        });
+        return;
+      } else {
+        // B. Hand -> Hand (Reorder)
+        setHandCards((prev) => {
+          const newHand = [...prev];
+          const oldIndex = newHand.findIndex((c) => c.id === id);
+          if (oldIndex === -1) return prev;
+
+          // Remove
+          const [card] = newHand.splice(oldIndex, 1);
+
+          // Re-insert (clamp index to new length)
+          const targetIndex = Math.min(newIndex, newHand.length);
+          newHand.splice(targetIndex, 0, card);
+
+          return newHand;
+        });
         return;
       }
-      // Optional: Hand Reorder Logic here
-      return;
     }
+
+    // 3. Dropping onto Board
     const targetSlot = getSlotFromCoords(absX, absY);
-    if (targetSlot === null) return;
+    if (targetSlot === null) return; // Dropped into void
 
     if (!fromBoard) {
-      // From Hand
+      // From Hand -> Board
       const c = handCards.find((x) => x.id === id)!;
       setHandCards((p) => p.filter((x) => x.id !== id));
       setBoardCards((p) => [
@@ -183,7 +228,7 @@ export const useGameLogic = ({
       ]);
       setMaxZIndex((p) => p + 1);
     } else {
-      // Board to Board
+      // Board -> Board
       setBoardCards((p) =>
         p.map((x) => (x.id === id ? { ...x, slot: targetSlot } : x)),
       );
@@ -204,7 +249,8 @@ export const useGameLogic = ({
     handleDrag,
     actions: {
       flipCard,
-      flipAllHand, // <--- HIER EXPORTIEREN
+      flipAllHand,
+      shuffleHand,
       shuffleStack,
       takeStack,
     },

@@ -9,7 +9,7 @@ type HandAreaProps = {
   handCards: CardData[];
   draggedId: string | null;
   cardBackColor?: string;
-  cardBackPattern?: string; // <--- NEU: Prop für Muster
+  cardBackPattern?: string;
   onDrop: (id: string, x: number, y: number) => void;
   onDrag: (id: string, x: number, y: number) => void;
   onTap: (id: string, x: number, y: number) => void;
@@ -21,7 +21,7 @@ export default function HandArea({
   handCards,
   draggedId,
   cardBackColor,
-  cardBackPattern, // <--- NEU: Destructure
+  cardBackPattern,
   onDrop,
   onDrag,
   onTap,
@@ -91,7 +91,7 @@ export default function HandArea({
               x={0}
               y={0}
               backColor={cardBackColor}
-              backPattern={cardBackPattern} // <--- NEU: Weitergeben
+              backPattern={cardBackPattern}
               onDrop={onDrop}
               onDrag={onDrag}
               onTap={() => onTap(card.id, x, handGlobalY)}

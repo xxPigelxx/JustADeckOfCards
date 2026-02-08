@@ -228,6 +228,7 @@ export default function GameScreen() {
           moveStack: game.setMovingStackSlot,
           takeStack: game.actions.takeStack,
           flipAllHand: game.actions.flipAllHand,
+          shuffleHand: game.actions.shuffleHand,
         }}
       />
 

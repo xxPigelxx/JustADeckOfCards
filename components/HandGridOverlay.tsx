@@ -125,7 +125,7 @@ export default function HandGridOverlay({
         ]}
       >
         <View style={[styles.header, isDraggingAny && { opacity: 0 }]}>
-          <Text style={styles.title}>Deine Hand ({handCards.length})</Text>
+          <Text style={styles.title}>Deine Hand: {handCards.length}</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Ionicons name="chevron-down" size={28} color="white" />
           </Pressable>
