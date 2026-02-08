@@ -1,4 +1,3 @@
-
 const mauMauRules = `
 Ziel:
 Werde als Erster alle deine Karten los.
@@ -136,36 +135,6 @@ Spielende:
 - Neue Runde mit den vergebenen Titeln
 - Punkte oder Rundenanzahl nach Vereinbarung
 `.trim();
-const unoLikeRules = `
-Ziel:
-Werde als Erster alle deine Karten los.
-
-Setup:
-- 2–10 Spieler
-- Spezielles UNO-Deck
-- Jeder Spieler erhält 7 Karten
-- Eine Karte wird offen ausgelegt, Rest ist Nachziehstapel
-
-Ablauf:
-- Lege eine Karte, die Farbe oder Zahl übereinstimmt
-- Alternativ eine passende Aktionskarte legen
-- Kannst du nicht legen, ziehst du eine Karte
-
-Aktionskarten:
-- +2: Nächster Spieler zieht zwei Karten
-- Aussetzen: Nächster Spieler wird übersprungen
-- Richtungswechsel: Spielreihenfolge kehrt sich um
-- Joker: Wunschfarbe bestimmen
-- Joker +4: Wunschfarbe + nächster zieht 4
-
-UNO rufen:
-- Bei letzter Karte muss „UNO“ gesagt werden
-- Vergisst man es und wird erwischt → 2 Strafkarten
-
-Spielende:
-- Wer keine Karten hat, gewinnt
-- Optionale Punktewertung pro Runde
-`.trim();
 
 const siebenUndHalbRules = `
 Ziel:
@@ -267,9 +236,6 @@ export type Game = {
   rules: string;
 };
 
-
-
-
 export const GAMES: Game[] = [
   {
     id: "maumau",
@@ -280,12 +246,13 @@ export const GAMES: Game[] = [
   {
     id: "schwarzerpeter",
     name: "Schwarzer Peter",
-    shortDescription: "Paarbildungsspiel – vermeide die letzte unpaarbare Karte.",
+    shortDescription:
+      "Paarbildungsspiel – vermeide die letzte unpaarbare Karte.",
     rules: schwarzerPeterRules,
   },
   {
-    id: "schwimmen31",
-    name: "Schwimmen (31)",
+    id: "schwimmen",
+    name: "Schwimmen",
     shortDescription: "Sammelspiel um Punktewerte bis 31 in einer Farbe.",
     rules: schwimmenRules,
   },
@@ -297,15 +264,10 @@ export const GAMES: Game[] = [
   },
   {
     id: "praesident",
-    name: "Präsident",
-    shortDescription: "Ablagespiel mit sozialen Rollen wie Präsident und Bettler.",
+    name: "Praesident",
+    shortDescription:
+      "Ablagespiel mit sozialen Rollen wie Präsident und Bettler.",
     rules: praesidentRules,
-  },
-   {
-    id: "uno",
-    name: "UNO",
-    shortDescription: "UNO-typisches Ablegespiel mit Aktionskarten.",
-    rules: unoLikeRules,
   },
   {
     id: "siebenhalb",
@@ -322,12 +284,13 @@ export const GAMES: Game[] = [
   {
     id: "durak",
     name: "Durak",
-    shortDescription: "Russisches Ablege- und Stichspiel – vermeide den letzten Platz.",
+    shortDescription:
+      "Russisches Ablege- und Stichspiel – vermeide den letzten Platz.",
     rules: durakRules,
   },
   {
-    id: "lügenspiel",
-    name: "Lügen (Bullshit)",
+    id: "luegenspiel",
+    name: "Luegen",
     shortDescription: "Bluff- und Ablegespiel mit Aufdecken.",
     rules: liarGameRules,
   },
