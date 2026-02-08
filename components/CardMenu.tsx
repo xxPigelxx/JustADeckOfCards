@@ -13,7 +13,6 @@ type CardMenuProps = {
   onClose: () => void;
   actions: {
     flipCard: (id: string | null, slot: number | null) => void;
-    // NEU: Funktion zum Flippen aller Handkarten
     flipAllHand?: () => void;
     shuffleStack: (id: string | null, slot: number | null) => void;
     moveStack: (slot: number | null) => void;
@@ -37,84 +36,98 @@ export default function CardMenu({
   const stack = targetSlot !== null ? cardsBySlot[targetSlot] || [] : [];
   const isStack = stack.length > 1;
 
+  // Helper to execute action and close menu
+  const handleAction = (action: () => void) => {
+    action();
+    onClose();
+  };
+
   return (
     <Modal transparent visible={visible} animationType="fade">
       <Pressable style={styles.overlay} onPress={onClose}>
         <View
           style={[styles.menuContainer, { top: position.y, left: position.x }]}
         >
-          <AppButton
-            title="Flip"
-            onPress={() => {
-              actions.flipCard(targetCardId, targetSlot);
-              onClose();
-            }}
-            style={styles.menuButton}
-            textStyle={styles.menuButtonText}
-          />
-
           {isStack ? (
+            // --- 1. STACK ACTIONS ---
             <>
               <AppButton
+                title="Flip All"
+                onPress={() =>
+                  handleAction(() => actions.flipCard(targetCardId, targetSlot))
+                }
+                style={styles.menuButton}
+                textStyle={styles.menuButtonText}
+              />
+              <AppButton
                 title="Mix"
-                onPress={() => {
-                  actions.shuffleStack(targetCardId, targetSlot);
-                  onClose();
-                }}
+                onPress={() =>
+                  handleAction(() =>
+                    actions.shuffleStack(targetCardId, targetSlot),
+                  )
+                }
                 style={styles.menuButton}
                 textStyle={styles.menuButtonText}
               />
               <AppButton
                 title="Move"
-                onPress={() => {
-                  if (targetSlot !== null) actions.moveStack(targetSlot);
-                  onClose();
-                }}
+                onPress={() =>
+                  handleAction(() => {
+                    if (targetSlot !== null) actions.moveStack(targetSlot);
+                  })
+                }
                 style={styles.menuButton}
                 textStyle={styles.menuButtonText}
               />
               <AppButton
                 title="Take"
-                onPress={() => {
-                  actions.takeStack(targetSlot);
-                  onClose();
-                }}
+                onPress={() =>
+                  handleAction(() => actions.takeStack(targetSlot))
+                }
                 style={styles.menuButton}
                 textStyle={styles.menuButtonText}
               />
             </>
           ) : isHand ? (
+            // --- 2. HAND ACTIONS (Multiple) ---
             <>
               <AppButton
                 title="Flip All"
-                onPress={() => {
-                  actions.flipAllHand?.(); // Sicherer Aufruf
-                  onClose();
-                }}
+                onPress={() => handleAction(() => actions.flipAllHand?.())}
                 style={styles.menuButton}
                 textStyle={styles.menuButtonText}
               />
               <AppButton
                 title="Mix"
-                onPress={() => {
-                  actions.shuffleStack(targetCardId, null);
-                  onClose();
-                }}
+                onPress={() =>
+                  handleAction(() => actions.shuffleStack(targetCardId, null))
+                }
+                style={styles.menuButton}
+                textStyle={styles.menuButtonText}
+              />
+              {/* Optional: Add single 'Flip' here if you want both. Currently removed per request. */}
+            </>
+          ) : (
+            // --- 3. SINGLE BOARD CARD ACTIONS ---
+            <>
+              <AppButton
+                title="Flip"
+                onPress={() =>
+                  handleAction(() => actions.flipCard(targetCardId, targetSlot))
+                }
+                style={styles.menuButton}
+                textStyle={styles.menuButtonText}
+              />
+              <AppButton
+                title="Take"
+                onPress={() =>
+                  handleAction(() => actions.takeStack(targetSlot))
+                }
                 style={styles.menuButton}
                 textStyle={styles.menuButtonText}
               />
             </>
-          ) : !isHand ? (
-            <AppButton
-              title="Take"
-              onPress={() => {
-                actions.takeStack(targetSlot);
-                onClose();
-              }}
-              style={styles.menuButton}
-              textStyle={styles.menuButtonText}
-            />
-          ) : null}
+          )}
         </View>
       </Pressable>
     </Modal>
