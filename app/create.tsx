@@ -7,7 +7,6 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -72,9 +71,9 @@ export default function Create() {
       <BurgerMenu />
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
+        <View
+          style={[
+            styles.content,
             isTablet && { width: 600, alignSelf: "center" },
           ]}
         >
@@ -203,7 +202,7 @@ export default function Create() {
             onPress={handleStartGame}
             style={styles.button}
           />
-        </ScrollView>
+        </View>
       </SafeAreaView>
 
       <InfoAlert
@@ -218,7 +217,7 @@ export default function Create() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F2E8DF" },
-  scrollContent: {
+  content: {
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 40,

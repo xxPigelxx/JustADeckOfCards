@@ -156,9 +156,7 @@ export default function CustomSlider({
   const thumbStyle = [
     styles.thumb,
     { transform: [{ translateX: pan }] },
-    thumbColor
-      ? { backgroundColor: thumbColor, borderColor: "white", borderWidth: 2 }
-      : {},
+    thumbColor ? { backgroundColor: thumbColor } : {},
   ];
 
   return (
@@ -240,7 +238,6 @@ const styles = StyleSheet.create({
     height: 28,
     backgroundColor: "#000000",
     borderRadius: 14,
-    borderWidth: 2,
     elevation: 5,
     shadowColor: "transparent",
     zIndex: 10,
