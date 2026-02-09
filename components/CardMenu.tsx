@@ -1,7 +1,7 @@
 import AppButton from "@/components/AppButton";
 import { CardData } from "@/components/useGameLogic";
 import React from "react";
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 type CardMenuProps = {
   visible: boolean;
@@ -14,7 +14,6 @@ type CardMenuProps = {
   actions: {
     flipCard: (id: string | null, slot: number | null) => void;
     flipAllHand?: () => void;
-    // NEW: Add specific action for shuffling hand
     shuffleHand?: () => void;
     shuffleStack: (id: string | null, slot: number | null) => void;
     moveStack: (slot: number | null) => void;
@@ -44,87 +43,98 @@ export default function CardMenu({
   };
 
   return (
-    <Modal transparent visible={visible} animationType="fade">
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <View
-          style={[styles.menuContainer, { top: position.y, left: position.x }]}
-        >
-          {isStack ? (
-            // --- STACK ACTIONS ---
-            <>
-              <AppButton
-                title="Flip All"
-                onPress={() =>
-                  handleAction(() => actions.flipCard(targetCardId, targetSlot))
-                }
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-              <AppButton
-                title="Mix"
-                onPress={() =>
-                  handleAction(() =>
-                    actions.shuffleStack(targetCardId, targetSlot),
-                  )
-                }
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-              <AppButton
-                title="Move"
-                onPress={() =>
-                  handleAction(() => {
-                    if (targetSlot !== null) actions.moveStack(targetSlot);
-                  })
-                }
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-              <AppButton
-                title="Take"
-                onPress={() =>
-                  handleAction(() => actions.takeStack(targetSlot))
-                }
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-            </>
-          ) : isHand ? (
-            // --- HAND ACTIONS ---
-            <>
-              <AppButton
-                title="Flip All"
-                onPress={() => handleAction(() => actions.flipAllHand?.())}
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-              <AppButton
-                title="Mix"
-                // FIX: Call specific shuffleHand action
-                onPress={() => handleAction(() => actions.shuffleHand?.())}
-                style={styles.menuButton}
-                textStyle={styles.menuButtonText}
-              />
-            </>
-          ) : (
-            // --- SINGLE CARD ACTIONS ---
+    // REPLACED MODAL WITH ABSOLUTE VIEW
+    <View style={styles.fullScreenOverlay}>
+      {/* Invisible backdrop to close menu when clicking outside */}
+      <Pressable style={styles.backdrop} onPress={onClose} />
+
+      {/* The Menu itself */}
+      <View
+        style={[
+          styles.menuContainer,
+          {
+            top: position.y,
+            left: position.x,
+          },
+        ]}
+      >
+        {isStack ? (
+          <>
             <AppButton
-              title="Flip"
+              title="Flip All"
               onPress={() =>
                 handleAction(() => actions.flipCard(targetCardId, targetSlot))
               }
               style={styles.menuButton}
               textStyle={styles.menuButtonText}
             />
-          )}
-        </View>
-      </Pressable>
-    </Modal>
+            <AppButton
+              title="Mix"
+              onPress={() =>
+                handleAction(() =>
+                  actions.shuffleStack(targetCardId, targetSlot),
+                )
+              }
+              style={styles.menuButton}
+              textStyle={styles.menuButtonText}
+            />
+            <AppButton
+              title="Move"
+              onPress={() =>
+                handleAction(() => {
+                  if (targetSlot !== null) actions.moveStack(targetSlot);
+                })
+              }
+              style={styles.menuButton}
+              textStyle={styles.menuButtonText}
+            />
+            <AppButton
+              title="Take"
+              onPress={() => handleAction(() => actions.takeStack(targetSlot))}
+              style={styles.menuButton}
+              textStyle={styles.menuButtonText}
+            />
+          </>
+        ) : isHand ? (
+          <>
+            <AppButton
+              title="Flip All"
+              onPress={() => handleAction(() => actions.flipAllHand?.())}
+              style={styles.menuButton}
+              textStyle={styles.menuButtonText}
+            />
+            <AppButton
+              title="Mix"
+              onPress={() => handleAction(() => actions.shuffleHand?.())}
+              style={styles.menuButton}
+              textStyle={styles.menuButtonText}
+            />
+          </>
+        ) : (
+          <AppButton
+            title="Flip"
+            onPress={() =>
+              handleAction(() => actions.flipCard(targetCardId, targetSlot))
+            }
+            style={styles.menuButton}
+            textStyle={styles.menuButtonText}
+          />
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "transparent" },
+  fullScreenOverlay: {
+    ...StyleSheet.absoluteFillObject, // Fill the entire screen
+    zIndex: 9999, // Ensure it sits on top of everything
+    elevation: 9999, // For Android
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "transparent", // Or 'rgba(0,0,0,0.2)' if you want a dim effect
+  },
   menuContainer: {
     position: "absolute",
     backgroundColor: "transparent",

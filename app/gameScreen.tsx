@@ -111,6 +111,7 @@ export default function GameScreen() {
     router.replace("/");
   };
 
+  // --- FIXED COORDINATE CALCULATION ---
   const handleCardTap = (cardId: string, globalX: number, globalY: number) => {
     if (game.movingStackSlot !== null) {
       game.setMovingStackSlot(null);
@@ -125,17 +126,22 @@ export default function GameScreen() {
     setMenuTargetSlot(card.slot ?? null);
 
     const MENU_W = 70;
+    const MENU_H_ESTIMATE = 80; // Approx height of menu buttons
     const inHand = game.handCards.find((c) => c.id === cardId);
 
     if (inHand) {
+      // Hand Cards: Position Menu ABOVE the card
+      // We subtract the menu height to push it up
       setMenuPos({
         x: globalX + C.CARD_W / 2 - MENU_W / 2,
-        y: globalY - C.CARD_H - 5 - C.SAFE_TOP,
+        y: globalY - MENU_H_ESTIMATE,
       });
     } else {
+      // Board Cards: Position Menu BELOW the card
+      // We add the card height + padding to push it down
       setMenuPos({
         x: globalX + C.CARD_W / 2 - MENU_W / 2,
-        y: globalY + C.CARD_H + 5 - C.SAFE_TOP,
+        y: globalY + C.CARD_H + 5,
       });
     }
     setMenuVisible(true);
@@ -171,6 +177,7 @@ export default function GameScreen() {
             onDragStart={(id) => {
               game.setDraggedId(id);
               game.bringToFront(id);
+              setMenuVisible(false);
             }}
             onDragEnd={() => {
               game.setDraggedId(null);
@@ -203,7 +210,10 @@ export default function GameScreen() {
             onDrop={game.handleDrop}
             onDrag={game.handleDrag}
             onTap={handleCardTap}
-            onDragStart={(id) => game.setDraggedId(id)}
+            onDragStart={(id) => {
+              game.setDraggedId(id);
+              setMenuVisible(false);
+            }}
             onDragEnd={() => {
               game.setDraggedId(null);
               game.setHighlightedSlot(null);
@@ -251,8 +261,8 @@ export default function GameScreen() {
 
       <CustomAlert
         visible={exitModalVisible}
-        title="Lobby verlassen"
-        message="Möchtest du die Lobby wirklich verlassen?"
+        title="Spiel verlassen"
+        message="Möchtest du das Spiel wirklich verlassen?"
         onConfirm={confirmExit}
         onCancel={() => setExitModalVisible(false)}
       />
@@ -269,6 +279,4 @@ const styles = StyleSheet.create({
     left: 40,
     zIndex: 200,
   },
-
-  // gridIconCircle is no longer needed here!
 });
