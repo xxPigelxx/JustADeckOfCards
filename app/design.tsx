@@ -304,9 +304,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowColor: "transparent",
     elevation: 2,
   },
   tabText: { fontFamily: "MochiBoom", fontSize: 14, color: "#999" },
@@ -361,10 +359,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
     elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "transparent",
   },
   customOptionDashed: { borderColor: "#ccc", borderStyle: "dashed" },
   rainbowCircle: {
