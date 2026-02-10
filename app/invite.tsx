@@ -1,6 +1,5 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
-// Importiere deine neue Komponente
 import ControlsHint from "@/components/ControlsHint";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,7 +9,12 @@ import { Image, StyleSheet, Text, View } from "react-native";
 export default function Invite() {
   const [code, setCode] = useState("");
   const router = useRouter();
+
+  // Params holen (hier drin stecken deckType, deckCount, playerCount, etc.)
   const params = useLocalSearchParams();
+
+  // Spieleranzahl extrahieren (Standard: 4, falls undefined)
+  const playerCount = params.playerCount || 4;
 
   const generateCode = () => {
     const randomNum = Math.floor(Math.random() * 1000000);
@@ -35,7 +39,6 @@ export default function Invite() {
         <Text style={styles.codeText}>{code}</Text>
       </View>
 
-      {/* HIER: Pill-Style für Spieler Anzahl */}
       <View style={styles.playerBadge}>
         <Feather
           name="users"
@@ -43,17 +46,20 @@ export default function Invite() {
           color="black"
           style={{ marginRight: 8 }}
         />
-        <Text style={styles.text}>Spieler Anzahl: 1</Text>
+        {/* HIER: Variable statt Hardcode nutzen */}
+        <Text style={styles.text}>Spieler Anzahl: {playerCount}</Text>
       </View>
 
-      {/* Hier nutzen wir jetzt die Komponente mit etwas Abstand */}
       <ControlsHint style={{ marginTop: 120 }} />
       <AppButton
         title="Spiel starten"
         onPress={() => {
           router.push({
             pathname: "/gameScreen",
-            params: params,
+            params: {
+              ...params,
+              lobbyCode: code,
+            },
           });
         }}
         style={styles.button}
@@ -83,13 +89,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: -40,
   },
-  // Style für den Text IN der Pill
   text: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
-    // marginTop entfernt, damit es in der Pill mittig ist
   },
   codeField: {
     width: "70%",
@@ -110,17 +114,13 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 30,
   },
-
-  // NEU: Style für die Pill-Box
   playerBadge: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10, // Abstand nach oben zum Code
-
-    // Das macht es zur "Pill":
-    backgroundColor: "#ffffffff", // Leichtes Grau
-    paddingVertical: 10, // Höhe
-    paddingHorizontal: 20, // Breite
-    borderRadius: 15, // Ganz rund
+    marginTop: 10,
+    backgroundColor: "#ffffffff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 15,
   },
 });

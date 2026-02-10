@@ -4,7 +4,7 @@ import CardMenu from "@/components/CardMenu";
 import * as C from "@/components/constants";
 import CustomAlert from "@/components/CustomAlert";
 import HandArea from "@/components/HandArea";
-import HandGridOverlay from "@/components/HandGridOverlay"; // Verwenden wir jetzt
+import HandGridOverlay from "@/components/HandGridOverlay";
 import HandGridToggleButton from "@/components/HandGridToggleButton";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
 import {
@@ -14,15 +14,19 @@ import {
   loadCardPattern,
 } from "@/utils/designStorage";
 import { generateGameData } from "@/utils/gameSetup";
+import { Feather } from "@expo/vector-icons"; // Import für das Icon
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useMemo, useState } from "react";
-import { BackHandler, StyleSheet, View } from "react-native";
+import { BackHandler, StyleSheet, Text, View } from "react-native"; // Text Importiert
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function GameScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+
+  // Code aus Params holen (oder Fallback)
+  const lobbyCode = (params.lobbyCode as string) || "OFFLINE";
 
   // --- Design State ---
   const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
@@ -45,13 +49,27 @@ export default function GameScreen() {
     const playerCount = Number(params.playerCount) || 4;
     const startCards = Number(params.startCards) || 0;
 
-    return generateGameData(deckType, deckCount, playerCount, startCards);
+    // Add playerCount to the returned object
+    const gameData = generateGameData(
+      deckType,
+      deckCount,
+      playerCount,
+      startCards,
+    );
+    return {
+      ...gameData,
+      playerCount,
+    };
   }, [
     params.deckType,
     params.deckCount,
     params.playerCount,
     params.startCards,
   ]);
+
+  // Make playerCount available in the component scope
+  const playerCount =
+    Number(params.playerCount) || (initialData && initialData.playerCount) || 4;
 
   const game = useGameLogic({
     initialBoard: initialData.boardCards,
@@ -130,15 +148,11 @@ export default function GameScreen() {
     const inHand = game.handCards.find((c) => c.id === cardId);
 
     if (inHand) {
-      // Hand Cards: Position Menu ABOVE the card
-      // We subtract the menu height to push it up
       setMenuPos({
         x: globalX + C.CARD_W / 2 - MENU_W / 2,
         y: globalY - MENU_H_ESTIMATE,
       });
     } else {
-      // Board Cards: Position Menu BELOW the card
-      // We add the card height + padding to push it down
       setMenuPos({
         x: globalX + C.CARD_W / 2 - MENU_W / 2,
         y: globalY + C.CARD_H + 10,
@@ -160,6 +174,15 @@ export default function GameScreen() {
     <GestureHandlerRootView style={styles.container}>
       <StatusBar style="light" />
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
+
+      {/* --- NEU: LOBBY CODE PILL --- */}
+      <View style={styles.lobbyPill}>
+        <Feather name="hash" size={14} color="white" />
+        <Text style={styles.lobbyText}>{lobbyCode} </Text>
+        <Feather name="users" size={18} color="white" />
+        <Text style={styles.lobbyText}>: {playerCount}</Text>
+      </View>
+      {/* ----------------------------- */}
 
       <View style={{ flex: 1 }}>
         {/* BOARD AREA */}
@@ -278,5 +301,28 @@ const styles = StyleSheet.create({
     bottom: 40,
     left: 40,
     zIndex: 200,
+  },
+
+  // --- NEUER STYLE FÜR DIE PILLE ---
+  lobbyPill: {
+    position: "absolute",
+    top: "4%", // Leicht unter der Statusbar
+    alignSelf: "center", // Zentriert
+    backgroundColor: "rgba(0, 0, 0, 1)", // Halbtransparent dunkel
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    zIndex: 900, // Über allem
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  lobbyText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
+    letterSpacing: 1,
   },
 });
