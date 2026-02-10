@@ -125,8 +125,8 @@ export default function GameScreen() {
     setMenuTargetCardId(cardId);
     setMenuTargetSlot(card.slot ?? null);
 
-    const MENU_W = 70;
-    const MENU_H_ESTIMATE = 80; // Approx height of menu buttons
+    const MENU_W = 100;
+    const MENU_H_ESTIMATE = 100; // Approx height of menu buttons
     const inHand = game.handCards.find((c) => c.id === cardId);
 
     if (inHand) {
@@ -141,7 +141,7 @@ export default function GameScreen() {
       // We add the card height + padding to push it down
       setMenuPos({
         x: globalX + C.CARD_W / 2 - MENU_W / 2,
-        y: globalY + C.CARD_H + 5,
+        y: globalY + C.CARD_H + 10,
       });
     }
     setMenuVisible(true);

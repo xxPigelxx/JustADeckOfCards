@@ -61,7 +61,7 @@ export default function CardMenu({
         {isStack ? (
           <>
             <AppButton
-              title="Flip All"
+              title="Alle Umdrehen"
               onPress={() =>
                 handleAction(() => actions.flipCard(targetCardId, targetSlot))
               }
@@ -69,7 +69,7 @@ export default function CardMenu({
               textStyle={styles.menuButtonText}
             />
             <AppButton
-              title="Mix"
+              title="Mischen"
               onPress={() =>
                 handleAction(() =>
                   actions.shuffleStack(targetCardId, targetSlot),
@@ -79,7 +79,7 @@ export default function CardMenu({
               textStyle={styles.menuButtonText}
             />
             <AppButton
-              title="Move"
+              title="Verschieben"
               onPress={() =>
                 handleAction(() => {
                   if (targetSlot !== null) actions.moveStack(targetSlot);
@@ -89,7 +89,7 @@ export default function CardMenu({
               textStyle={styles.menuButtonText}
             />
             <AppButton
-              title="Take"
+              title="Aufnehmen"
               onPress={() => handleAction(() => actions.takeStack(targetSlot))}
               style={styles.menuButton}
               textStyle={styles.menuButtonText}
@@ -98,13 +98,13 @@ export default function CardMenu({
         ) : isHand ? (
           <>
             <AppButton
-              title="Flip All"
+              title="Alle Umdrehen"
               onPress={() => handleAction(() => actions.flipAllHand?.())}
               style={styles.menuButton}
               textStyle={styles.menuButtonText}
             />
             <AppButton
-              title="Mix"
+              title="Mischen"
               onPress={() => handleAction(() => actions.shuffleHand?.())}
               style={styles.menuButton}
               textStyle={styles.menuButtonText}
@@ -112,7 +112,7 @@ export default function CardMenu({
           </>
         ) : (
           <AppButton
-            title="Flip"
+            title="Umdrehen"
             onPress={() =>
               handleAction(() => actions.flipCard(targetCardId, targetSlot))
             }
@@ -139,14 +139,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     backgroundColor: "transparent",
     alignItems: "center",
-    width: 70,
+    width: 100,
   },
   menuButton: {
     paddingVertical: 6,
     paddingHorizontal: 8,
     borderRadius: 6,
-    minWidth: 70,
-    marginBottom: 4,
+    minWidth: 100,
+    minHeight: 35,
+    marginBottom: 10,
   },
-  menuButtonText: { fontSize: 12 },
+  menuButtonText: { marginTop: 2, fontSize: 12, alignSelf: "center" },
 });

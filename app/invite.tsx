@@ -33,7 +33,7 @@ export default function Invite() {
       <View style={styles.codeField}>
         <Text style={styles.codeText}>{code}</Text>
       </View>
-
+      <Text style={styles.text}>Spieler Anzahl: 1</Text>
       {/* Hier nutzen wir jetzt die Komponente mit etwas Abstand */}
       <ControlsHint style={{ marginTop: 20, marginBottom: 10 }} />
 
@@ -71,6 +71,13 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "center",
     marginTop: -40,
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
+    marginTop: 5,
   },
   codeField: {
     width: "70%",
