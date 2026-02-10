@@ -31,6 +31,7 @@ export default function RootLayout() {
           headerTransparent: true,
           headerShadowVisible: false,
           headerBackButtonDisplayMode: "minimal",
+          animation: "fade",
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
