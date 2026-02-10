@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     height: 45,
     borderColor: "#000",
     borderWidth: 0.5,
-    borderRadius: 8,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -121,6 +121,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffffff", // Leichtes Grau
     paddingVertical: 10, // Höhe
     paddingHorizontal: 20, // Breite
-    borderRadius: 25, // Ganz rund
+    borderRadius: 15, // Ganz rund
   },
 });

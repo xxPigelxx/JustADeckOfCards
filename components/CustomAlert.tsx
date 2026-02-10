@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 100,
     height: 50,
-    borderRadius: 25,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 0,
