@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
+    shadowColor: "transparent",
     elevation: 1,
   },
   sliderSection: {

@@ -2,6 +2,7 @@ import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
 // Importiere deine neue Komponente
 import ControlsHint from "@/components/ControlsHint";
+import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
@@ -33,10 +34,20 @@ export default function Invite() {
       <View style={styles.codeField}>
         <Text style={styles.codeText}>{code}</Text>
       </View>
-      <Text style={styles.text}>Spieler Anzahl: 1</Text>
-      {/* Hier nutzen wir jetzt die Komponente mit etwas Abstand */}
-      <ControlsHint style={{ marginTop: 20, marginBottom: 10 }} />
 
+      {/* HIER: Pill-Style für Spieler Anzahl */}
+      <View style={styles.playerBadge}>
+        <Feather
+          name="users"
+          size={24}
+          color="black"
+          style={{ marginRight: 8 }}
+        />
+        <Text style={styles.text}>Spieler Anzahl: 1</Text>
+      </View>
+
+      {/* Hier nutzen wir jetzt die Komponente mit etwas Abstand */}
+      <ControlsHint style={{ marginTop: 120 }} />
       <AppButton
         title="Spiel starten"
         onPress={() => {
@@ -72,12 +83,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: -40,
   },
+  // Style für den Text IN der Pill
   text: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
-    marginTop: 5,
+    // marginTop entfernt, damit es in der Pill mittig ist
   },
   codeField: {
     width: "70%",
@@ -96,7 +108,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   button: {
-    marginTop: 50,
+    marginTop: 30,
   },
-  // Hinweis-Styles wurden entfernt, da sie jetzt in der Komponente sind
+
+  // NEU: Style für die Pill-Box
+  playerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10, // Abstand nach oben zum Code
+
+    // Das macht es zur "Pill":
+    backgroundColor: "#ffffffff", // Leichtes Grau
+    paddingVertical: 10, // Höhe
+    paddingHorizontal: 20, // Breite
+    borderRadius: 25, // Ganz rund
+  },
 });

@@ -9,7 +9,7 @@ export default function Join() {
   const [code, setCode] = useState("");
   const router = useRouter();
 
-  const isCodeValid = code.trim().length > 0;
+  const isCodeValid = code.trim().length === 6; // Validierung: Muss 6 Zeichen haben
 
   const handleJoin = () => {
     router.push("/gameScreen");
@@ -23,7 +23,7 @@ export default function Join() {
         resizeMode="contain"
       />
 
-      <Text style={styles.title}>Einladungscode eingeben</Text>
+      <Text style={styles.title}>Einladungscode</Text>
 
       <TextInput
         style={styles.input}
@@ -32,9 +32,17 @@ export default function Join() {
         value={code}
         onChangeText={setCode}
         textAlign="center"
+        autoCapitalize="characters"
+        maxLength={6} // UX: Verhindert, dass man mehr als 6 Zeichen eingibt
       />
-      {/* 2. NEU: Hinweis-Text */}
-      <ControlsHint style={{ marginTop: 20, marginBottom: 10 }} />
+
+      {/* NEUER HINWEIS TEXT */}
+      <Text style={styles.helperText}>Bitte gib den 6-stelligen Code ein</Text>
+
+      {/* Fixer Abstand */}
+      <View style={{ height: 150 }} />
+
+      <ControlsHint style={{ marginBottom: 20 }} />
 
       <AppButton
         title="Spiel beitreten"
@@ -79,9 +87,18 @@ const styles = StyleSheet.create({
     color: "#000",
     marginTop: 10,
     paddingHorizontal: 10,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  // Style für den neuen Hilfstext
+  helperText: {
+    marginTop: 8, // Kleiner Abstand zum Input
+    fontSize: 12, // Kleiner als normaler Text
+    color: "#666", // Grau, damit es dezent ist
+    textAlign: "center",
   },
   button: {
-    marginTop: 30,
+    marginTop: 0,
   },
   buttonDisabled: {
     opacity: 0.5,

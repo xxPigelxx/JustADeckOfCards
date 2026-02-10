@@ -213,8 +213,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 3, // Thick white border
-    shadowColor: "transparent", // Kein Schatten
+    padding: 3,
+    shadowColor: "transparent",
     elevation: 2,
     justifyContent: "center",
     alignItems: "center",
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     borderRadius: 4,
-    overflow: "hidden", // Clips the pattern
+    overflow: "hidden",
     justifyContent: "space-between",
   },
   patternWrapper: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     opacity: 0.4,
   },
-  corner: { alignItems: "center", width: 16, marginTop: 2, marginLeft: 2 }, // Slightly wider for JK
+  corner: { alignItems: "center", width: 16, marginTop: 2, marginLeft: 2 },
   bottomRight: {
     alignSelf: "flex-end",
     transform: [{ rotate: "180deg" }],
