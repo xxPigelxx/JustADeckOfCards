@@ -12,7 +12,12 @@ export default function Join() {
   const isCodeValid = code.trim().length === 6; // Validierung: Muss 6 Zeichen haben
 
   const handleJoin = () => {
-    router.push("/gameScreen");
+    router.push({
+      pathname: "/gameScreen",
+      params: {
+        lobbyCode: code,
+      },
+    });
   };
 
   return (
