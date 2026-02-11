@@ -305,20 +305,20 @@ const styles = StyleSheet.create({
 
   // --- NEUER STYLE FÜR DIE PILLE ---
   lobbyPill: {
-    position: "absolute",
-    top: "4%", // Leicht unter der Statusbar
-    alignSelf: "center", // Zentriert
-    backgroundColor: "rgba(0, 0, 0, 1)", // Halbtransparent dunkel
+    position: "absolute", // Take it out of the layout flow
+    top: C.SAFE_TOP - 15, // Position it just below the status bar area
+    alignSelf: "center",
+    backgroundColor: "black", // slightly more transparent looks better as overlay
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    zIndex: 900, // Über allem
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    zIndex: 900,
+    elevation: 900, // Android shadow/layering
   },
+
   lobbyText: {
     color: "white",
     fontWeight: "bold",

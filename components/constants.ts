@@ -6,7 +6,8 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 export const ANDROID_BAR =
   Platform.OS === "android" ? StatusBar.currentHeight || 24 : 0;
 export const IOS_BAR = Platform.OS === "ios" ? 47 : 0;
-export const SAFE_TOP = ANDROID_BAR + IOS_BAR;
+export const WEB_BAR = Platform.OS === "web" ? 20 : 0; // Add padding for web header/navigation
+export const SAFE_TOP = ANDROID_BAR + IOS_BAR + WEB_BAR;
 
 // --- CONFIGURATION ---
 export const CARD_W = 60;
