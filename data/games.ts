@@ -228,7 +228,143 @@ Spielende:
 - Wer keine Karten mehr hat, gewinnt
 `.trim();
 
-// data/games.ts
+const rommeRules = `
+Ziel:
+Alle Karten in Sätzen (drei oder vier gleiche Werte) oder Folgen (gleiche Farbe, aufsteigend) auslegen.
+
+Setup:
+- 2–6 Spieler
+- 2x 52 Karten + 6 Joker (110 Karten)
+- Jeder erhält 13 Karten (Startspieler 14)
+
+Ablauf:
+- Startspieler legt eine Karte ab
+- Nächster Spieler zieht eine Karte (vom Stapel oder Ablagestapel)
+- Erstmeldung muss mind. 40 Punkte wert sein
+- Karten können an eigene oder fremde Meldungen angelegt werden
+- Joker ersetzen jede beliebige Karte
+
+Spielende:
+- Wer alle Karten ausgelegt und die letzte auf den Ablagestapel gelegt hat
+- Punkte der Gegner werden als Minuspunkte notiert
+`.trim();
+
+const pokerRules = `
+Ziel:
+Das beste Blatt aus 5 Karten bilden oder alle anderen zum Aufgeben (Folden) bringen.
+
+Setup:
+- 2–10 Spieler
+- 52-Karten-Deck
+- Chips für Einsätze
+
+Ablauf (Texas Hold'em):
+- Jeder erhält 2 verdeckte Karten (Hole Cards)
+- 1. Setzrunde
+- Flop: 3 Gemeinschaftskarten offen
+- 2. Setzrunde
+- Turn: 4. Gemeinschaftskarte
+- 3. Setzrunde
+- River: 5. Gemeinschaftskarte
+- Letzte Setzrunde
+
+Showdown:
+- Wer noch im Spiel ist, zeigt die Karten
+- Bestes Blatt aus eigenen und Gemeinschaftskarten gewinnt den Pot
+`.trim();
+
+const blackjackRules = `
+Ziel:
+Mehr Punkte als der Dealer haben, ohne 21 zu überschreiten.
+
+Setup:
+- 1–7 Spieler gegen den Dealer
+- 52-Karten-Deck (meist mehrere Decks)
+- Alle Bildkarten = 10, Ass = 1 oder 11
+
+Ablauf:
+- Spieler und Dealer erhalten 2 Karten (Dealer meist eine verdeckt)
+- Spieler entscheidet: Karte ziehen (Hit) oder stehenbleiben (Stand)
+- Wer über 21 kommt (Bust), verliert sofort
+
+Dealer-Regel:
+- Muss bis 16 ziehen, muss bei 17 stehenbleiben
+
+Gewinn:
+- Blackjack (Ass + 10er Karte) zahlt meist 3:2
+- Einfacher Sieg zahlt 1:1
+`.trim();
+
+const jassRules = `
+Ziel:
+Gemeinsam mit dem Partner möglichst viele Punkte durch Stiche machen (Schieber).
+
+Setup:
+- 4 Spieler (2 Teams)
+- 36-Karten-Deck (Deutschschweizer oder Französische Farben)
+- Jeder erhält 9 Karten
+
+Ablauf:
+- Trumpf wird bestimmt (oder geschoben zum Partner)
+- Es herrscht Farbzwang (außer Trumpf)
+- Stiche zählen Punkte (Ass=11, König=4, etc.)
+- "Nell" (Trumpf-9) = 14 Punkte, "Bauer" (Trumpf-J) = 20 Punkte
+
+Weis:
+- Zusätzliche Punkte für Reihen (3+ aufeinanderfolgend) oder 4 Gleiche
+
+Spielende:
+- Gespielt wird meist auf eine feste Punktzahl (z.B. 1000 oder 2500)
+`.trim();
+
+const skatRules = `
+Ziel:
+Durch Bieten das Spielrecht erhalten und dann 61 Augen (Punkte) im Stichspiel erreichen.
+
+Setup:
+- 3 Spieler
+- 32-Karten-Deck
+- Jeder erhält 10 Karten, 2 liegen im "Skat"
+
+Ablauf:
+- Reizen: Wer das höchste Spiel bietet, wird Alleinspieler
+- Alleinspieler nimmt (optional) den Skat auf und drückt 2 Karten
+- Alleinspieler bestimmt Spielart (Farbspiel, Grand, Null)
+- Die anderen zwei spielen als Team gegen ihn
+
+Wertung:
+- Farbstiche zählen Augen (Ass=11, 10=10, K=4, D=3, B=2)
+- Nullspiel: Alleinspieler darf keinen Stich machen
+
+Spielende:
+- Nach 10 Stichen wird gezählt
+- Überreizt der Spieler, verliert er doppelt
+`.trim();
+
+const sechsUndSechzigRules = `
+Ziel:
+66 Augen durch Stiche und Ansagen erreichen (ähnlich Schnapsen, aber mit leichten Unterschieden).
+
+Setup:
+- 2 Spieler
+- 24-Karten-Deck (Ass, 10, K, D, B, 9)
+- Jeder erhält 6 Karten
+
+Ablauf:
+- Farbzwang erst, wenn der Talon aufgebraucht/gesperrt ist
+- Stichwerte: Ass=11, 10=10, K=4, D=3, B=2, 9=0
+- Hochzeiten (K+D) zählen 20 (in Trumpf 40)
+
+Unterschied zu Schnapsen:
+- Wird oft mit 24 Karten (inkl. Neunern) gespielt
+- Start mit 6 Handkarten (statt 5)
+- "Gehen" (Schließen) ist erlaubt
+
+Spielende:
+- Wer zuerst 66 Augen meldet, gewinnt den Deal
+- Siegpunkte je nach Augen des Verlierers (1 bis 3)
+`.trim();
+
 export type Game = {
   id: string;
   name: string;
@@ -236,63 +372,105 @@ export type Game = {
   rules: string;
 };
 
+// data/games.ts
+// ... (Die Regel-Texte bleiben oben gleich) ...
+
 export const GAMES: Game[] = [
+  // --- KLASSIKER & EINSTEIGERSPIELE ---
   {
     id: "maumau",
     name: "Mau Mau",
-    shortDescription: "Ablage-Kartenspiel für 3–99 Spieler.",
+    shortDescription: "Der Klassiker: Werde deine Karten als Erster los.",
     rules: mauMauRules,
   },
   {
     id: "schwarzerpeter",
     name: "Schwarzer Peter",
-    shortDescription:
-      "Paarbildungsspiel – vermeide die letzte unpaarbare Karte.",
+    shortDescription: "Vermeide die letzte unpaarbare Karte.",
     rules: schwarzerPeterRules,
-  },
-  {
-    id: "schwimmen",
-    name: "Schwimmen",
-    shortDescription: "Sammelspiel um Punktewerte bis 31 in einer Farbe.",
-    rules: schwimmenRules,
   },
   {
     id: "quartett",
     name: "Quartett",
-    shortDescription: "Sammle vier gleiche Werte zu einem Quartett.",
+    shortDescription: "Sammle vier gleiche Werte zu einem Satz.",
     rules: quartettRules,
   },
   {
-    id: "praesident",
-    name: "Praesident",
-    shortDescription:
-      "Ablagespiel mit sozialen Rollen wie Präsident und Bettler.",
-    rules: praesidentRules,
+    id: "romme",
+    name: "Romme",
+    shortDescription: "Lege Folgen und Sätze aus.",
+    rules: rommeRules,
   },
   {
-    id: "siebenhalb",
-    name: "Sieben und Halb",
-    shortDescription: "Zahlen- und Risikospiel bis 7,5 Punkte.",
-    rules: siebenUndHalbRules,
+    id: "schwimmen",
+    name: "Schwimmen",
+    shortDescription: "Tausche dich zu 31 Punkten.",
+    rules: schwimmenRules,
   },
+
+  // --- STICHSPIELE & STRATEGIE ---
   {
-    id: "schnapsen",
-    name: "Schnapsen",
-    shortDescription: "Stichspiel für zwei Spieler mit 66 Punkten als Ziel.",
-    rules: schnapsenRules,
+    id: "skat",
+    name: "Skat",
+    shortDescription: "Das deutsche Nationalspiel: Alleine gegen zwei.",
+    rules: skatRules,
   },
   {
     id: "durak",
     name: "Durak",
-    shortDescription:
-      "Russisches Ablege- und Stichspiel – vermeide den letzten Platz.",
+    shortDescription: "Angriff und Verteidigung – werde nicht der Dumme.",
     rules: durakRules,
   },
   {
+    id: "schnapsen",
+    name: "Schnapsen",
+    shortDescription: "Schnelles Stichspiel für zwei Personen.",
+    rules: schnapsenRules,
+  },
+  {
+    id: "jass",
+    name: "Jass",
+    shortDescription: "Schweizer Stichspiel im Team.",
+    rules: jassRules,
+  },
+  {
+    id: "sechsundsechzig",
+    name: "Sechsundsechzig",
+    shortDescription: "Ähnlich wie Schnapsen, oft mit 24 Karten.",
+    rules: sechsUndSechzigRules,
+  },
+
+  // --- PARTY & BLUFF ---
+  {
+    id: "praesident",
+    name: "Präsident", // (Ä/Ae angepasst für Anzeige)
+    shortDescription: "Vom Bettler zum Boss – Rangordnung durch Kartenspiel.",
+    rules: praesidentRules,
+  },
+  {
     id: "luegenspiel",
-    name: "Luegen",
-    shortDescription: "Bluff- und Ablegespiel mit Aufdecken.",
+    name: "Lügen / Cheat",
+    shortDescription: "Bluffe dich zum Sieg.",
     rules: liarGameRules,
   },
-  // weitere Spiele …
+
+  // --- CASINO & GLÜCK ---
+  {
+    id: "poker",
+    name: "Poker (Hold'em)",
+    shortDescription: "Das ultimative Spiel um Einsätze und Nerven.",
+    rules: pokerRules,
+  },
+  {
+    id: "blackjack",
+    name: "Blackjack",
+    shortDescription: "Schlage die Bank bis zur 21.",
+    rules: blackjackRules,
+  },
+  {
+    id: "siebenhalb",
+    name: "Sieben und Halb",
+    shortDescription: "Die klassische Variante von Blackjack.",
+    rules: siebenUndHalbRules,
+  },
 ];
