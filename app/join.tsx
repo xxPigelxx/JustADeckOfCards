@@ -30,16 +30,17 @@ export default function Join() {
         placeholder="Code eingeben"
         placeholderTextColor="#888"
         value={code}
-        onChangeText={setCode}
+        onChangeText={(text) => {
+          const cleanText = text.replace(/\s/g, "").toUpperCase();
+          setCode(cleanText);
+        }}
         textAlign="center"
         autoCapitalize="characters"
-        maxLength={6} // UX: Verhindert, dass man mehr als 6 Zeichen eingibt
+        maxLength={6}
       />
 
-      {/* NEUER HINWEIS TEXT */}
       <Text style={styles.helperText}>Bitte gib den 6-stelligen Code ein</Text>
 
-      {/* Fixer Abstand */}
       <View style={{ height: 150 }} />
 
       <ControlsHint style={{ marginBottom: 20 }} />

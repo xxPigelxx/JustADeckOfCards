@@ -46,7 +46,7 @@ export default function GameScreen() {
   const initialData = useMemo(() => {
     const deckType = (params.deckType as string) || "52 Karten";
     const deckCount = Number(params.deckCount) || 1;
-    const playerCount = Number(params.playerCount) || 4;
+    const playerCount = Number(params.playerCount) || 1;
     const startCards = Number(params.startCards) || 0;
 
     // Add playerCount to the returned object
@@ -177,9 +177,19 @@ export default function GameScreen() {
 
       {/* --- NEU: LOBBY CODE PILL --- */}
       <View style={styles.lobbyPill}>
-        <Feather name="hash" size={14} color="white" />
-        <Text style={styles.lobbyText}>{lobbyCode} </Text>
-        <Feather name="users" size={18} color="white" />
+        <Feather
+          name="hash"
+          size={18}
+          style={{ marginRight: -5 }}
+          color="white"
+        />
+        <Text style={styles.lobbyText}>: {lobbyCode} </Text>
+        <Feather
+          name="users"
+          size={18}
+          style={{ marginRight: -3 }}
+          color="white"
+        />
         <Text style={styles.lobbyText}>: {playerCount}</Text>
       </View>
       {/* ----------------------------- */}
