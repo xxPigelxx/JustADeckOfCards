@@ -108,7 +108,6 @@ export default function BoardArea({
     group.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)),
   );
 
-  // NEU: Diese Funktion markiert den Slot sofort als "berührt"
   const markAsTouched = (id: string) => {
     const card = boardCards.find((c) => c.id === id);
     if (card && card.slot !== undefined) {
@@ -160,7 +159,6 @@ export default function BoardArea({
                 onDrop={onDrop}
                 onDrag={onDrag}
                 onDragEnd={onDragEnd}
-                // HIER: Sowohl bei Tap als auch bei Drag wird markiert
                 onTap={() => {
                   markAsTouched(leader.id);
                   onTap(leader.id, pos.globalX, pos.globalY);
@@ -198,7 +196,6 @@ export default function BoardArea({
                   onDrop={onDrop}
                   onDrag={onDrag}
                   onDragEnd={onDragEnd}
-                  // HIER: Sowohl bei Tap als auch bei Drag wird markiert
                   onTap={() => {
                     markAsTouched(card.id);
                     onTap(card.id, pos.globalX, pos.globalY);
@@ -324,7 +321,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // Marker Style
   chipMarker: {
     position: "absolute",
     width: 40,

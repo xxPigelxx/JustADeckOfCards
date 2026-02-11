@@ -22,9 +22,6 @@ export default function ColorPickerModal({
   const [green, setGreen] = useState(0);
   const [blue, setBlue] = useState(0);
 
-  // Wenn Modal öffnet, Slider auf aktuelle Farbe setzen
-  // Nur beim Öffnen (visible wechselt von false auf true) die Werte setzen.
-  // Wir ignorieren Änderungen an initialColor, während das Modal offen ist.
   useEffect(() => {
     if (visible) {
       const rgb = hexToRgb(initialColor);
@@ -32,23 +29,11 @@ export default function ColorPickerModal({
       setGreen(rgb.g);
       setBlue(rgb.b);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]); // initialColor aus Dependency Array entfernt!
-
-  // Wenn Slider bewegt werden, Farbe update an Parent senden (optional,
-  // oder erst beim Speichern. Hier machen wir es 'live' für Vorschau,
-  // oder wir haben lokalen State und 'Übernehmen' Button).
-  // Im originalen Code hast du 'Übernehmen' gedrückt um zu schließen,
-  // aber die Farbe wurde live im 'useEffect' des Parents gesetzt.
-  // Sauberer: Wir nutzen einen lokalen State für Vorschau im Modal,
-  // und geben die Farbe erst bei 'Übernehmen' zurück?
-  // -> Um nah am Original zu bleiben: Wir updaten live, damit man es sieht?
-  // BESSER: Wir updaten live, damit der User Feedback hat.
+  }, [visible]);
 
   useEffect(() => {
     if (visible) {
       const newHex = rgbToHex(red, green, blue);
-      // Nur senden, wenn es sich geändert hat (vermeidet Loops)
       onSelectColor(newHex);
     }
   }, [red, green, blue]);
@@ -90,7 +75,6 @@ export default function ColorPickerModal({
   );
 }
 
-// Kleine Hilfskomponente für die Slider-Zeilen (DRY!)
 const SliderRow = ({ label, val, setVal, color }: any) => (
   <View style={styles.sliderRow}>
     <Text style={[styles.sliderLabel, { color }]}>{label}</Text>

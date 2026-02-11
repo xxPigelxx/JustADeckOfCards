@@ -9,7 +9,7 @@ export default function Join() {
   const [code, setCode] = useState("");
   const router = useRouter();
 
-  const isCodeValid = code.trim().length === 6; // Validierung: Muss 6 Zeichen haben
+  const isCodeValid = code.trim().length === 6;
 
   const handleJoin = () => {
     router.push({
@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  // Style für den neuen Hilfstext
+
   helperText: {
-    marginTop: 8, // Kleiner Abstand zum Input
-    fontSize: 12, // Kleiner als normaler Text
-    color: "#666", // Grau, damit es dezent ist
+    marginTop: 8,
+    fontSize: 12,
+    color: "#666",
     textAlign: "center",
   },
   button: {

@@ -6,7 +6,6 @@ export const DEFAULT_PATTERN = "none";
 const KEY_COLOR = "card_back_color";
 const KEY_PATTERN = "card_back_pattern";
 
-// Farbe laden
 export const loadCardBack = async () => {
   try {
     const color = await AsyncStorage.getItem(KEY_COLOR);
@@ -16,7 +15,6 @@ export const loadCardBack = async () => {
   }
 };
 
-// NEU: Muster laden
 export const loadCardPattern = async () => {
   try {
     const pattern = await AsyncStorage.getItem(KEY_PATTERN);
@@ -26,7 +24,6 @@ export const loadCardPattern = async () => {
   }
 };
 
-// NEU: Beides zusammen speichern (ersetzt saveCardBack im DesignScreen)
 export const saveCardDesign = async (color: string, pattern: string) => {
   try {
     await AsyncStorage.setItem(KEY_COLOR, color);
@@ -35,8 +32,6 @@ export const saveCardDesign = async (color: string, pattern: string) => {
     console.error("Fehler beim Speichern des Designs", e);
   }
 };
-
-// Legacy Support (falls noch woanders nur Farbe gespeichert wird)
 export const saveCardBack = async (color: string) => {
   try {
     await AsyncStorage.setItem(KEY_COLOR, color);

@@ -43,12 +43,9 @@ export default function CardMenu({
   };
 
   return (
-    // REPLACED MODAL WITH ABSOLUTE VIEW
     <View style={styles.fullScreenOverlay}>
-      {/* Invisible backdrop to close menu when clicking outside */}
       <Pressable style={styles.backdrop} onPress={onClose} />
 
-      {/* The Menu itself */}
       <View
         style={[
           styles.menuContainer,

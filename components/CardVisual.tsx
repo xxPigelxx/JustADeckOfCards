@@ -65,18 +65,16 @@ export default function CardVisual({
   backColor = "#3b82f6",
   backPattern = "none",
 }: CardVisualProps) {
-  // 1. Check for Joker
   const isJoker = rank === "JK";
 
   const isRed = suit === "♥" || suit === "♦";
-  // Joker color (Purple), otherwise Red or Black
+
   const textColor = isJoker ? "#581c87" : isRed ? "red" : "black";
 
   const patternIcon = getPatternIcon(backPattern);
 
   return (
     <View style={styles.cardOuter}>
-      {/* Inner Container with overflow hidden for the pattern */}
       <View
         style={[
           styles.innerContainer,
@@ -260,7 +258,6 @@ const styles = StyleSheet.create({
   },
   bigSuit: { fontSize: 24, opacity: 0.1 },
 
-  // Joker Container
   jokerContainer: {
     flex: 1,
     width: "100%",

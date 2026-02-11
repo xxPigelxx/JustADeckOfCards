@@ -22,7 +22,7 @@ export default function CustomAlert({
       transparent={true}
       visible={visible}
       animationType="fade"
-      statusBarTranslucent={true} // 1. WICHTIG: Damit es hinter die Statusbar geht
+      statusBarTranslucent={true}
       onRequestClose={onCancel}
     >
       <Pressable style={styles.overlay} onPress={onCancel}>
@@ -60,13 +60,11 @@ export default function CustomAlert({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    // 2. WICHTIG: Absolute Positionierung für Fullscreen
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    // Hintergrund & Ausrichtung
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",

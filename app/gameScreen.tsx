@@ -282,7 +282,6 @@ export default function GameScreen() {
         cardBackColor={cardBackColor}
         cardBackPattern={cardBackPattern}
         onClose={() => setHandGridVisible(false)}
-        // HIER SIND DIE ECHTEN FUNKTIONEN:
         onDragStart={(id) => game.setDraggedId(id)}
         onDrag={game.handleDrag}
         onDrop={game.handleDrop}
@@ -313,12 +312,11 @@ const styles = StyleSheet.create({
     zIndex: 200,
   },
 
-  // --- NEUER STYLE FÜR DIE PILLE ---
   lobbyPill: {
-    position: "absolute", // Take it out of the layout flow
-    top: C.SAFE_TOP - 15, // Position it just below the status bar area
+    position: "absolute",
+    top: C.SAFE_TOP - 15,
     alignSelf: "center",
-    backgroundColor: "black", // slightly more transparent looks better as overlay
+    backgroundColor: "black",
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -326,7 +324,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     zIndex: 900,
-    elevation: 900, // Android shadow/layering
+    elevation: 900,
   },
 
   lobbyText: {

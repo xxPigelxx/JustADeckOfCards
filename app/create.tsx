@@ -60,7 +60,7 @@ export default function Create() {
     <Pressable
       onPress={onPress}
       hitSlop={15}
-      style={{ marginLeft: 8, opacity: 0.6 }} // Margin leicht erhöht
+      style={{ marginLeft: 8, opacity: 0.6 }}
     >
       <Ionicons name="information-circle" size={24} color="#000" />
     </Pressable>
@@ -77,9 +77,6 @@ export default function Create() {
             isTablet && { width: 600, alignSelf: "center" },
           ]}
         >
-          {/* 
-              NEU: Überschrift jetzt als Row mit Info-Icon 
-          */}
           <View style={styles.mainHeaderRow}>
             <Text style={styles.mainHeading}>Spiel Konfiguration</Text>
             <InfoIcon
@@ -222,7 +219,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  // NEU: Container für Header + Icon
   mainHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -232,7 +228,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: "#333",
-    // marginBottom entfernt, da jetzt im Row-Container geregelt
   },
   toggleGroup: {
     flexDirection: "row",

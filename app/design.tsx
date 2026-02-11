@@ -74,16 +74,14 @@ export default function DesignScreen() {
   useEffect(() => {
     const loadData = async () => {
       const color = await loadCardBack();
-      const pattern = await loadCardPattern(); // Pattern laden
+      const pattern = await loadCardPattern();
       setSelectedColor(color);
-      setSelectedPattern(pattern); // Pattern setzen
+      setSelectedPattern(pattern);
     };
     loadData();
   }, []);
 
-  // --- HIER WURDE GEÄNDERT: SPEICHERN ---
   const handleSave = async () => {
-    // Speichert jetzt beides gleichzeitig
     await saveCardDesign(selectedColor, selectedPattern);
 
     if (router.canGoBack()) router.back();
@@ -287,7 +285,6 @@ const styles = StyleSheet.create({
   header: { alignItems: "center", paddingTop: 20, marginBottom: 10, zIndex: 1 },
   title: { fontSize: 32, fontFamily: "MochiBoom", color: "#000" },
 
-  // Tabs
   tabContainer: {
     flexDirection: "row",
     backgroundColor: "rgba(255,255,255,0.5)",

@@ -35,13 +35,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 10, // Etwas weniger Padding damit es bei kleinen Screens passt
+    paddingHorizontal: 10,
     opacity: 0.8,
   },
   hintText: {
-    fontSize: 14, // Kleine Schriftgröße passt gut unter den Button
+    fontSize: 14,
     color: "#666",
     textAlign: "center",
-    lineHeight: 20, // Genug Abstand für die Icons im Text
+    lineHeight: 20,
   },
 });

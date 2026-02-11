@@ -30,12 +30,9 @@ export default function CustomSlider({
   const [sliderWidth, setSliderWidth] = useState(0);
   const widthRef = useRef(0);
 
-  // FIX: Wir speichern value und callback in Refs, damit der PanResponder
-  // immer die aktuellen Werte sieht (verhindert Endlosschleifen durch Stale Closures)
   const valueRef = useRef(value);
   const onValueChangeRef = useRef(onValueChange);
 
-  // Bei jedem Render Refs aktualisieren
   valueRef.current = value;
   onValueChangeRef.current = onValueChange;
 
@@ -63,7 +60,6 @@ export default function CustomSlider({
     extrapolate: "clamp",
   });
 
-  // Synchronisiere Pan-Position, wenn Value sich von außen ändert
   useEffect(() => {
     if (!isDragging.current && sliderWidth > 0) {
       const newPos = getPositionFromValue(value, sliderWidth);
@@ -90,7 +86,6 @@ export default function CustomSlider({
 
         const currentPos = startPos.current + gesture.dx;
 
-        // Clamp Position für visuelles Feedback
         if (currentPos >= 0 && currentPos <= currentWidth) {
           pan.setValue(gesture.dx);
         } else {
@@ -102,7 +97,6 @@ export default function CustomSlider({
         const rawValue = (clampedPos / currentWidth) * range + minimumValue;
         const steppedValue = Math.round(rawValue / step) * step;
 
-        // FIX: Nutze Refs für Vergleich und Callback
         if (steppedValue !== valueRef.current) {
           onValueChangeRef.current(steppedValue);
         }
@@ -134,7 +128,6 @@ export default function CustomSlider({
           bounciness: 0,
         }).start();
 
-        // FIX: Auch hier Ref nutzen
         if (clampedValue !== valueRef.current) {
           onValueChangeRef.current(clampedValue);
         }
@@ -142,7 +135,6 @@ export default function CustomSlider({
     }),
   ).current;
 
-  // Render Helpers
   const numbers = showNumbers
     ? Array.from({ length: range + 1 }, (_, i) => minimumValue + i)
     : [];

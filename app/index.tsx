@@ -2,24 +2,16 @@ import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
 import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
-import { useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context"; // Empfohlen für Layouts
-
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const { width, height } = useWindowDimensions(); // Holt aktuelle Screen-Maße
+  const { width, height } = useWindowDimensions();
 
-  // Berechne dynamische Logo-Größe:
-  // Auf Tablets größer, auf Handys kleiner, aber nie riesig.
-  // Z.B. 80% der Breite, aber maximal 400px.
   const logoSize = Math.min(width * 0.8, 400);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <BurgerMenu dontShow="home" />
-
-      {/* Oberer Bereich für Logo (nimmt ca. 50% des Platzes ein) */}
       <View style={styles.logoContainer}>
         <ImageBackground
           source={require("../assets/images/logo.png")}
@@ -31,12 +23,10 @@ export default function Index() {
           }}
           contentFit="contain"
         >
-          {/* Text relativ zum Bild positionieren, falls er ÜBER dem Bild sein soll */}
           <Text style={styles.logoText}>Just a Deck of Cards</Text>
         </ImageBackground>
       </View>
 
-      {/* Unterer Bereich für Buttons (nimmt den Rest ein) */}
       <View style={styles.buttonContainer}>
         <AppButton
           title="Spiel erstellen"
@@ -54,29 +44,26 @@ export default function Index() {
 const styles = StyleSheet.create({
   logoContainer: {
     marginTop: 40,
-    flex: 1.2, // Logo bekommt etwas mehr Platz als die Buttons (Verhältnis 1.2 zu 1)
-    justifyContent: "center", // Vertikal zentriert
-    alignItems: "center", // Horizontal zentriert
-    // paddingTop entfernen wir, da 'justifyContent: center' das übernimmt
+    flex: 1.2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonContainer: {
-    flex: 1, // Buttons nehmen den unteren Bereich ein
-    justifyContent: "flex-start", // Starten oben in ihrem Bereich
+    flex: 1,
+    justifyContent: "flex-start",
     alignItems: "center",
-    rowGap: 30, // Abstand zwischen Buttons
-    paddingTop: 20, // Kleiner Abstand zum Logo-Bereich
+    rowGap: 30,
+    paddingTop: 20,
   },
   logoText: {
     fontSize: 32,
     fontFamily: "MochiBoom",
     color: "#000000ff",
-    marginBottom: 20, // Abstand zum unteren Rand des Bildes
-    // Positionierung relativ zum Logo-Bild anpassen
-    // Wenn es drüber schweben soll, ist position: 'absolute' oft sicherer
-    // als negative Margins, die oft Layouts verschieben.
+    marginBottom: 20,
+
     position: "absolute",
     top: -50,
-    width: "150%", // Breiter als das Bild erlauben, falls Text lang ist
+    width: "150%",
     textAlign: "center",
   },
   circleText: {

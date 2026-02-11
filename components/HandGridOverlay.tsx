@@ -136,14 +136,12 @@ export default function HandGridOverlay({
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           numColumns={NUM_COLUMNS}
-          // --- Performance Props ---
           initialNumToRender={12}
           maxToRenderPerBatch={8}
           windowSize={5}
           removeClippedSubviews={true}
-          // Helps FlatList calculate layout without rendering
           getItemLayout={(data, index) => ({
-            length: CARD_H + 10, // Height + marginBottom
+            length: CARD_H + 10,
             offset: (CARD_H + 10) * Math.floor(index / NUM_COLUMNS),
             index,
           })}
@@ -208,12 +206,12 @@ const styles = StyleSheet.create({
   closeButton: { padding: 5 },
   gridContent: {
     paddingTop: 10,
-    paddingBottom: 100, // Safe area for scrolling
+    paddingBottom: 100,
   },
   cardWrapper: {
     width: CARD_W,
     height: CARD_H,
-    marginBottom: 10, // vertical gap between rows
+    marginBottom: 10,
     zIndex: 1,
     alignItems: "center",
     justifyContent: "center",

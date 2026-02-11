@@ -10,10 +10,8 @@ export default function Invite() {
   const [code, setCode] = useState("");
   const router = useRouter();
 
-  // Params holen (hier drin stecken deckType, deckCount, playerCount, etc.)
   const params = useLocalSearchParams();
 
-  // Spieleranzahl extrahieren (Standard: 4, falls undefined)
   const playerCount = params.playerCount || 4;
 
   const generateCode = () => {
@@ -46,7 +44,6 @@ export default function Invite() {
           color="black"
           style={{ marginRight: 8 }}
         />
-        {/* HIER: Variable statt Hardcode nutzen */}
         <Text style={styles.text}>Spieler Anzahl: {playerCount}</Text>
       </View>
 

@@ -24,10 +24,7 @@ export default function InfoAlert({
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable
-          style={styles.alertBox}
-          onPress={(e) => e.stopPropagation()} // Klick auf Box schließt NICHT
-        >
+        <Pressable style={styles.alertBox} onPress={(e) => e.stopPropagation()}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
 
@@ -35,7 +32,7 @@ export default function InfoAlert({
             title="OK"
             onPress={onClose}
             style={styles.button}
-            textStyle={{ fontSize: 16 }} // Kleinerer Text im Button
+            textStyle={{ fontSize: 16 }}
           />
         </Pressable>
       </Pressable>
@@ -46,18 +43,17 @@ export default function InfoAlert({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Leicht abgedunkelt
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
   alertBox: {
     width: "80%",
     maxWidth: 320,
-    backgroundColor: "#fff", // Light Mode
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 24,
     alignItems: "center",
-    // Schatten für Tiefe
     elevation: 5,
     shadowColor: "#000",
     shadowOpacity: 0.15,
@@ -70,7 +66,6 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 12,
     textAlign: "center",
-    // fontFamily: "MochiBoom", // Falls du den Font überall willst, einkommentieren
   },
   message: {
     fontSize: 15,
@@ -80,7 +75,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   button: {
-    minWidth: 100, // Nicht zu riesig
-    height: 44, // Kompakter
+    minWidth: 100,
+    height: 44,
   },
 });

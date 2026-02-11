@@ -4,28 +4,16 @@ import { Pressable, StyleSheet, ViewStyle } from "react-native";
 
 interface Props {
   onPress: () => void;
-  style?: ViewStyle; // Allows the parent to position it (absolute, bottom, etc.)
+  style?: ViewStyle;
 }
 
 export default function HandGridToggleButton({ onPress, style }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      // Pass the 'pressed' state to the style
-      style={({ pressed }) => [
-        styles.button,
-        style, // Apply external positioning (bottom/left)
-        pressed && styles.pressed, // Apply yellow background when pressed
-      ]}
+      style={({ pressed }) => [styles.button, style, pressed && styles.pressed]}
     >
-      {({ pressed }) => (
-        <Ionicons
-          name="chevron-up"
-          size={24}
-          // Turn icon black on yellow background, white on black background
-          color="white"
-        />
-      )}
+      {({ pressed }) => <Ionicons name="chevron-up" size={24} color="white" />}
     </Pressable>
   );
 }
@@ -39,10 +27,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 6,
-    // iOS Shadow
     shadowColor: "transparent",
   },
   pressed: {
-    backgroundColor: "#f1ce5bff", // Yellow/Gold
+    backgroundColor: "#f1ce5bff",
   },
 });

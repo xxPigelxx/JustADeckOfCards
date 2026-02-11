@@ -19,7 +19,7 @@ export const ALL_RANKS = [
 ];
 
 export const DECK_TYPES = {
-  "54 Karten": { minRankIndex: 0, jokers: 2 }, // <--- Hier: 2 Joker
+  "54 Karten": { minRankIndex: 0, jokers: 2 },
   "52 Karten": { minRankIndex: 0, jokers: 0 },
   "36 Karten": { minRankIndex: 4, jokers: 0 },
   "32 Karten": { minRankIndex: 5, jokers: 0 },
@@ -43,7 +43,6 @@ export const generateGameData = (
 
   // Schleife über Anzahl der Decks (falls man mit 2 Decks spielt)
   for (let d = 0; d < deckCount; d++) {
-    // --- TEIL A: Die 52 Standard-Karten ---
     SUITS.forEach((suit) => {
       activeRanks.forEach((rank) => {
         allCards.push({
@@ -57,13 +56,11 @@ export const generateGameData = (
       });
     });
 
-    // --- TEIL B: Die Joker (werden manuell angehängt) ---
-    // Sie nutzen NICHT das ALL_RANKS Array, sondern bekommen hardcodierte Werte.
     for (let j = 0; j < config.jokers; j++) {
       allCards.push({
         id: `d${d}-joker-${j}-${idCounter++}`,
-        rank: "JK", // Spezieller Rank für Visualisierung
-        suit: "JOKER", // Spezieller Suit (statt Herz/Pik)
+        rank: "JK",
+        suit: "JOKER",
         isFaceUp: false,
         slot: 0,
         zIndex: 0,
@@ -71,15 +68,11 @@ export const generateGameData = (
     }
   }
 
-  // 2. Mischen (Fisher-Yates Shuffle)
+  // 2. Mischen
   for (let i = allCards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
   }
-
-  // ... (Restlicher Code fürs Verteilen bleibt gleich wie vorher)
-
-  // (Nur zur Sicherheit hier kurz angerissen für den Kontext)
   const mainDeckSlot = COLS * 1 + Math.floor(COLS / 2);
   const rowStart = COLS * 3;
   const playerSlots = Array.from(

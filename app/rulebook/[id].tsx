@@ -36,10 +36,10 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     paddingTop: 100,
-    marginBottom: 20, // Reduced slightly so fade starts closer to text
+    marginBottom: 20,
     paddingHorizontal: 20,
-    zIndex: 10, // Ensure header is above scroll content
-    backgroundColor: "#F2E8DF", // Solid background for header
+    zIndex: 10,
+    backgroundColor: "#F2E8DF",
   },
   title: {
     fontSize: 32,
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingHorizontal: 24,
-    paddingTop: 20, // Add padding to top of scroll content so it starts under the fade
+    paddingTop: 20,
     paddingBottom: 80,
   },
   rules: {
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 40, // Adjusted height for a subtle fade
+    height: 40,
     zIndex: 5,
   },
 });
