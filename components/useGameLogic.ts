@@ -1,10 +1,5 @@
 import { applyAction } from "@/shared/game/rules";
-import {
-  CardData,
-  GameAction,
-  GameState,
-  PlayerId,
-} from "@/shared/game/types";
+import { CardData, GameAction, GameState, PlayerId } from "@/shared/game/types";
 import {
   boardToSlot,
   getHandIndexFromX,
@@ -19,8 +14,12 @@ export type { CardData } from "@/shared/game/types";
 export const LOCAL_PLAYER: PlayerId = "local";
 
 interface GameLogicProps {
+  // Offline: the dealt game. Online: the latest state from the server,
+  // which replaces the local state whenever it changes.
   initialState: GameState;
   playerId?: PlayerId;
+  // Online: sends an action to the server
+  onAction?: (action: GameAction) => void;
 }
 
 // Game state is changed only through the shared rules (applyAction); this
@@ -28,6 +27,7 @@ interface GameLogicProps {
 export const useGameLogic = ({
   initialState,
   playerId = LOCAL_PLAYER,
+  onAction,
 }: GameLogicProps) => {
   const [state, setState] = useState<GameState>(initialState);
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -41,8 +41,25 @@ export const useGameLogic = ({
   const boardCards = state.board;
   const handCards: CardData[] = state.hands[playerId] ?? [];
 
-  const dispatch = (action: GameAction) =>
-    setState((prev) => applyAction(prev, playerId, action));
+  // Online the result only counts when the server sends it back, but most
+  // actions are applied right away so the table reacts without delay
+  const predictable = (action: GameAction) => {
+    if (action.type === "shuffleSlot" || action.type === "shuffleHand") {
+      return false; // the server decides the random order
+    }
+    if (action.type === "flipSlot") {
+      // Face-down cards arrive without rank/suit, so they can't be shown yet
+      return state.board.every((c) => c.slot !== action.slot || c.rank);
+    }
+    return true;
+  };
+
+  const dispatch = (action: GameAction) => {
+    if (!onAction || predictable(action)) {
+      setState((prev) => applyAction(prev, playerId, action));
+    }
+    onAction?.(action);
+  };
 
   const isInHand = (id: string | null) =>
     !!id && handCards.some((c) => c.id === id);

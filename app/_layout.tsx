@@ -1,7 +1,8 @@
+import { warmUpServer } from "@/components/useRoom";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -9,6 +10,11 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     MochiBoom: require("../assets/fonts/MochiBoom.ttf"),
   });
+
+  // Wake the game server up early (it may be asleep on the free tier)
+  useEffect(() => {
+    warmUpServer();
+  }, []);
 
   // Falls Font noch lädt: Zeige einfach nichts oder Ladekreis (verhindert Crash)
   if (!fontsLoaded) {

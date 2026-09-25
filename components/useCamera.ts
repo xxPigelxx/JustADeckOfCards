@@ -86,7 +86,10 @@ export const useCamera = (startFocus: Point, onMove?: () => void) => {
 
   // One or two fingers (or the mouse). Cards block this gesture (see Card
   // blocksGesture), so it only moves the board when it starts on an empty spot.
+  // The larger start distance lets a card's drag win on the web as well,
+  // where the blocking is not reliable.
   const pan = Gesture.Pan()
+    .minDistance(10)
     .onStart(() => {
       lastPanX.value = 0;
       lastPanY.value = 0;

@@ -13,8 +13,11 @@ import {
   LOCAL_PLAYER,
   useGameLogic,
 } from "@/components/useGameLogic";
+import { leaveRoom, sendAction, useRoom } from "@/components/useRoom";
 import { DECK_SLOT } from "@/shared/game/board";
 import { createGame } from "@/shared/game/setup";
+import { GameState } from "@/shared/game/types";
+import { viewToState } from "@/shared/game/view";
 import { getCameraZoom, slotCenter } from "@/utils/boardGeometry";
 import {
   DEFAULT_BACK_COLOR,
@@ -36,12 +39,17 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+// Online, until the server's first game view has arrived
+const EMPTY_GAME: GameState = { board: [], hands: {}, maxZIndex: 0 };
+
 export default function GameScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  // Code aus Params holen (oder Fallback)
-  const lobbyCode = (params.lobbyCode as string) || "OFFLINE";
+  // Online: game of the joined room (started from the invite screen)
+  const { room, view } = useRoom();
+  const online = params.mode === "online" && room?.status === "playing";
+  const lobbyCode = online ? room.code : "OFFLINE";
 
   // --- Design State ---
   const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
@@ -58,24 +66,35 @@ export default function GameScreen() {
     }, []),
   );
 
-  const playerCount = Number(params.playerCount) || 1;
+  const offlinePlayerCount = Number(params.playerCount) || 1;
+  const playerCount = online ? room.players.length : offlinePlayerCount;
 
   // Offline game: one pile per player on the board, one hand on this device
-  const initialState = useMemo(
+  const offlineState = useMemo(
     () =>
       createGame(
         {
           deckType: (params.deckType as string) || "52 Karten",
           deckCount: Number(params.deckCount) || 1,
-          pileCount: playerCount,
+          pileCount: offlinePlayerCount,
           cardsPerPile: Number(params.startCards) || 0,
         },
         [LOCAL_PLAYER],
       ),
-    [params.deckType, params.deckCount, playerCount, params.startCards],
+    [params.deckType, params.deckCount, offlinePlayerCount, params.startCards],
   );
 
-  const game = useGameLogic({ initialState });
+  // Online game: what the server lets this player see
+  const onlineState = useMemo(
+    () => (online && view ? viewToState(view, room.you) : EMPTY_GAME),
+    [online, view, room?.you],
+  );
+
+  const game = useGameLogic(
+    online
+      ? { initialState: onlineState, playerId: room.you, onAction: sendAction }
+      : { initialState: offlineState },
+  );
 
   // UI States
   const [menuVisible, setMenuVisible] = useState(false);
@@ -119,6 +138,7 @@ export default function GameScreen() {
   const handleLeaveGame = () => setExitModalVisible(true);
   const confirmExit = () => {
     setExitModalVisible(false);
+    if (online) leaveRoom();
     router.replace("/");
   };
 

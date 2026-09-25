@@ -1,23 +1,28 @@
 import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
 import ControlsHint from "@/components/ControlsHint";
+import { joinRoom, roomErrorMessage } from "@/components/useRoom";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Join() {
   const [code, setCode] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const isCodeValid = code.trim().length === 6;
 
-  const handleJoin = () => {
-    router.push({
-      pathname: "/gameScreen",
-      params: {
-        lobbyCode: code,
-      },
-    });
+  // Join the room on the server, then wait for the host in the waiting room
+  const handleJoin = async () => {
+    if (joining) return;
+    setError(null);
+    setJoining(true);
+    const res = await joinRoom(code);
+    setJoining(false);
+    if (res.ok) router.push("/invite");
+    else setError(roomErrorMessage(res.error));
   };
 
   return (
@@ -38,20 +43,23 @@ export default function Join() {
         onChangeText={(text) => {
           const cleanText = text.replace(/\s/g, "").toUpperCase();
           setCode(cleanText);
+          setError(null);
         }}
         textAlign="center"
         autoCapitalize="characters"
         maxLength={6}
       />
 
-      <Text style={styles.helperText}>Bitte gib den 6-stelligen Code ein</Text>
+      <Text style={[styles.helperText, error && styles.errorText]}>
+        {error ?? "Bitte gib den 6-stelligen Code ein"}
+      </Text>
 
       <View style={{ height: 150 }} />
 
       <ControlsHint style={{ marginBottom: 20 }} />
 
       <AppButton
-        title="Spiel beitreten"
+        title={joining ? "Verbinde…" : "Spiel beitreten"}
         onPress={isCodeValid ? handleJoin : () => {}}
         style={{
           ...styles.button,
@@ -102,6 +110,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
     textAlign: "center",
+  },
+  errorText: {
+    color: "#b91c1c",
+    fontWeight: "600",
   },
   button: {
     marginTop: 0,

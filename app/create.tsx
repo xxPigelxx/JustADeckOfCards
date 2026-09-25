@@ -2,6 +2,7 @@ import AppButton from "@/components/AppButton";
 import BurgerMenu from "@/components/BurgerMenu";
 import InfoAlert from "@/components/InfoAlert";
 import CustomSlider from "@/components/Slider";
+import { createRoom, leaveRoom, roomErrorMessage } from "@/components/useRoom";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -44,9 +45,31 @@ export default function Create() {
     "24 Karten",
   ];
 
-  const handleStartGame = () => {
+  const [creating, setCreating] = useState(false);
+
+  // Online: create a room on the server, then wait for players to join
+  const handleStartGame = async () => {
+    if (creating) return;
+    setCreating(true);
+    const res = await createRoom({
+      deckType: options[selectedDeckIndex],
+      deckCount,
+      cardsPerPile: startCards,
+      maxPlayers: playerCount,
+    });
+    setCreating(false);
+    if (res.ok) {
+      router.push("/invite");
+    } else {
+      showInfo("Spiel erstellen", roomErrorMessage(res.error));
+    }
+  };
+
+  // Offline: everything on this device, one pile per player
+  const handleOffline = () => {
+    leaveRoom();
     router.push({
-      pathname: "/invite",
+      pathname: "/gameScreen",
       params: {
         deckType: options[selectedDeckIndex],
         deckCount,
@@ -155,7 +178,8 @@ export default function Create() {
                   onPress={() =>
                     showInfo(
                       "Anzahl Spieler",
-                      "Bestimmt, wie viele Spielerbereiche (Spieler-Stapel) auf dem Spielbrett vorbereitet werden.",
+                      "Online: wie viele Spieler höchstens beitreten können. Beim Start bekommt jeder beigetretene Spieler einen Stapel.\n" +
+                        "Offline: wie viele Spieler-Stapel auf dem Spielbrett vorbereitet werden.",
                     )
                   }
                 />
@@ -195,10 +219,14 @@ export default function Create() {
           </View>
 
           <AppButton
-            title="Erstellen"
+            title={creating ? "Verbinde…" : "Erstellen"}
             onPress={handleStartGame}
             style={styles.button}
           />
+
+          <Pressable onPress={handleOffline} hitSlop={10}>
+            <Text style={styles.offlineLink}>Offline spielen</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
 
@@ -281,5 +309,13 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 50,
     alignSelf: "center",
+  },
+  offlineLink: {
+    marginTop: 18,
+    alignSelf: "center",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    textDecorationLine: "underline",
   },
 });
