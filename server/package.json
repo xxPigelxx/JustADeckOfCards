@@ -1,0 +1,26 @@
+{
+  "name": "justadeckofcards-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multiplayer room server for Just a Deck of Cards",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsup src/main.ts --format cjs --target node20 --clean",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "socket.io-client": "^4.8.4",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
