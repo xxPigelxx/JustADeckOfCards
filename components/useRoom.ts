@@ -9,9 +9,11 @@ import {
   RoomInfo,
   ServerToClientEvents,
 } from "@/shared/protocol";
+import { loadCurrentRoom, saveCurrentRoom } from "@/utils/currentRoom";
 import { loadPlayerName, savePlayerName } from "@/utils/playerName";
 import { loadPlayerSecret } from "@/utils/playerSecret";
 import { useSyncExternalStore } from "react";
+import { AppState } from "react-native";
 import { io, Socket } from "socket.io-client";
 
 export const SERVER_URL =
@@ -28,16 +30,36 @@ interface RoomSnapshot {
   room: RoomInfo | null;
   view: PlayerView | null;
   connected: boolean;
+  // The room we were in no longer exists (everyone left, server restarted)
+  lost: boolean;
 }
 
 // One connection for the whole app, so the room survives screen changes
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
-let snapshot: RoomSnapshot = { room: null, view: null, connected: false };
+let snapshot: RoomSnapshot = {
+  room: null,
+  view: null,
+  connected: false,
+  lost: false,
+};
 const listeners = new Set<() => void>();
+let savedCode: string | null = null;
 
 const update = (patch: Partial<RoomSnapshot>) => {
   snapshot = { ...snapshot, ...patch };
   listeners.forEach((listener) => listener());
+};
+
+// Remembers the room on the device (for resuming after an app restart)
+const rememberRoom = (code: string | null) => {
+  if (code === savedCode) return;
+  savedCode = code;
+  saveCurrentRoom(code);
+};
+
+const roomGone = () => {
+  forgetSavedRoom();
+  update({ room: null, view: null, lost: true });
 };
 
 const getSocket = () => {
@@ -51,13 +73,23 @@ const getSocket = () => {
     if (snapshot.room) {
       const secret = await loadPlayerSecret();
       s.emit("room:join", { secret, code: snapshot.room.code }, (res) => {
-        if (!res.ok) update({ room: null, view: null });
+        if (!res.ok) roomGone();
       });
     }
   });
   s.on("disconnect", () => update({ connected: false }));
-  s.on("room:update", (room) => update({ room }));
+  s.on("room:update", (room) => {
+    rememberRoom(room.code);
+    update({ room });
+  });
   s.on("game:view", ({ view }) => update({ view }));
+
+  // Phones drop the connection in the background: reconnect right away when
+  // the app is back instead of waiting for the next retry
+  AppState.addEventListener("change", (state) => {
+    if (state === "active" && !s.connected) s.connect();
+  });
+
   socket = s;
   return s;
 };
@@ -75,7 +107,7 @@ const request = async <T extends object>(
 };
 
 export const createRoom = async (config: RoomConfig) => {
-  update({ room: null, view: null });
+  update({ room: null, view: null, lost: false });
   const [secret, name] = await Promise.all([
     loadPlayerSecret(),
     loadPlayerName(),
@@ -86,7 +118,7 @@ export const createRoom = async (config: RoomConfig) => {
 };
 
 export const joinRoom = async (code: string) => {
-  update({ room: null, view: null });
+  update({ room: null, view: null, lost: false });
   const [secret, name] = await Promise.all([
     loadPlayerSecret(),
     loadPlayerName(),
@@ -111,8 +143,33 @@ export const startGame = () => request((s) => s.emitWithAck("room:start"));
 
 export const leaveRoom = () => {
   socket?.emit("room:leave");
+  forgetSavedRoom();
   update({ room: null, view: null });
 };
+
+// --- Resuming after the app was closed or the page reloaded ---
+
+// Code of a room this device was in before, if any
+export const getSavedRoom = loadCurrentRoom;
+
+export const forgetSavedRoom = () => {
+  savedCode = null;
+  saveCurrentRoom(null);
+};
+
+// Rejoins the saved room: the server gives this device its seat and hand back
+export const resumeRoom = async (): Promise<ClientAck<{ code: string }>> => {
+  const code = await loadCurrentRoom();
+  if (!code) return { ok: false, error: "not_found" };
+  const res = await joinRoom(code);
+  if (!res.ok && res.error !== "offline") {
+    forgetSavedRoom();
+    update({ lost: true });
+  }
+  return res;
+};
+
+export const clearLostRoom = () => update({ lost: false });
 
 export const sendAction = (action: GameAction) =>
   socket?.emit("game:action", action);

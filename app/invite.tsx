@@ -26,7 +26,7 @@ import {
 export default function Invite() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { room } = useRoom();
+  const { room, connected, lost } = useRoom();
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const goingToGame = useRef(false);
@@ -84,7 +84,9 @@ export default function Invite() {
       <Text style={styles.title}>Einladungscode</Text>
 
       <View style={styles.codeField}>
-        <Text style={styles.codeText}>{room?.code ?? "Verbinde…"}</Text>
+        <Text style={styles.codeText}>
+          {room?.code ?? (lost ? "–" : "Verbinde…")}
+        </Text>
       </View>
 
       <TextInput
@@ -142,6 +144,16 @@ export default function Invite() {
 
       <ControlsHint style={{ marginTop: 24 }} />
 
+      {lost && (
+        <Text style={styles.errorText}>
+          Dieses Spiel gibt es nicht mehr. Gehe zurück und erstelle ein neues.
+        </Text>
+      )}
+      {room && !connected && (
+        <Text style={styles.errorText}>
+          Verbindung unterbrochen – verbinde neu…
+        </Text>
+      )}
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {isHost ? (

@@ -14,7 +14,14 @@ import {
   LOCAL_PLAYER,
   useGameLogic,
 } from "@/components/useGameLogic";
-import { leaveRoom, sendAction, useRoom } from "@/components/useRoom";
+import InfoAlert from "@/components/InfoAlert";
+import {
+  clearLostRoom,
+  leaveRoom,
+  resumeRoom,
+  sendAction,
+  useRoom,
+} from "@/components/useRoom";
 import { DECK_SLOT } from "@/shared/game/board";
 import { createGame } from "@/shared/game/setup";
 import { GameState } from "@/shared/game/types";
@@ -30,7 +37,13 @@ import {
 import { Feather } from "@expo/vector-icons"; // Import für das Icon
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   BackHandler,
   Platform,
@@ -49,9 +62,19 @@ export default function GameScreen() {
   const router = useRouter();
 
   // Online: game of the joined room (started from the invite screen)
-  const { room, view } = useRoom();
-  const online = params.mode === "online" && room?.status === "playing";
-  const lobbyCode = online ? room.code : "OFFLINE";
+  const { room, view, connected, lost } = useRoom();
+  const wantsOnline = params.mode === "online";
+  const online = wantsOnline && room?.status === "playing";
+  const lobbyCode = online ? room.code : wantsOnline ? "…" : "OFFLINE";
+  const disconnected = wantsOnline && !connected && !lost;
+
+  // Page reloaded or app reopened on this screen: take the seat back
+  const resumeTried = useRef(false);
+  useEffect(() => {
+    if (!wantsOnline || room || lost || resumeTried.current) return;
+    resumeTried.current = true;
+    resumeRoom();
+  }, [wantsOnline, room, lost]);
 
   // --- Design State ---
   const [cardBackColor, setCardBackColor] = useState(DEFAULT_BACK_COLOR);
@@ -69,7 +92,9 @@ export default function GameScreen() {
   );
 
   const offlinePlayerCount = Number(params.playerCount) || 1;
-  const playerCount = online ? room.players.length : offlinePlayerCount;
+  const playerCount = wantsOnline
+    ? (room?.players.length ?? 0)
+    : offlinePlayerCount;
 
   // Offline game: one pile per player on the board, one hand on this device
   const offlineState = useMemo(
@@ -92,9 +117,14 @@ export default function GameScreen() {
     [online, view, room?.you],
   );
 
+  // An online game never falls back to a local game, even while reconnecting
   const game = useGameLogic(
-    online
-      ? { initialState: onlineState, playerId: room.you, onAction: sendAction }
+    wantsOnline
+      ? {
+          initialState: onlineState,
+          playerId: room?.you ?? LOCAL_PLAYER,
+          onAction: sendAction,
+        }
       : { initialState: offlineState },
   );
 
@@ -165,7 +195,13 @@ export default function GameScreen() {
   const handleLeaveGame = () => setExitModalVisible(true);
   const confirmExit = () => {
     setExitModalVisible(false);
-    if (online) leaveRoom();
+    if (wantsOnline) leaveRoom();
+    router.replace("/");
+  };
+
+  // The room no longer exists: back to the start screen
+  const closeLostGame = () => {
+    clearLostRoom();
     router.replace("/");
   };
 
@@ -219,10 +255,11 @@ export default function GameScreen() {
 
       {/* --- LOBBY CODE PILL (tap: players and their hand cards) --- */}
       <Pressable
-        style={styles.lobbyPill}
+        style={[styles.lobbyPill, disconnected && styles.lobbyPillOffline]}
         onPress={() => setPlayersVisible(true)}
         hitSlop={8}
       >
+        {disconnected && <Feather name="wifi-off" size={16} color="white" />}
         <Feather
           name="hash"
           size={18}
@@ -301,6 +338,13 @@ export default function GameScreen() {
       {/* Dragged card, drawn above board and hand */}
       <DragLayer layer={dragLayer} />
 
+      {/* Online game without room yet (reloaded page, reopened app) */}
+      {wantsOnline && !online && !lost && (
+        <View style={styles.reconnectBox} pointerEvents="none">
+          <Text style={styles.reconnectText}>Verbinde neu…</Text>
+        </View>
+      )}
+
       {/* Zoom buttons (web only, touch devices use pinch) */}
       {Platform.OS === "web" && (
         <View style={styles.zoomButtons}>
@@ -355,6 +399,13 @@ export default function GameScreen() {
         }}
       />
 
+      <InfoAlert
+        visible={wantsOnline && lost}
+        title="Spiel beendet"
+        message="Dieses Spiel gibt es nicht mehr. Vielleicht haben alle Spieler es verlassen oder der Server wurde neu gestartet."
+        onClose={closeLostGame}
+      />
+
       <PlayerListPopup
         visible={playersVisible}
         players={playerRows}
@@ -380,6 +431,27 @@ const styles = StyleSheet.create({
     bottom: 40,
     left: 40,
     zIndex: 200,
+  },
+
+  lobbyPillOffline: {
+    backgroundColor: "#b91c1c",
+  },
+
+  reconnectBox: {
+    position: "absolute",
+    top: "40%",
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.75)",
+    borderRadius: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    zIndex: 950,
+  },
+
+  reconnectText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
   },
 
   lobbyPill: {
