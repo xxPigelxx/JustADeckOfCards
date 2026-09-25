@@ -112,6 +112,27 @@ describe("RoomManager", () => {
     expect(room.hostId).toBe("p2");
   });
 
+  it("stores player names and lets them change only in the lobby", () => {
+    const { rooms, room } = setup();
+    rooms.join(room.code, "secret-p2", "s2", "  Max ");
+    const info = rooms.infoFor(room, room.players[1]);
+    expect(info.players.map((p) => p.name)).toEqual([null, "Max"]);
+
+    rooms.setName("s-host", "Anna");
+    expect(room.players[0].name).toBe("Anna");
+    rooms.setName("s2", "   ");
+    expect(room.players[1].name).toBeNull();
+
+    rooms.start("s-host");
+    expect(rooms.setName("s-host", "Nope")).toBeNull();
+    expect(room.players[0].name).toBe("Anna");
+
+    // Rejoining during the game keeps the name
+    rooms.disconnect("s-host");
+    rooms.join(room.code, "secret-host", "s-host-2", "Other");
+    expect(room.players[0].name).toBe("Anna");
+  });
+
   it("removes a player who leaves the lobby", () => {
     const { rooms, room } = setup();
     rooms.join(room.code, "secret-p2", "s2");

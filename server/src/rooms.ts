@@ -7,6 +7,7 @@ import {
   PlayerView,
 } from "../../shared/game";
 import {
+  cleanPlayerName,
   MAX_PLAYERS,
   normalizeRoomCode,
   ROOM_CODE_CHARS,
@@ -25,6 +26,7 @@ export const EMPTY_ROOM_TIMEOUT_MS = 10 * 60_000;
 interface Player {
   secret: string;
   id: string; // public id, key of the hand in the game state
+  name: string | null;
   socketId: string | null;
   disconnectedAt: number | null;
 }
@@ -86,6 +88,7 @@ export class RoomManager {
     secret: unknown,
     config: unknown,
     socketId: string,
+    name?: unknown,
   ): Result<{ room: Room }> {
     if (!isSecret(secret) || !isRoomConfig(config)) {
       return { ok: false, error: "invalid" };
@@ -104,14 +107,17 @@ export class RoomManager {
       emptySince: null,
     };
     this.rooms.set(room.code, room);
-    room.hostId = this.addPlayer(room, secret, socketId).id;
+    room.hostId = this.addPlayer(room, secret, socketId, name).id;
     return { ok: true, room };
   }
 
+  // `name` is optional; a device that rejoins keeps its name unless it sends
+  // a new one while the room is still in the lobby
   join(
     code: unknown,
     secret: unknown,
     socketId: string,
+    name?: unknown,
   ): Result<{ room: Room }> {
     if (typeof code !== "string" || !isSecret(secret)) {
       return { ok: false, error: "invalid" };
@@ -126,6 +132,9 @@ export class RoomManager {
       if (known.socketId) this.bySocket.delete(known.socketId);
       known.socketId = socketId;
       known.disconnectedAt = null;
+      if (room.status === "lobby" && name !== undefined) {
+        known.name = cleanPlayerName(name);
+      }
       room.emptySince = null;
       this.bySocket.set(socketId, { code: room.code, secret });
       this.ensureHost(room);
@@ -137,8 +146,16 @@ export class RoomManager {
       return { ok: false, error: "full" };
     }
     this.leave(socketId);
-    this.addPlayer(room, secret, socketId);
+    this.addPlayer(room, secret, socketId, name);
     return { ok: true, room };
+  }
+
+  // Names can only be changed in the waiting room
+  setName(socketId: string, name: unknown): Room | null {
+    const ctx = this.context(socketId);
+    if (!ctx || ctx.room.status !== "lobby") return null;
+    ctx.player.name = cleanPlayerName(name);
+    return ctx.room;
   }
 
   // Host deals the cards: one pile per player who has joined
@@ -244,6 +261,7 @@ export class RoomManager {
       players: room.players.map((p, i) => ({
         id: p.id,
         seat: i + 1,
+        name: p.name,
         connected: p.socketId !== null,
       })),
     };
@@ -289,10 +307,16 @@ export class RoomManager {
     return room.players.filter((p) => p.socketId !== null);
   }
 
-  private addPlayer(room: Room, secret: string, socketId: string) {
+  private addPlayer(
+    room: Room,
+    secret: string,
+    socketId: string,
+    name?: unknown,
+  ) {
     const player: Player = {
       secret,
       id: `p${room.nextPlayerNumber++}`,
+      name: cleanPlayerName(name),
       socketId,
       disconnectedAt: null,
     };

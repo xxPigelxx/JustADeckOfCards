@@ -1,6 +1,7 @@
 import { GameAction, PlayerView } from "@/shared/game/types";
 import {
   Ack,
+  cleanPlayerName,
   ClientToServerEvents,
   normalizeRoomCode,
   RoomConfig,
@@ -8,6 +9,7 @@ import {
   RoomInfo,
   ServerToClientEvents,
 } from "@/shared/protocol";
+import { loadPlayerName, savePlayerName } from "@/utils/playerName";
 import { loadPlayerSecret } from "@/utils/playerSecret";
 import { useSyncExternalStore } from "react";
 import { io, Socket } from "socket.io-client";
@@ -74,18 +76,35 @@ const request = async <T extends object>(
 
 export const createRoom = async (config: RoomConfig) => {
   update({ room: null, view: null });
-  const secret = await loadPlayerSecret();
+  const [secret, name] = await Promise.all([
+    loadPlayerSecret(),
+    loadPlayerName(),
+  ]);
   return request<{ code: string }>((s) =>
-    s.emitWithAck("room:create", { secret, config }),
+    s.emitWithAck("room:create", { secret, config, name }),
   );
 };
 
 export const joinRoom = async (code: string) => {
   update({ room: null, view: null });
-  const secret = await loadPlayerSecret();
+  const [secret, name] = await Promise.all([
+    loadPlayerSecret(),
+    loadPlayerName(),
+  ]);
   return request<{ code: string }>((s) =>
-    s.emitWithAck("room:join", { secret, code: normalizeRoomCode(code) }),
+    s.emitWithAck("room:join", {
+      secret,
+      code: normalizeRoomCode(code),
+      name,
+    }),
   );
+};
+
+// Remembers the name and tells the room (only possible in the waiting room)
+export const setPlayerName = (value: string) => {
+  const name = cleanPlayerName(value);
+  savePlayerName(name);
+  socket?.emit("room:setName", name);
 };
 
 export const startGame = () => request((s) => s.emitWithAck("room:start"));

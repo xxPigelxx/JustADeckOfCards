@@ -54,19 +54,28 @@ export const startServer = (port: number, rooms = new RoomManager()) => {
 
   io.on("connection", (socket) => {
     socket.on("room:create", (data, ack) => {
-      const res = rooms.create(data?.secret, data?.config, socket.id);
+      const res = rooms.create(
+        data?.secret,
+        data?.config,
+        socket.id,
+        data?.name,
+      );
       if (!res.ok) return reply(ack, res);
       reply(ack, { ok: true, code: res.room.code });
       sendRoom(res.room);
     });
 
     socket.on("room:join", (data, ack) => {
-      const res = rooms.join(data?.code, data?.secret, socket.id);
+      const res = rooms.join(data?.code, data?.secret, socket.id, data?.name);
       if (!res.ok) return reply(ack, res);
       reply(ack, { ok: true, code: res.room.code });
       sendRoom(res.room);
       sendViews(res.room);
     });
+
+    socket.on("room:setName", (name) =>
+      sendRoom(rooms.setName(socket.id, name)),
+    );
 
     socket.on("room:start", (ack) => {
       const res = rooms.start(socket.id);

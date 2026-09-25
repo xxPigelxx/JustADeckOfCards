@@ -4,13 +4,23 @@ import ControlsHint from "@/components/ControlsHint";
 import {
   leaveRoom,
   roomErrorMessage,
+  setPlayerName,
   startGame,
   useRoom,
 } from "@/components/useRoom";
-import { Feather } from "@expo/vector-icons";
+import { MAX_NAME_LENGTH, playerLabel } from "@/shared/protocol";
+import { loadPlayerName } from "@/utils/playerName";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 // Waiting room for host and guests until the host starts the game
 export default function Invite() {
@@ -39,10 +49,25 @@ export default function Invite() {
     [navigation],
   );
 
+  // Optional name, filled in from the last game; sent shortly after typing
+  const [name, setName] = useState("");
+  const nameEdited = useRef(false);
+
+  useEffect(() => {
+    loadPlayerName().then((saved) => setName(saved ?? ""));
+  }, []);
+
+  useEffect(() => {
+    if (!nameEdited.current) return;
+    const timer = setTimeout(() => setPlayerName(name), 400);
+    return () => clearTimeout(timer);
+  }, [name]);
+
   const handleStart = async () => {
     if (starting) return;
     setError(null);
     setStarting(true);
+    setPlayerName(name);
     const res = await startGame();
     setStarting(false);
     if (!res.ok) setError(roomErrorMessage(res.error));
@@ -62,20 +87,60 @@ export default function Invite() {
         <Text style={styles.codeText}>{room?.code ?? "Verbinde…"}</Text>
       </View>
 
-      <View style={styles.playerBadge}>
-        <Feather
-          name="users"
-          size={24}
-          color="black"
-          style={{ marginRight: 8 }}
-        />
-        <Text style={styles.text}>
-          Spieler: {room ? room.players.length : "–"} /{" "}
-          {room ? room.config.maxPlayers : "–"}
-        </Text>
+      <TextInput
+        style={styles.nameInput}
+        placeholder="Dein Name (optional)"
+        placeholderTextColor="#888"
+        value={name}
+        onChangeText={(text) => {
+          nameEdited.current = true;
+          setName(text);
+        }}
+        onBlur={() => setPlayerName(name)}
+        maxLength={MAX_NAME_LENGTH}
+        textAlign="center"
+        returnKeyType="done"
+      />
+
+      <View style={styles.playerCard}>
+        <View style={styles.playerHeader}>
+          <Feather
+            name="users"
+            size={20}
+            color="black"
+            style={{ marginRight: 8 }}
+          />
+          <Text style={styles.text}>
+            Spieler: {room ? room.players.length : "–"} /{" "}
+            {room ? room.config.maxPlayers : "–"}
+          </Text>
+        </View>
+        <ScrollView style={styles.playerList}>
+          {room?.players.map((p) => (
+            <View key={p.id} style={styles.playerRow}>
+              <View
+                style={[
+                  styles.dot,
+                  !p.connected && { backgroundColor: "#bbb" },
+                ]}
+              />
+              <Text style={styles.playerName} numberOfLines={1}>
+                {playerLabel(p)}
+                {p.id === room.you ? " (du)" : ""}
+              </Text>
+              {p.id === room.hostId && (
+                <MaterialCommunityIcons
+                  name="crown"
+                  size={18}
+                  color="#854d0e"
+                />
+              )}
+            </View>
+          ))}
+        </ScrollView>
       </View>
 
-      <ControlsHint style={{ marginTop: 100 }} />
+      <ControlsHint style={{ marginTop: 24 }} />
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -104,16 +169,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
-    width: 230,
-    height: 350,
-    marginTop: 40,
+    width: 180,
+    height: 250,
+    marginTop: 30,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
-    marginTop: -40,
+    marginTop: -30,
   },
   text: {
     fontSize: 16,
@@ -138,10 +203,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   button: {
-    marginTop: 30,
+    marginTop: 20,
   },
   waitingText: {
-    marginTop: 40,
+    marginTop: 24,
     fontSize: 16,
     fontWeight: "600",
     color: "#555",
@@ -152,13 +217,50 @@ const styles = StyleSheet.create({
     color: "#b91c1c",
     textAlign: "center",
   },
-  playerBadge: {
+  nameInput: {
+    width: "70%",
+    height: 40,
+    borderColor: "#000",
+    borderWidth: 0.5,
+    borderRadius: 15,
+    backgroundColor: "#fff",
+    color: "#000",
+    marginTop: 10,
+    paddingHorizontal: 10,
+    fontSize: 15,
+  },
+  playerCard: {
+    width: "70%",
+    marginTop: 10,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 15,
+  },
+  playerHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
-    backgroundColor: "#ffffffff",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 15,
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+  playerList: {
+    maxHeight: 130,
+  },
+  playerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 3,
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#22c55e",
+  },
+  playerName: {
+    flexShrink: 1,
+    fontSize: 15,
+    color: "#000",
   },
 });

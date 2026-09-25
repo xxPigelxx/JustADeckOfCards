@@ -7,6 +7,7 @@ import DragLayer, { useDragLayer } from "@/components/DragLayer";
 import HandArea from "@/components/HandArea";
 import HandGridOverlay from "@/components/HandGridOverlay";
 import HandGridToggleButton from "@/components/HandGridToggleButton";
+import PlayerListPopup, { PlayerRow } from "@/components/PlayerListPopup";
 import { useCamera } from "@/components/useCamera";
 import {
   CardData,
@@ -18,6 +19,7 @@ import { DECK_SLOT } from "@/shared/game/board";
 import { createGame } from "@/shared/game/setup";
 import { GameState } from "@/shared/game/types";
 import { viewToState } from "@/shared/game/view";
+import { playerLabel } from "@/shared/protocol";
 import { getCameraZoom, slotCenter } from "@/utils/boardGeometry";
 import {
   DEFAULT_BACK_COLOR,
@@ -110,6 +112,31 @@ export default function GameScreen() {
   // Hand Grid Modal State
   const [handGridVisible, setHandGridVisible] = useState(false);
 
+  // Player list: other hands only as a count (from the server)
+  const [playersVisible, setPlayersVisible] = useState(false);
+  const playerRows: PlayerRow[] = online
+    ? room.players.map((p) => ({
+        id: p.id,
+        label: playerLabel(p),
+        cards:
+          p.id === room.you
+            ? game.handCards.length
+            : (view?.handCounts[p.id] ?? 0),
+        connected: p.connected,
+        isYou: p.id === room.you,
+        isHost: p.id === room.hostId,
+      }))
+    : [
+        {
+          id: LOCAL_PLAYER,
+          label: "Du",
+          cards: game.handCards.length,
+          connected: true,
+          isYou: false,
+          isHost: false,
+        },
+      ];
+
   // Back Button Handler
   useFocusEffect(
     useCallback(() => {
@@ -190,8 +217,12 @@ export default function GameScreen() {
       <StatusBar style="light" />
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
 
-      {/* --- NEU: LOBBY CODE PILL --- */}
-      <View style={styles.lobbyPill}>
+      {/* --- LOBBY CODE PILL (tap: players and their hand cards) --- */}
+      <Pressable
+        style={styles.lobbyPill}
+        onPress={() => setPlayersVisible(true)}
+        hitSlop={8}
+      >
         <Feather
           name="hash"
           size={18}
@@ -206,7 +237,7 @@ export default function GameScreen() {
           color="white"
         />
         <Text style={styles.lobbyText}>: {playerCount}</Text>
-      </View>
+      </Pressable>
       {/* ----------------------------- */}
 
       <View style={{ flex: 1 }}>
@@ -322,6 +353,12 @@ export default function GameScreen() {
           game.setDraggedId(null);
           game.setHighlightedSlot(null);
         }}
+      />
+
+      <PlayerListPopup
+        visible={playersVisible}
+        players={playerRows}
+        onClose={() => setPlayersVisible(false)}
       />
 
       <CustomAlert

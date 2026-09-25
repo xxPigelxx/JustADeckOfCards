@@ -19,9 +19,28 @@ export type RoomStatus = "lobby" | "playing";
 
 export interface RoomPlayer {
   id: PlayerId; // public id
-  seat: number; // 1-based, shown as "Spieler n"
+  seat: number; // 1-based, shown as "Spieler n" without a name
+  name: string | null;
   connected: boolean;
 }
+
+export const MAX_NAME_LENGTH = 16;
+
+// Optional name: without control characters, whitespace collapsed, at most
+// MAX_NAME_LENGTH characters; empty or invalid -> null
+export const cleanPlayerName = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const name = value
+    .replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_NAME_LENGTH)
+    .trim();
+  return name || null;
+};
+
+export const playerLabel = (player: RoomPlayer) =>
+  player.name ?? `Spieler ${player.seat}`;
 
 export interface RoomInfo {
   code: string;
@@ -40,13 +59,15 @@ export type Ack<T = object> =
 
 export interface ClientToServerEvents {
   "room:create": (
-    data: { secret: string; config: RoomConfig },
+    data: { secret: string; config: RoomConfig; name?: string | null },
     ack: (res: Ack<{ code: string }>) => void,
   ) => void;
   "room:join": (
-    data: { secret: string; code: string },
+    data: { secret: string; code: string; name?: string | null },
     ack: (res: Ack<{ code: string }>) => void,
   ) => void;
+  // Only in the waiting room
+  "room:setName": (name: string | null) => void;
   "room:start": (ack: (res: Ack) => void) => void;
   "room:leave": () => void;
   "game:action": (action: GameAction) => void;
