@@ -1,0 +1,25 @@
+# Render Blueprint for the multiplayer server (server/ + shared/).
+# Render: New > Blueprint > this repo. See server/README.md.
+services:
+  - type: web
+    name: justadeckofcards-server
+    runtime: node
+    plan: free
+    region: frankfurt
+    # The build bundles server/ and shared/ into server/dist/main.js
+    buildCommand: npm ci --prefix server && npm run build --prefix server
+    startCommand: node server/dist/main.js
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    # Only server changes redeploy (a redeploy ends all running games)
+    buildFilter:
+      paths:
+        - server/**
+        - shared/**
+        - render.yaml
+      ignoredPaths:
+        - "**/*.test.ts"
+        - "**/*.md"
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
