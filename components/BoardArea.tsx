@@ -12,6 +12,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 type BoardAreaProps = {
   boardCards: CardData[];
+  cardsBySlot: { [key: number]: CardData[] };
   highlightedSlot: number | null;
   movingStackSlot: number | null;
   draggedId: string | null;
@@ -26,6 +27,7 @@ type BoardAreaProps = {
 
 export default function BoardArea({
   boardCards,
+  cardsBySlot,
   highlightedSlot,
   movingStackSlot,
   draggedId,
@@ -96,16 +98,6 @@ export default function BoardArea({
       globalY: global.y,
     };
   };
-
-  const cardsBySlot: { [key: number]: CardData[] } = {};
-  boardCards.forEach((card) => {
-    if (!cardsBySlot[card.slot!]) cardsBySlot[card.slot!] = [];
-    cardsBySlot[card.slot!].push(card);
-  });
-
-  Object.values(cardsBySlot).forEach((group) =>
-    group.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)),
-  );
 
   const markAsTouched = (id: string) => {
     const card = boardCards.find((c) => c.id === id);

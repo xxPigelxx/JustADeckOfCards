@@ -30,10 +30,10 @@ export const ACTUAL_BOARD_W = SCREEN_W - BOARD_PADDING * 2;
 export const AVAILABLE_HEIGHT =
   BOARD_HEIGHT - SAFE_TOP - TOP_OFFSET - GRID_MARGIN_TOP - BOARD_PADDING;
 
-export const COLS = Math.floor(ACTUAL_BOARD_W / (SLOT_W + GAP));
-export const ROWS = Math.floor(AVAILABLE_HEIGHT / (SLOT_H + GAP));
-export const TOTAL_SLOTS = ROWS * COLS;
-export const GRID_WIDTH = COLS * (SLOT_W + GAP) - GAP;
+export const BOARD_COLS = Math.floor(ACTUAL_BOARD_W / (SLOT_W + GAP));
+export const BOARD_ROWS = Math.floor(AVAILABLE_HEIGHT / (SLOT_H + GAP));
+export const TOTAL_SLOTS = BOARD_ROWS * BOARD_COLS;
+export const GRID_WIDTH = BOARD_COLS * (SLOT_W + GAP) - GAP;
 export const GRID_OFFSET_X = (ACTUAL_BOARD_W - GRID_WIDTH) / 2;
 
 export const SCREEN_DIMS = { width: SCREEN_W, height: SCREEN_H };

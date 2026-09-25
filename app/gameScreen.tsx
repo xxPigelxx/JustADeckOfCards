@@ -199,6 +199,7 @@ export default function GameScreen() {
         <View style={{ flex: 1, zIndex: boardZIndex, elevation: boardZIndex }}>
           <BoardArea
             boardCards={game.boardCards}
+            cardsBySlot={cardsBySlot}
             highlightedSlot={game.highlightedSlot}
             movingStackSlot={game.movingStackSlot}
             draggedId={game.draggedId}

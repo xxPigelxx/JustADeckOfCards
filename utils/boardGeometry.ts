@@ -26,8 +26,8 @@ export const setHandOrigin = (origin: Point) => {
 // --- BOARD ---
 
 export const slotToBoard = (slot: number, stackIndex: number = 0): Point => {
-  const col = slot % C.COLS;
-  const row = Math.floor(slot / C.COLS);
+  const col = slot % C.BOARD_COLS;
+  const row = Math.floor(slot / C.BOARD_COLS);
   const stackOffset = stackIndex * C.STACK_OFFSET;
 
   return {
@@ -40,8 +40,10 @@ export const boardToSlot = ({ x, y }: Point): number | null => {
   const col = Math.floor((x - C.GRID_OFFSET_X) / (C.SLOT_W + C.GAP));
   const row = Math.floor((y - C.GRID_MARGIN_TOP) / (C.SLOT_H + C.GAP));
 
-  if (col < 0 || col >= C.COLS || row < 0 || row >= C.ROWS) return null;
-  return row * C.COLS + col;
+  if (col < 0 || col >= C.BOARD_COLS || row < 0 || row >= C.BOARD_ROWS) {
+    return null;
+  }
+  return row * C.BOARD_COLS + col;
 };
 
 export const screenToBoard = ({ x, y }: Point): Point => ({

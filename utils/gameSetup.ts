@@ -1,4 +1,4 @@
-import { COLS } from "@/components/constants";
+import { BOARD_COLS } from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
 
 export const SUITS = ["♦", "♥", "♠", "♣"];
@@ -74,8 +74,8 @@ export const generateGameData = (
     const j = Math.floor(Math.random() * (i + 1));
     [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
   }
-  const mainDeckSlot = COLS * 1 + Math.floor(COLS / 2);
-  const rowStart = COLS * 3;
+  const mainDeckSlot = BOARD_COLS * 1 + Math.floor(BOARD_COLS / 2);
+  const rowStart = BOARD_COLS * 3;
   const playerSlots = Array.from(
     { length: playerCount },
     (_, i) => rowStart + i * 2,
