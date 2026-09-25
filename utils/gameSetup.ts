@@ -23,6 +23,7 @@ export const DECK_TYPES = {
   "52 Karten": { minRankIndex: 0, jokers: 0 },
   "36 Karten": { minRankIndex: 4, jokers: 0 },
   "32 Karten": { minRankIndex: 5, jokers: 0 },
+  "24 Karten": { minRankIndex: 7, jokers: 0 },
 };
 
 export const generateGameData = (

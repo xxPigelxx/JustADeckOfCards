@@ -1,6 +1,6 @@
 import Card from "@/components/Card";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Dimensions,
   FlatList,

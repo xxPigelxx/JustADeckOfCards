@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import * as C from "./constants";
+import {
+  boardToSlot,
+  getHandIndexFromX,
+  isOverHand,
+  screenToBoard,
+} from "@/utils/boardGeometry";
 
 export interface CardData {
   id: string;
@@ -33,37 +38,8 @@ export const useGameLogic = ({
   }, [initialBoard, initialHand]);
 
   // --- HELPER: Detect Board Slot ---
-  const getSlotFromCoords = (absX: number, absY: number) => {
-    const localX = absX - C.BOARD_PADDING - C.GRID_OFFSET_X;
-    const localY = absY - C.TOP_OFFSET - C.GRID_MARGIN_TOP - C.SAFE_TOP;
-
-    const col = Math.floor(localX / (C.SLOT_W + C.GAP));
-    const row = Math.floor(localY / (C.SLOT_H + C.GAP));
-
-    if (col < 0 || col >= C.COLS || row < 0 || row >= C.ROWS) return null;
-    return row * C.COLS + col;
-  };
-
-  // --- HELPER: Detect Hand Index (for sorting) ---
-  const getHandIndexFromX = (absX: number) => {
-    // 1. Calculate how wide the hand fan is currently
-    // Note: Matches logic in HandArea.tsx
-    const totalWidth = (handCards.length - 1) * C.FAN_SPREAD;
-
-    // 2. Calculate where the fan starts on screen (left edge)
-    // Note: HandArea centers the fan: (Screen - TotalWidth) / 2 - (CardWidth / 2) offset
-    // We simplify slightly to target the "center" of slots
-    const startX = (C.SCREEN_DIMS.width - totalWidth) / 2 - C.CARD_W / 2;
-
-    // 3. Calculate relative position
-    const relativeX = absX - startX;
-
-    // 4. Convert to index
-    const index = Math.round(relativeX / C.FAN_SPREAD);
-
-    // 5. Clamp between 0 and last index
-    return Math.max(0, Math.min(handCards.length, index));
-  };
+  const getSlotFromCoords = (absX: number, absY: number) =>
+    boardToSlot(screenToBoard({ x: absX, y: absY }));
 
   const bringToFront = (id: string) => {
     const newZ = maxZIndex + 1;
@@ -136,8 +112,7 @@ export const useGameLogic = ({
   // --- DRAG HANDLERS ---
 
   const handleDrag = (id: string, absX: number, absY: number) => {
-    const isOverHand = absY > C.BOARD_HEIGHT - 30;
-    if (isOverHand) {
+    if (isOverHand(absY)) {
       if (highlightedSlot !== null) setHighlightedSlot(null);
       return;
     }
@@ -147,7 +122,7 @@ export const useGameLogic = ({
 
   const handleDrop = (id: string, absX: number, absY: number) => {
     setHighlightedSlot(null);
-    const isOverHand = absY > C.BOARD_HEIGHT - 30;
+    const overHand = isOverHand(absY);
     const fromBoard = boardCards.find((c) => c.id === id);
 
     // 1. Moving a whole stack (Special Case)
@@ -156,7 +131,7 @@ export const useGameLogic = ({
       fromBoard &&
       fromBoard.slot === movingStackSlot
     ) {
-      if (isOverHand) {
+      if (overHand) {
         takeStack(movingStackSlot);
         setMovingStackSlot(null);
         return;
@@ -182,8 +157,8 @@ export const useGameLogic = ({
     }
 
     // 2. Dropping into Hand (Sorting / Adding)
-    if (isOverHand) {
-      const newIndex = getHandIndexFromX(absX);
+    if (overHand) {
+      const newIndex = getHandIndexFromX(absX, handCards.length);
 
       if (fromBoard) {
         // A. From Board -> Hand (Insert at specific index)

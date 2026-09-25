@@ -19,6 +19,7 @@ export const GRID_MARGIN_TOP = 20;
 export const VISIBLE_STACK_LIMIT = 3;
 export const STACK_OFFSET = 3;
 export const HAND_HEIGHT = 150;
+export const HAND_CARD_TOP = 30;
 export const BOARD_HEIGHT = SCREEN_H - HAND_HEIGHT;
 export const FAN_SPREAD = 25;
 export const FAN_ANGLE = 5;

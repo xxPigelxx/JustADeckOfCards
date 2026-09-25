@@ -1,8 +1,13 @@
 import Card from "@/components/Card";
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
+import {
+  boardToScreen,
+  setBoardOrigin,
+  slotToBoard,
+} from "@/utils/boardGeometry";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 type BoardAreaProps = {
@@ -32,6 +37,7 @@ export default function BoardArea({
   onDragStart,
   onDragEnd,
 }: BoardAreaProps) {
+  const surfaceRef = useRef<View>(null);
   const [touchedSlots, setTouchedSlots] = useState<number[]>([]);
 
   // Map: SlotIndex -> Label ("P1", "P2", "Deck")
@@ -80,22 +86,15 @@ export default function BoardArea({
   }, [boardCards, isInitialized]);
 
   const getGridCardPosition = (slot: number, visualIndex: number = 0) => {
-    const col = slot % C.COLS;
-    const row = Math.floor(slot / C.COLS);
+    const surface = slotToBoard(slot, visualIndex);
+    const global = boardToScreen(surface);
 
-    const baseX = C.GRID_OFFSET_X + col * (C.SLOT_W + C.GAP);
-    const baseY = C.GRID_MARGIN_TOP + row * (C.SLOT_H + C.GAP);
-
-    const offsetX = visualIndex * C.STACK_OFFSET * -1;
-    const offsetY = visualIndex * C.STACK_OFFSET * -1;
-
-    const surfaceX = baseX + offsetX;
-    const surfaceY = baseY + offsetY;
-
-    const globalX = surfaceX + C.BOARD_PADDING;
-    const globalY = surfaceY + C.TOP_OFFSET + C.SAFE_TOP;
-
-    return { surfaceX, surfaceY, globalX, globalY, baseX, baseY };
+    return {
+      surfaceX: surface.x,
+      surfaceY: surface.y,
+      globalX: global.x,
+      globalY: global.y,
+    };
   };
 
   const cardsBySlot: { [key: number]: CardData[] } = {};
@@ -119,7 +118,15 @@ export default function BoardArea({
 
   return (
     <View style={styles.boardContainer}>
-      <View style={styles.boardSurface}>
+      <View
+        ref={surfaceRef}
+        style={styles.boardSurface}
+        onLayout={() =>
+          surfaceRef.current?.measure((_x, _y, _w, _h, pageX, pageY) =>
+            setBoardOrigin({ x: pageX, y: pageY }),
+          )
+        }
+      >
         {/* 1. LAYER: LEERE SLOTS */}
         <View style={styles.gridContainer}>
           {Array.from({ length: C.TOTAL_SLOTS }).map((_, i) => (

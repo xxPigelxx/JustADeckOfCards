@@ -1,8 +1,13 @@
 import Card from "@/components/Card";
 import * as C from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
+import {
+  getFanPosition,
+  handCardToScreen,
+  setHandOrigin,
+} from "@/utils/boardGeometry";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
 type HandAreaProps = {
@@ -28,28 +33,25 @@ export default function HandArea({
   onDragStart,
   onDragEnd,
 }: HandAreaProps) {
-  const getFanConfig = (index: number, total: number) => {
-    const centerIndex = (total - 1) / 2;
-    const offset = index - centerIndex;
-    const rotation = offset * C.FAN_ANGLE;
-    const translateY =
-      Math.abs(offset) * C.FAN_CURVE + Math.abs(offset * offset) * 1.5;
-    const totalWidth = (total - 1) * C.FAN_SPREAD;
-    const startX = (C.SCREEN_DIMS.width - totalWidth) / 2 - C.CARD_W / 2;
-    const x = startX + index * C.FAN_SPREAD;
-    return { x, translateY, rotation };
-  };
-
+  const handRef = useRef<View>(null);
   const centerX = (C.SCREEN_DIMS.width - C.CARD_W) / 2;
 
   return (
-    <View style={styles.handArea}>
+    <View
+      ref={handRef}
+      style={styles.handArea}
+      onLayout={() =>
+        handRef.current?.measure((_x, _y, _w, _h, pageX, pageY) =>
+          setHandOrigin({ x: pageX, y: pageY }),
+        )
+      }
+    >
       {handCards.length === 0 && (
         <View
           style={{
             position: "absolute",
             left: centerX,
-            top: 30,
+            top: C.HAND_CARD_TOP,
             width: C.CARD_W,
             height: C.CARD_H,
             borderColor: "#666",
@@ -66,12 +68,12 @@ export default function HandArea({
       )}
 
       {handCards.map((card, i) => {
-        const { x, translateY, rotation } = getFanConfig(i, handCards.length);
+        const { x, translateY, rotation } = getFanPosition(
+          i,
+          handCards.length,
+        );
         const isDragging = draggedId === card.id;
-
-        const handRelativeY =
-          C.SCREEN_DIMS.height - C.HAND_HEIGHT - C.SAFE_TOP + 30 + translateY;
-        const handGlobalY = handRelativeY + C.SAFE_TOP;
+        const screenPos = handCardToScreen(i, handCards.length);
 
         return (
           <View
@@ -79,7 +81,7 @@ export default function HandArea({
             style={{
               position: "absolute",
               left: x,
-              top: 30 + translateY,
+              top: C.HAND_CARD_TOP + translateY,
               width: C.CARD_W,
               height: C.CARD_H,
               transform: [{ rotate: isDragging ? "0deg" : `${rotation}deg` }],
@@ -94,7 +96,7 @@ export default function HandArea({
               backPattern={cardBackPattern}
               onDrop={onDrop}
               onDrag={onDrag}
-              onTap={() => onTap(card.id, x, handGlobalY)}
+              onTap={() => onTap(card.id, screenPos.x, screenPos.y)}
               onDragStart={() => onDragStart(card.id)}
               onDragEnd={onDragEnd}
             />
