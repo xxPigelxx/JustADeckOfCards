@@ -1,4 +1,4 @@
-import { BOARD_COLS } from "@/components/constants";
+import { BOARD_COLS, BOARD_ROWS } from "@/components/constants";
 import { CardData } from "@/components/useGameLogic";
 
 export const SUITS = ["♦", "♥", "♠", "♣"];
@@ -17,6 +17,13 @@ export const ALL_RANKS = [
   "K",
   "A",
 ];
+
+// The deck lies in the middle of the board (the camera starts there),
+// the players two rows below it
+const DECK_COL = Math.floor(BOARD_COLS / 2);
+const DECK_ROW = Math.floor(BOARD_ROWS / 2) - 1;
+const PLAYER_ROW = DECK_ROW + 2;
+export const DECK_SLOT = DECK_ROW * BOARD_COLS + DECK_COL;
 
 export const DECK_TYPES = {
   "54 Karten": { minRankIndex: 0, jokers: 2 },
@@ -74,11 +81,11 @@ export const generateGameData = (
     const j = Math.floor(Math.random() * (i + 1));
     [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
   }
-  const mainDeckSlot = BOARD_COLS * 1 + Math.floor(BOARD_COLS / 2);
-  const rowStart = BOARD_COLS * 3;
+  // Players centered below the deck, with an empty slot between each player
+  const firstPlayerCol = DECK_COL - (playerCount - 1);
   const playerSlots = Array.from(
     { length: playerCount },
-    (_, i) => rowStart + i * 2,
+    (_, i) => PLAYER_ROW * BOARD_COLS + firstPlayerCol + i * 2,
   );
 
   const boardCards: CardData[] = [];
@@ -97,7 +104,7 @@ export const generateGameData = (
 
   while (cardIndex < allCards.length) {
     const card = allCards[cardIndex++];
-    boardCards.push({ ...card, slot: mainDeckSlot, zIndex: cardIndex });
+    boardCards.push({ ...card, slot: DECK_SLOT, zIndex: cardIndex });
   }
 
   return { boardCards, handCards: [] };

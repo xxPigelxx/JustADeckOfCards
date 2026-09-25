@@ -2,10 +2,21 @@ import * as C from "@/components/constants";
 
 // Coordinate spaces:
 // - screen: absolute touch position (event.absoluteX / absoluteY)
-// - board:  position on the green board surface, where cards are placed
-// All conversions between them live here, so the camera only has to change this file.
+// - board:  position on the board content, where cards are placed
+//           (moved and scaled by the camera inside the green board surface)
+// All conversions between them live here.
 
 export type Point = { x: number; y: number };
+export type Camera = { x: number; y: number; zoom: number };
+
+// Current camera, provided by useCamera (reads its shared values)
+let getCamera: () => Camera = () => ({ x: 0, y: 0, zoom: 1 });
+
+export const setCameraSource = (source: () => Camera) => {
+  getCamera = source;
+};
+
+export const getCameraZoom = () => getCamera().zoom;
 
 // Drop slightly above the hand area still counts as "into the hand"
 const HAND_DROP_TOLERANCE = 30;
@@ -36,6 +47,11 @@ export const slotToBoard = (slot: number, stackIndex: number = 0): Point => {
   };
 };
 
+export const slotCenter = (slot: number): Point => {
+  const topLeft = slotToBoard(slot);
+  return { x: topLeft.x + C.SLOT_W / 2, y: topLeft.y + C.SLOT_H / 2 };
+};
+
 export const boardToSlot = ({ x, y }: Point): number | null => {
   const col = Math.floor((x - C.GRID_OFFSET_X) / (C.SLOT_W + C.GAP));
   const row = Math.floor((y - C.GRID_MARGIN_TOP) / (C.SLOT_H + C.GAP));
@@ -46,15 +62,21 @@ export const boardToSlot = ({ x, y }: Point): number | null => {
   return row * C.BOARD_COLS + col;
 };
 
-export const screenToBoard = ({ x, y }: Point): Point => ({
-  x: x - boardOrigin.x,
-  y: y - boardOrigin.y,
-});
+export const screenToBoard = ({ x, y }: Point): Point => {
+  const cam = getCamera();
+  return {
+    x: (x - boardOrigin.x - cam.x) / cam.zoom,
+    y: (y - boardOrigin.y - cam.y) / cam.zoom,
+  };
+};
 
-export const boardToScreen = ({ x, y }: Point): Point => ({
-  x: x + boardOrigin.x,
-  y: y + boardOrigin.y,
-});
+export const boardToScreen = ({ x, y }: Point): Point => {
+  const cam = getCamera();
+  return {
+    x: boardOrigin.x + cam.x + x * cam.zoom,
+    y: boardOrigin.y + cam.y + y * cam.zoom,
+  };
+};
 
 export const isOverHand = (screenY: number) =>
   screenY > handOrigin.y - HAND_DROP_TOLERANCE;

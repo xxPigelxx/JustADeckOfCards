@@ -26,14 +26,14 @@ export const FAN_ANGLE = 5;
 export const FAN_CURVE = 3;
 export const SLOT_W = CARD_W;
 export const SLOT_H = CARD_H;
-export const ACTUAL_BOARD_W = SCREEN_W - BOARD_PADDING * 2;
-export const AVAILABLE_HEIGHT =
-  BOARD_HEIGHT - SAFE_TOP - TOP_OFFSET - GRID_MARGIN_TOP - BOARD_PADDING;
-
-export const BOARD_COLS = Math.floor(ACTUAL_BOARD_W / (SLOT_W + GAP));
-export const BOARD_ROWS = Math.floor(AVAILABLE_HEIGHT / (SLOT_H + GAP));
+// --- BOARD (fixed size, larger than the screen; the camera moves over it) ---
+export const BOARD_COLS = 20;
+export const BOARD_ROWS = 20;
 export const TOTAL_SLOTS = BOARD_ROWS * BOARD_COLS;
+export const GRID_OFFSET_X = 20;
 export const GRID_WIDTH = BOARD_COLS * (SLOT_W + GAP) - GAP;
-export const GRID_OFFSET_X = (ACTUAL_BOARD_W - GRID_WIDTH) / 2;
+export const GRID_HEIGHT = BOARD_ROWS * (SLOT_H + GAP) - GAP;
+export const BOARD_CONTENT_W = GRID_OFFSET_X * 2 + GRID_WIDTH;
+export const BOARD_CONTENT_H = GRID_MARGIN_TOP * 2 + GRID_HEIGHT;
 
 export const SCREEN_DIMS = { width: SCREEN_W, height: SCREEN_H };

@@ -1,5 +1,6 @@
 import Card from "@/components/Card";
 import * as C from "@/components/constants";
+import { DragLayerControls } from "@/components/DragLayer";
 import { CardData } from "@/components/useGameLogic";
 import {
   getFanPosition,
@@ -11,6 +12,7 @@ import React, { useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
 type HandAreaProps = {
+  dragLayer: DragLayerControls;
   handCards: CardData[];
   draggedId: string | null;
   cardBackColor?: string;
@@ -23,6 +25,7 @@ type HandAreaProps = {
 };
 
 export default function HandArea({
+  dragLayer,
   handCards,
   draggedId,
   cardBackColor,
@@ -68,10 +71,7 @@ export default function HandArea({
       )}
 
       {handCards.map((card, i) => {
-        const { x, translateY, rotation } = getFanPosition(
-          i,
-          handCards.length,
-        );
+        const { x, translateY, rotation } = getFanPosition(i, handCards.length);
         const isDragging = draggedId === card.id;
         const screenPos = handCardToScreen(i, handCards.length);
 
@@ -94,6 +94,8 @@ export default function HandArea({
               y={0}
               backColor={cardBackColor}
               backPattern={cardBackPattern}
+              dragLayer={dragLayer}
+              getScreenOrigin={() => ({ topLeft: screenPos, scale: 1 })}
               onDrop={onDrop}
               onDrag={onDrag}
               onTap={() => onTap(card.id, screenPos.x, screenPos.y)}

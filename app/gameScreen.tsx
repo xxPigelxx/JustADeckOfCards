@@ -3,22 +3,32 @@ import BurgerMenu from "@/components/BurgerMenu";
 import CardMenu from "@/components/CardMenu";
 import * as C from "@/components/constants";
 import CustomAlert from "@/components/CustomAlert";
+import DragLayer, { useDragLayer } from "@/components/DragLayer";
 import HandArea from "@/components/HandArea";
 import HandGridOverlay from "@/components/HandGridOverlay";
 import HandGridToggleButton from "@/components/HandGridToggleButton";
+import { useCamera } from "@/components/useCamera";
 import { CardData, useGameLogic } from "@/components/useGameLogic";
+import { getCameraZoom, slotCenter } from "@/utils/boardGeometry";
 import {
   DEFAULT_BACK_COLOR,
   DEFAULT_PATTERN,
   loadCardBack,
   loadCardPattern,
 } from "@/utils/designStorage";
-import { generateGameData } from "@/utils/gameSetup";
+import { DECK_SLOT, generateGameData } from "@/utils/gameSetup";
 import { Feather } from "@expo/vector-icons"; // Import für das Icon
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useMemo, useState } from "react";
-import { BackHandler, StyleSheet, Text, View } from "react-native"; // Text Importiert
+import {
+  BackHandler,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function GameScreen() {
@@ -76,24 +86,16 @@ export default function GameScreen() {
     initialHand: initialData.handCards,
   });
 
-  // --- Smart zIndex Fix ---
-  const draggedSource = useMemo(() => {
-    if (!game.draggedId) return null;
-    if (game.handCards.find((c) => c.id === game.draggedId)) {
-      return "hand";
-    }
-    return "board";
-  }, [game.draggedId, game.handCards]);
-
-  const boardZIndex = draggedSource === "board" ? 100 : 1;
-  const handZIndex = draggedSource === "hand" ? 100 : 10;
-
   // UI States
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTargetSlot, setMenuTargetSlot] = useState<number | null>(null);
   const [menuTargetCardId, setMenuTargetCardId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [exitModalVisible, setExitModalVisible] = useState(false);
+
+  // The card menu is placed next to its card, so it closes when the board moves
+  const camera = useCamera(slotCenter(DECK_SLOT), () => setMenuVisible(false));
+  const dragLayer = useDragLayer();
 
   // Hand Grid Modal State
   const [handGridVisible, setHandGridVisible] = useState(false);
@@ -153,9 +155,11 @@ export default function GameScreen() {
         y: globalY - MENU_H_ESTIMATE,
       });
     } else {
+      // Board cards are scaled by the camera
+      const zoom = getCameraZoom();
       setMenuPos({
-        x: globalX + C.CARD_W / 2 - MENU_W / 2,
-        y: globalY + C.CARD_H + 10,
+        x: globalX + (C.CARD_W * zoom) / 2 - MENU_W / 2,
+        y: globalY + C.CARD_H * zoom + 10,
       });
     }
     setMenuVisible(true);
@@ -196,8 +200,10 @@ export default function GameScreen() {
 
       <View style={{ flex: 1 }}>
         {/* BOARD AREA */}
-        <View style={{ flex: 1, zIndex: boardZIndex, elevation: boardZIndex }}>
+        <View style={{ flex: 1, zIndex: 1 }}>
           <BoardArea
+            camera={camera}
+            dragLayer={dragLayer}
             boardCards={game.boardCards}
             cardsBySlot={cardsBySlot}
             highlightedSlot={game.highlightedSlot}
@@ -229,14 +235,9 @@ export default function GameScreen() {
         )}
 
         {/* HAND AREA */}
-        <View
-          style={{
-            height: C.HAND_HEIGHT,
-            zIndex: handZIndex,
-            elevation: handZIndex,
-          }}
-        >
+        <View style={{ height: C.HAND_HEIGHT, zIndex: 10 }}>
           <HandArea
+            dragLayer={dragLayer}
             handCards={game.handCards}
             draggedId={game.draggedId}
             cardBackColor={cardBackColor}
@@ -256,7 +257,28 @@ export default function GameScreen() {
         </View>
       </View>
 
-      <BurgerMenu onLeave={handleLeaveGame} />
+      {/* Dragged card, drawn above board and hand */}
+      <DragLayer layer={dragLayer} />
+
+      {/* Zoom buttons (web only, touch devices use pinch) */}
+      {Platform.OS === "web" && (
+        <View style={styles.zoomButtons}>
+          <Pressable
+            style={styles.zoomButton}
+            onPress={() => camera.zoomBy(1.25)}
+          >
+            <Feather name="plus" size={22} color="white" />
+          </Pressable>
+          <Pressable
+            style={styles.zoomButton}
+            onPress={() => camera.zoomBy(0.8)}
+          >
+            <Feather name="minus" size={22} color="white" />
+          </Pressable>
+        </View>
+      )}
+
+      <BurgerMenu onLeave={handleLeaveGame} onResetView={camera.resetView} />
 
       <CardMenu
         visible={menuVisible}
@@ -326,6 +348,23 @@ const styles = StyleSheet.create({
     gap: 6,
     zIndex: 900,
     elevation: 900,
+  },
+
+  zoomButtons: {
+    position: "absolute",
+    top: C.SAFE_TOP + 30,
+    right: 24,
+    gap: 10,
+    zIndex: 900,
+  },
+
+  zoomButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   lobbyText: {

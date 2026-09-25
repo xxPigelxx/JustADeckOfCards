@@ -7,9 +7,15 @@ import AppButton from "./AppButton";
 type BurgerMenuProps = {
   dontShow?: "controls" | "rulebook" | "home" | "design" | "";
   onLeave?: () => void;
+  // Game screen only: move the board camera back to the start view
+  onResetView?: () => void;
 };
 
-export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
+export default function BurgerMenu({
+  dontShow,
+  onLeave,
+  onResetView,
+}: BurgerMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -64,6 +70,19 @@ export default function BurgerMenu({ dontShow, onLeave }: BurgerMenuProps) {
                 onPress={() => {
                   setMenuOpen(false);
                   router.push("/rulebook");
+                }}
+                style={styles.menuButton}
+                textStyle={styles.circleText}
+              />
+            )}
+
+            {onResetView && (
+              <AppButton
+                title="Reset View"
+                icon={<Feather name="crosshair" size={22} color="white" />}
+                onPress={() => {
+                  setMenuOpen(false);
+                  onResetView();
                 }}
                 style={styles.menuButton}
                 textStyle={styles.circleText}
