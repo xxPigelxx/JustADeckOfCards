@@ -1,112 +1,75 @@
-import { useEffect, useState } from "react";
+import { applyAction } from "@/shared/game/rules";
+import {
+  CardData,
+  GameAction,
+  GameState,
+  PlayerId,
+} from "@/shared/game/types";
 import {
   boardToSlot,
   getHandIndexFromX,
   isOverHand,
   screenToBoard,
 } from "@/utils/boardGeometry";
+import { useEffect, useState } from "react";
 
-export interface CardData {
-  id: string;
-  rank: string;
-  suit: string;
-  slot?: number;
-  zIndex?: number;
-  isFaceUp: boolean;
-}
+export type { CardData } from "@/shared/game/types";
+
+// Player id for a game on this device only (no server)
+export const LOCAL_PLAYER: PlayerId = "local";
 
 interface GameLogicProps {
-  initialBoard?: CardData[];
-  initialHand?: CardData[];
+  initialState: GameState;
+  playerId?: PlayerId;
 }
 
+// Game state is changed only through the shared rules (applyAction); this
+// hook adds the UI state and turns finger positions into actions.
 export const useGameLogic = ({
-  initialBoard,
-  initialHand,
-}: GameLogicProps = {}) => {
-  const [maxZIndex, setMaxZIndex] = useState(100);
+  initialState,
+  playerId = LOCAL_PLAYER,
+}: GameLogicProps) => {
+  const [state, setState] = useState<GameState>(initialState);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [highlightedSlot, setHighlightedSlot] = useState<number | null>(null);
   const [movingStackSlot, setMovingStackSlot] = useState<number | null>(null);
 
-  const [boardCards, setBoardCards] = useState<CardData[]>(initialBoard || []);
-  const [handCards, setHandCards] = useState<CardData[]>(initialHand || []);
-
   useEffect(() => {
-    if (initialBoard) setBoardCards(initialBoard);
-    if (initialHand) setHandCards(initialHand);
-  }, [initialBoard, initialHand]);
+    setState(initialState);
+  }, [initialState]);
+
+  const boardCards = state.board;
+  const handCards: CardData[] = state.hands[playerId] ?? [];
+
+  const dispatch = (action: GameAction) =>
+    setState((prev) => applyAction(prev, playerId, action));
+
+  const isInHand = (id: string | null) =>
+    !!id && handCards.some((c) => c.id === id);
 
   // --- HELPER: Detect Board Slot ---
   const getSlotFromCoords = (absX: number, absY: number) =>
     boardToSlot(screenToBoard({ x: absX, y: absY }));
 
-  const bringToFront = (id: string) => {
-    const newZ = maxZIndex + 1;
-    setMaxZIndex(newZ);
-    setBoardCards((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, zIndex: newZ } : c)),
-    );
-  };
-
-  // --- ACTIONS ---
+  // --- ACTIONS (card menu) ---
 
   const flipCard = (id: string | null, slot: number | null) => {
-    if (id && handCards.some((c) => c.id === id)) {
-      setHandCards((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, isFaceUp: !c.isFaceUp } : c)),
-      );
-      return;
-    }
-    if (slot !== null) {
-      setBoardCards((prev) =>
-        prev.map((c) =>
-          c.slot === slot ? { ...c, isFaceUp: !c.isFaceUp } : c,
-        ),
-      );
-    }
+    if (isInHand(id)) dispatch({ type: "flipHandCard", cardId: id! });
+    else if (slot !== null) dispatch({ type: "flipSlot", slot });
   };
 
-  const flipAllHand = () => {
-    setHandCards((prev) => {
-      const allFaceUp = prev.every((c) => c.isFaceUp);
-      return prev.map((c) => ({ ...c, isFaceUp: !allFaceUp }));
-    });
-  };
+  const flipAllHand = () => dispatch({ type: "flipHand" });
 
-  const shuffleHand = () => {
-    setHandCards((prev) => {
-      const newHand = [...prev].sort(() => Math.random() - 0.5);
-      return newHand;
-    });
-  };
+  const shuffleHand = () => dispatch({ type: "shuffleHand" });
 
+  // On a hand card this shuffles the hand
   const shuffleStack = (id: string | null, slot: number | null) => {
-    // If context menu called on a hand card, shuffle the hand
-    if (id && handCards.some((c) => c.id === id)) {
-      shuffleHand();
-      return;
-    }
-    if (slot === null) return;
-    setBoardCards((prev) => {
-      const s = prev.filter((c) => c.slot === slot);
-      const o = prev.filter((c) => c.slot !== slot);
-
-      for (let i = s.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [s[i], s[j]] = [s[j], s[i]];
-      }
-      const bz = Math.min(...s.map((c) => c.zIndex!));
-      return [...o, ...s.map((c, i) => ({ ...c, zIndex: bz + i }))];
-    });
+    if (isInHand(id)) shuffleHand();
+    else if (slot !== null) dispatch({ type: "shuffleSlot", slot });
   };
 
   const takeStack = (slot: number | null) => {
-    if (slot === null) return;
-    const t = boardCards.filter((c) => c.slot === slot);
-    if (!t.length) return;
-    setBoardCards((p) => p.filter((c) => c.slot !== slot));
-    setHandCards((p) => [...p, ...t.map((c) => ({ ...c, slot: undefined }))]);
+    if (slot !== null) dispatch({ type: "takeStack", slot });
   };
 
   // --- DRAG HANDLERS ---
@@ -123,90 +86,37 @@ export const useGameLogic = ({
   const handleDrop = (id: string, absX: number, absY: number) => {
     setHighlightedSlot(null);
     const overHand = isOverHand(absY);
+    const targetSlot = overHand ? null : getSlotFromCoords(absX, absY);
     const fromBoard = boardCards.find((c) => c.id === id);
 
-    // 1. Moving a whole stack (Special Case)
-    if (
-      movingStackSlot !== null &&
-      fromBoard &&
-      fromBoard.slot === movingStackSlot
-    ) {
+    // 1. Moving a whole stack ("Verschieben" in the card menu)
+    if (movingStackSlot !== null && fromBoard?.slot === movingStackSlot) {
       if (overHand) {
         takeStack(movingStackSlot);
-        setMovingStackSlot(null);
-        return;
+      } else if (targetSlot !== null) {
+        dispatch({
+          type: "moveStack",
+          fromSlot: movingStackSlot,
+          toSlot: targetSlot,
+        });
       }
-      const targetSlot = getSlotFromCoords(absX, absY);
-      if (targetSlot === null) {
-        setMovingStackSlot(null);
-        return;
-      }
-
-      setBoardCards((prev) => {
-        const m = prev
-          .filter((c) => c.slot === movingStackSlot)
-          .sort((a, b) => a.zIndex! - b.zIndex!);
-        const o = prev.filter((c) => c.slot !== movingStackSlot);
-        let nz = maxZIndex + 1;
-        const um = m.map((c) => ({ ...c, slot: targetSlot, zIndex: nz++ }));
-        setMaxZIndex(nz);
-        return [...o, ...um];
-      });
       setMovingStackSlot(null);
       return;
     }
 
-    // 2. Dropping into Hand (Sorting / Adding)
+    // 2. Into the hand (from the board, or sorting the hand)
     if (overHand) {
-      const newIndex = getHandIndexFromX(absX, handCards.length);
-
-      if (fromBoard) {
-        // A. From Board -> Hand (Insert at specific index)
-        setBoardCards((p) => p.filter((c) => c.id !== id));
-        setHandCards((prev) => {
-          const newHand = [...prev];
-          newHand.splice(newIndex, 0, { ...fromBoard, slot: undefined });
-          return newHand;
-        });
-        return;
-      } else {
-        // B. Hand -> Hand (Reorder)
-        setHandCards((prev) => {
-          const newHand = [...prev];
-          const oldIndex = newHand.findIndex((c) => c.id === id);
-          if (oldIndex === -1) return prev;
-
-          // Remove
-          const [card] = newHand.splice(oldIndex, 1);
-
-          // Re-insert (clamp index to new length)
-          const targetIndex = Math.min(newIndex, newHand.length);
-          newHand.splice(targetIndex, 0, card);
-
-          return newHand;
-        });
-        return;
-      }
+      dispatch({
+        type: "moveToHand",
+        cardId: id,
+        index: getHandIndexFromX(absX, handCards.length),
+      });
+      return;
     }
 
-    // 3. Dropping onto Board
-    const targetSlot = getSlotFromCoords(absX, absY);
-    if (targetSlot === null) return; // Dropped into void
-
-    if (!fromBoard) {
-      // From Hand -> Board
-      const c = handCards.find((x) => x.id === id)!;
-      setHandCards((p) => p.filter((x) => x.id !== id));
-      setBoardCards((p) => [
-        ...p,
-        { ...c, slot: targetSlot, zIndex: maxZIndex + 1 },
-      ]);
-      setMaxZIndex((p) => p + 1);
-    } else {
-      // Board -> Board
-      setBoardCards((p) =>
-        p.map((x) => (x.id === id ? { ...x, slot: targetSlot } : x)),
-      );
+    // 3. Onto a board slot (dropped outside the grid: nothing happens)
+    if (targetSlot !== null) {
+      dispatch({ type: "moveToSlot", cardId: id, slot: targetSlot });
     }
   };
 
@@ -219,7 +129,6 @@ export const useGameLogic = ({
     setDraggedId,
     setHighlightedSlot,
     setMovingStackSlot,
-    bringToFront,
     handleDrop,
     handleDrag,
     actions: {

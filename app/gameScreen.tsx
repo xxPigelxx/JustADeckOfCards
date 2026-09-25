@@ -8,7 +8,13 @@ import HandArea from "@/components/HandArea";
 import HandGridOverlay from "@/components/HandGridOverlay";
 import HandGridToggleButton from "@/components/HandGridToggleButton";
 import { useCamera } from "@/components/useCamera";
-import { CardData, useGameLogic } from "@/components/useGameLogic";
+import {
+  CardData,
+  LOCAL_PLAYER,
+  useGameLogic,
+} from "@/components/useGameLogic";
+import { DECK_SLOT } from "@/shared/game/board";
+import { createGame } from "@/shared/game/setup";
 import { getCameraZoom, slotCenter } from "@/utils/boardGeometry";
 import {
   DEFAULT_BACK_COLOR,
@@ -16,7 +22,6 @@ import {
   loadCardBack,
   loadCardPattern,
 } from "@/utils/designStorage";
-import { DECK_SLOT, generateGameData } from "@/utils/gameSetup";
 import { Feather } from "@expo/vector-icons"; // Import für das Icon
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -53,38 +58,24 @@ export default function GameScreen() {
     }, []),
   );
 
-  const initialData = useMemo(() => {
-    const deckType = (params.deckType as string) || "52 Karten";
-    const deckCount = Number(params.deckCount) || 1;
-    const playerCount = Number(params.playerCount) || 1;
-    const startCards = Number(params.startCards) || 0;
+  const playerCount = Number(params.playerCount) || 1;
 
-    // Add playerCount to the returned object
-    const gameData = generateGameData(
-      deckType,
-      deckCount,
-      playerCount,
-      startCards,
-    );
-    return {
-      ...gameData,
-      playerCount,
-    };
-  }, [
-    params.deckType,
-    params.deckCount,
-    params.playerCount,
-    params.startCards,
-  ]);
+  // Offline game: one pile per player on the board, one hand on this device
+  const initialState = useMemo(
+    () =>
+      createGame(
+        {
+          deckType: (params.deckType as string) || "52 Karten",
+          deckCount: Number(params.deckCount) || 1,
+          pileCount: playerCount,
+          cardsPerPile: Number(params.startCards) || 0,
+        },
+        [LOCAL_PLAYER],
+      ),
+    [params.deckType, params.deckCount, playerCount, params.startCards],
+  );
 
-  // Make playerCount available in the component scope
-  const playerCount =
-    Number(params.playerCount) || (initialData && initialData.playerCount) || 4;
-
-  const game = useGameLogic({
-    initialBoard: initialData.boardCards,
-    initialHand: initialData.handCards,
-  });
+  const game = useGameLogic({ initialState });
 
   // UI States
   const [menuVisible, setMenuVisible] = useState(false);
@@ -216,7 +207,6 @@ export default function GameScreen() {
             onTap={handleCardTap}
             onDragStart={(id) => {
               game.setDraggedId(id);
-              game.bringToFront(id);
               setMenuVisible(false);
             }}
             onDragEnd={() => {

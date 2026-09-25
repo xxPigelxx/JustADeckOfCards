@@ -1,3 +1,4 @@
+import { BOARD_COLS, BOARD_ROWS } from "@/shared/game/board";
 import { Dimensions, Platform, StatusBar } from "react-native";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
@@ -27,9 +28,8 @@ export const FAN_CURVE = 3;
 export const SLOT_W = CARD_W;
 export const SLOT_H = CARD_H;
 // --- BOARD (fixed size, larger than the screen; the camera moves over it) ---
-export const BOARD_COLS = 20;
-export const BOARD_ROWS = 20;
-export const TOTAL_SLOTS = BOARD_ROWS * BOARD_COLS;
+// Slot grid size is shared with the server
+export { BOARD_COLS, BOARD_ROWS, TOTAL_SLOTS } from "@/shared/game/board";
 export const GRID_OFFSET_X = 20;
 export const GRID_WIDTH = BOARD_COLS * (SLOT_W + GAP) - GAP;
 export const GRID_HEIGHT = BOARD_ROWS * (SLOT_H + GAP) - GAP;
