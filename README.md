@@ -81,7 +81,25 @@ npm test
 ```
 
 Runs the tests for the game rules, the protocol and the server.
+## Demo
 
+
+
+https://github.com/user-attachments/assets/6ecfe002-840f-4822-8e04-5ba2a1cb98a8
+
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="250" alt="Home screen">
+  <img src="docs/screenshots/setup.png" width="250" alt="Game setup">
+  <img src="docs/screenshots/lobby.png" width="250" alt="Lobby with invite code">
+</p>
+<p align="center">
+  <img src="docs/screenshots/table.png" width="250" alt="Shared game table">
+  <img src="docs/screenshots/card-actions.png" width="250" alt="Card actions menu">
+  <img src="docs/screenshots/card-design.png" width="250" alt="Card design editor">
+</p>
 ## About
 
-A university project by [Nikolai](https://github.com/xxPigelxx), [Leon](https://github.com/BahamaMamaL) [Serge](https://github.com/SergeGraefenstein) & Lion.
+A university project by [Nikolai](https://github.com/xxPigelxx), [Leon](https://github.com/BahamaMamaL), [Serge](https://github.com/SergeGraefenstein) & Lion.
