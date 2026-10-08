@@ -84,4 +84,4 @@ Runs the tests for the game rules, the protocol and the server.
 
 ## About
 
-A university project by [Nikolai](https://github.com/xxPigelxx), [Leon](https://github.com/BahamaMamaL) [Serge](https://github.com/SergeGraefenstein) & Lion.
+A university project by [Nikolai](https://github.com/xxPigelxx), [Leon](https://github.com/BahamaMamaL), [Serge](https://github.com/SergeGraefenstein) & Lion.
