@@ -81,6 +81,14 @@ npm test
 ```
 
 Runs the tests for the game rules, the protocol and the server.
+## Demo
+
+
+
+https://github.com/user-attachments/assets/6ecfe002-840f-4822-8e04-5ba2a1cb98a8
+
+
+## Screenshots
 
 ## About
 
