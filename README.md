@@ -10,11 +10,30 @@ Built with React Native / Expo, plus a small Socket.IO server for online multipl
 - **Resume games**: rejoin a running game after the app was closed
 - **Offline mode**: play on a single device without a server
 - **Drag & drop controls**: hold a card and drag it onto the table or into your hand; tap a card for more options
-- **Custom card design**: pick your own card colours, with a live preview
+- **Custom card design**: pick your own card colour and pattern, with a live preview
 - **Rulebook**: rules for 15+ classic games (Mau Mau, Skat, Rommé, Durak, Poker, Blackjack, …)
 - **Fair play**: the server only sends each player what they may see, so other hands and face-down cards stay hidden
 
+## Demo
+
+https://github.com/user-attachments/assets/6ecfe002-840f-4822-8e04-5ba2a1cb98a8
+
 ## Screenshots
+
+*The app UI is currently in German.*
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="250" alt="Home screen">
+  <img src="docs/screenshots/setup.png" width="250" alt="Game setup">
+  <img src="docs/screenshots/lobby.png" width="250" alt="Lobby with invite code">
+</p>
+<p align="center">
+  <img src="docs/screenshots/table.png" width="250" alt="Shared game table">
+  <img src="docs/screenshots/card-actions.png" width="250" alt="Card actions menu">
+  <img src="docs/screenshots/card-design.png" width="250" alt="Card design editor">
+</p>
+
+## Tech stack
 
 <!-- Add 2–3 screenshots here, e.g. home screen, game table, card design -->
 
@@ -81,25 +100,7 @@ npm test
 ```
 
 Runs the tests for the game rules, the protocol and the server.
-## Demo
 
-
-
-https://github.com/user-attachments/assets/6ecfe002-840f-4822-8e04-5ba2a1cb98a8
-
-
-## Screenshots
-
-<p align="center">
-  <img src="docs/screenshots/home.png" width="250" alt="Home screen">
-  <img src="docs/screenshots/setup.png" width="250" alt="Game setup">
-  <img src="docs/screenshots/lobby.png" width="250" alt="Lobby with invite code">
-</p>
-<p align="center">
-  <img src="docs/screenshots/table.png" width="250" alt="Shared game table">
-  <img src="docs/screenshots/card-actions.png" width="250" alt="Card actions menu">
-  <img src="docs/screenshots/card-design.png" width="250" alt="Card design editor">
-</p>
 ## About
 
 A university project by [Nikolai](https://github.com/xxPigelxx), [Leon](https://github.com/BahamaMamaL), [Serge](https://github.com/SergeGraefenstein) & Lion.
