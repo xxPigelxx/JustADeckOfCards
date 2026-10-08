@@ -52,7 +52,13 @@ export interface RoomInfo {
 }
 
 export type RoomError =
-  "invalid" | "not_found" | "full" | "started" | "not_host" | "not_in_room";
+  | "invalid"
+  | "not_found"
+  | "full"
+  | "started"
+  | "not_host"
+  | "not_in_room"
+  | "busy"; // server has reached its room limit
 
 export type Ack<T = object> =
   ({ ok: true } & T) | { ok: false; error: RoomError };

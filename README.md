@@ -1,50 +1,87 @@
-# Welcome to your Expo app 👋
+# Just a Deck of Cards 🃏
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A virtual deck of cards for your phone. Just a deck you can play any card game with, together with your friends. There are no fixed rules built in: you deal, draw, play and arrange cards on a shared table, the same way you would with a real deck.
 
-## Get started
+Built with React Native / Expo, plus a small Socket.IO server for online multiplayer.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Online multiplayer**: create a room, share the code, and play on a shared table in real time
+- **Resume games**: rejoin a running game after the app was closed
+- **Offline mode**: play on a single device without a server
+- **Drag & drop controls**: hold a card and drag it onto the table or into your hand; tap a card for more options
+- **Custom card design**: pick your own card colours, with a live preview
+- **Rulebook**: rules for 15+ classic games (Mau Mau, Skat, Rommé, Durak, Poker, Blackjack, …)
+- **Fair play**: the server only sends each player what they may see, so other hands and face-down cards stay hidden
 
-2. Start the app
+## Screenshots
 
-   ```bash
-   npx expo start
-   ```
+<!-- Add 2–3 screenshots here, e.g. home screen, game table, card design -->
 
-In the output, you'll find options to open the app in a
+## Tech stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Part   | Tech |
+|--------|------|
+| App    | Expo 54, React Native 0.81, Expo Router, Reanimated, Gesture Handler |
+| Server | Node.js, Socket.IO (hosted on Render) |
+| Shared | Game rules & network protocol in TypeScript, used by both the app and the server |
+| Tests  | Vitest |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Project structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+app/          Screens (file-based routing via Expo Router)
+components/   UI components and hooks (game logic, room connection, camera)
+shared/       Game rules and network protocol (used by app + server)
+server/       Multiplayer server → see server/README.md
+data/         Rulebook content
+utils/        Helpers (storage, colours, board geometry)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting started
 
-## Learn more
+### Requirements
 
-To learn more about developing your project with Expo, look at the following resources:
+- Node.js 20+
+- [Expo Go](https://expo.dev/go) on your phone, or an Android emulator / iOS simulator
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Run the app
 
-## Join the community
+```bash
+npm install
+npx expo start
+```
 
-Join our community of developers creating universal apps.
+Scan the QR code with Expo Go.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Server
+
+The app connects to the server set in `EXPO_PUBLIC_SERVER_URL` (in `.env`). Without it, it uses `http://localhost:3000`.
+
+To run the server locally:
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+For testing on a phone in the same Wi‑Fi, create `.env.local` in the project root:
+
+```
+EXPO_PUBLIC_SERVER_URL=http://<your PC's IP>:3000
+```
+
+and restart Expo with `npx expo start -c`. See [server/README.md](server/README.md) for more, including deployment.
+
+## Tests
+
+```bash
+npm test
+```
+
+Runs the tests for the game rules, the protocol and the server.
+
+## About
+
+A university project by [xxPigelxx](https://github.com/xxPigelxx) and [SergeGraefenstein](https://github.com/SergeGraefenstein).

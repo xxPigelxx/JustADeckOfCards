@@ -45,6 +45,19 @@ describe("RoomManager", () => {
     });
   });
 
+  it("refuses new rooms once the room limit is reached", () => {
+    const rooms = new RoomManager(Math.random, Date.now, 2);
+    expect(rooms.create("secret-aaaa", CONFIG, "s1").ok).toBe(true);
+    expect(rooms.create("secret-bbbb", CONFIG, "s2").ok).toBe(true);
+    expect(rooms.create("secret-cccc", CONFIG, "s3")).toEqual({
+      ok: false,
+      error: "busy",
+    });
+    // Creating again from the same socket replaces its own room
+    expect(rooms.create("secret-aaaa", CONFIG, "s1").ok).toBe(true);
+    expect(rooms.roomCount).toBe(2);
+  });
+
   it("lets players join with the code (any case) until the room is full", () => {
     const { rooms, room } = setup();
     expect(rooms.join(room.code.toLowerCase(), "secret-p2", "s2").ok).toBe(

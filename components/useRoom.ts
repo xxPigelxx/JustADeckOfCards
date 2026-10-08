@@ -190,6 +190,8 @@ export const roomErrorMessage = (error: ClientError) => {
       return "Das Spiel hat bereits begonnen.";
     case "not_host":
       return "Nur der Host kann das Spiel starten.";
+    case "busy":
+      return "Der Server ist gerade voll. Versuche es später erneut oder spiele offline.";
     case "offline":
       return "Server nicht erreichbar. Versuche es später erneut oder spiele offline.";
     default:

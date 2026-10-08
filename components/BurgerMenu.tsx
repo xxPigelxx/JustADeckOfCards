@@ -9,12 +9,15 @@ type BurgerMenuProps = {
   onLeave?: () => void;
   // Game screen only: move the board camera back to the start view
   onResetView?: () => void;
+  // Game screen only: players and how many cards they hold
+  onShowPlayers?: () => void;
 };
 
 export default function BurgerMenu({
   dontShow,
   onLeave,
   onResetView,
+  onShowPlayers,
 }: BurgerMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -70,6 +73,19 @@ export default function BurgerMenu({
                 onPress={() => {
                   setMenuOpen(false);
                   router.push("/rulebook");
+                }}
+                style={styles.menuButton}
+                textStyle={styles.circleText}
+              />
+            )}
+
+            {onShowPlayers && (
+              <AppButton
+                title="Spieler"
+                icon={<Feather name="users" size={22} color="white" />}
+                onPress={() => {
+                  setMenuOpen(false);
+                  onShowPlayers();
                 }}
                 style={styles.menuButton}
                 textStyle={styles.circleText}

@@ -142,7 +142,7 @@ export default function GameScreen() {
   // Hand Grid Modal State
   const [handGridVisible, setHandGridVisible] = useState(false);
 
-  // Player list: other hands only as a count (from the server)
+  // Player list (burger menu): other hands only as a count (from the server)
   const [playersVisible, setPlayersVisible] = useState(false);
   const playerRows: PlayerRow[] = online
     ? room.players.map((p) => ({
@@ -253,11 +253,10 @@ export default function GameScreen() {
       <StatusBar style="light" />
       <View style={{ height: C.SAFE_TOP, backgroundColor: "#333" }} />
 
-      {/* --- LOBBY CODE PILL (tap: players and their hand cards) --- */}
-      <Pressable
+      {/* --- LOBBY CODE PILL (player list: burger menu → "Spieler") --- */}
+      <View
         style={[styles.lobbyPill, disconnected && styles.lobbyPillOffline]}
-        onPress={() => setPlayersVisible(true)}
-        hitSlop={8}
+        pointerEvents="none"
       >
         {disconnected && <Feather name="wifi-off" size={16} color="white" />}
         <Feather
@@ -274,7 +273,7 @@ export default function GameScreen() {
           color="white"
         />
         <Text style={styles.lobbyText}>: {playerCount}</Text>
-      </Pressable>
+      </View>
       {/* ----------------------------- */}
 
       <View style={{ flex: 1 }}>
@@ -363,7 +362,11 @@ export default function GameScreen() {
         </View>
       )}
 
-      <BurgerMenu onLeave={handleLeaveGame} onResetView={camera.resetView} />
+      <BurgerMenu
+        onLeave={handleLeaveGame}
+        onResetView={camera.resetView}
+        onShowPlayers={() => setPlayersVisible(true)}
+      />
 
       <CardMenu
         visible={menuVisible}

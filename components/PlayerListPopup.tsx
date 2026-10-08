@@ -27,7 +27,7 @@ export default function PlayerListPopup({
   if (!visible) return null;
 
   return (
-    <View style={StyleSheet.absoluteFill}>
+    <View style={styles.overlay}>
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       <View style={styles.popup}>
         <Text style={styles.title}>Spieler</Text>
@@ -54,6 +54,13 @@ export default function PlayerListPopup({
 }
 
 const styles = StyleSheet.create({
+  // Like the card menu: on Android only elevation draws it above other
+  // elevated views (lobby pill, drag layer, burger button)
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 9999,
+  },
   popup: {
     position: "absolute",
     top: C.SAFE_TOP + 30,

@@ -22,6 +22,8 @@ import {
 export const LOBBY_SEAT_TIMEOUT_MS = 5 * 60_000;
 // A room nobody is connected to is deleted after this long
 export const EMPTY_ROOM_TIMEOUT_MS = 10 * 60_000;
+// Upper limit for rooms in memory, so mass room creation cannot crash the server
+export const MAX_ROOMS = 500;
 
 interface Player {
   secret: string;
@@ -74,6 +76,7 @@ export class RoomManager {
   constructor(
     private random: () => number = Math.random,
     private now: () => number = Date.now,
+    private maxRooms = MAX_ROOMS,
   ) {}
 
   get roomCount() {
@@ -94,6 +97,7 @@ export class RoomManager {
       return { ok: false, error: "invalid" };
     }
     this.leave(socketId);
+    if (this.rooms.size >= this.maxRooms) return { ok: false, error: "busy" };
 
     const room: Room = {
       code: this.newCode(),
