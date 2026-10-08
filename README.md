@@ -35,10 +35,6 @@ https://github.com/user-attachments/assets/6ecfe002-840f-4822-8e04-5ba2a1cb98a8
 
 ## Tech stack
 
-<!-- Add 2–3 screenshots here, e.g. home screen, game table, card design -->
-
-## Tech stack
-
 | Part   | Tech |
 |--------|------|
 | App    | Expo 54, React Native 0.81, Expo Router, Reanimated, Gesture Handler |
